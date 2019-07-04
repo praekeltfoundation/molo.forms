@@ -22,21 +22,21 @@ from wagtail.admin.utils import permission_required
 from wagtail_personalisation.forms import SegmentAdminForm
 from wagtail_personalisation.models import Segment
 
-from wagtailsurveys.models import get_surveys_for_user
+from wagtai.contrib.forms.utils import get_forms_for_user
 
 from .forms import CSVGroupCreationForm
 
 
 def index(request):
-    survey_pages = get_surveys_for_user(request.user)
-    survey_pages = (
-        survey_pages.descendant_of(request.site.root_page)
+    form_pages = get_forms_for_user(request.user)
+    form_pages = (
+        form_pages.descendant_of(request.site.root_page)
                     .specific()
     )
-    paginator, survey_pages = paginate(request, survey_pages)
+    paginator, form_pages = paginate(request, form_pages)
 
-    return render(request, 'wagtailsurveys/index.html', {
-        'survey_pages': survey_pages,
+    return render(request, 'wagtailforms/index.html', {
+        'form_pages': form_pages,
     })
 
 
@@ -80,18 +80,18 @@ class ResultsPercentagesJson(View):
         ids = []
         for page in pages:
             ids.append(page.id)
-        survey = get_object_or_404(
+        form = get_object_or_404(
             MoloSurveyPage, slug=kwargs['slug'], id__in=ids)
         # Get information about form fields
         data_fields = [
             (field.clean_name, field.label)
-            for field in survey.get_form_fields()
+            for field in form.get_form_fields()
         ]
 
         results = dict()
         # Get all submissions for current page
         submissions = (
-            survey.get_submission_class().objects.filter(page=survey))
+            form.get_submission_class().objects.filter(page=form))
         for submission in submissions:
             data = submission.get_data()
 
@@ -122,7 +122,7 @@ class ResultsPercentagesJson(View):
 
 
 class SurveySuccess(TemplateView):
-    template_name = "surveys/molo_survey_page_success.html"
+    template_name = "forms/molo_form_page_success.html"
 
     def get_context_data(self, *args, **kwargs):
         context = super(TemplateView, self).get_context_data(*args, **kwargs)
@@ -130,19 +130,19 @@ class SurveySuccess(TemplateView):
         ids = []
         for page in pages:
             ids.append(page.id)
-        survey = get_object_or_404(
+        form = get_object_or_404(
             MoloSurveyPage, slug=kwargs['slug'], id__in=ids)
         results = dict()
-        if survey.show_results:
+        if form.show_results:
             # Get information about form fields
             data_fields = [
                 (field.clean_name, field.label)
-                for field in survey.get_form_fields()
+                for field in form.get_form_fields()
             ]
 
             # Get all submissions for current page
             submissions = (
-                survey.get_submission_class().objects.filter(page=survey))
+                form.get_submission_class().objects.filter(page=form))
             for submission in submissions:
                 data = submission.get_data()
 
@@ -163,24 +163,24 @@ class SurveySuccess(TemplateView):
                     question_stats = results.get(label, {})
                     question_stats[answer] = question_stats.get(answer, 0) + 1
                     results[label] = question_stats
-        if survey.show_results_as_percentage:
+        if form.show_results_as_percentage:
             for question, answers in results.items():
                 total = sum(answers.values())
                 for key in answers.keys():
                     answers[key] = int((answers[key] * 100) / total)
-        context.update({'self': survey, 'results': results})
+        context.update({'self': form, 'results': results})
         return context
 
 
-def submission_article(request, survey_id, submission_id):
+def submission_article(request, form_id, submission_id):
     # get the specific submission entry
-    survey_page = get_object_or_404(Page, id=survey_id).specific
-    SubmissionClass = survey_page.get_submission_class()
+    form_page = get_object_or_404(Page, id=form_id).specific
+    SubmissionClass = form_page.get_submission_class()
 
     submission = SubmissionClass.objects.filter(
-        page=survey_page).filter(pk=submission_id).first()
+        page=form_page).filter(pk=submission_id).first()
     if not submission.article_page:
-        survey_index_page = (
+        form_index_page = (
             SurveysIndexPage.objects.descendant_of(
                 request.site.root_page).live().first())
         body = []
@@ -191,7 +191,7 @@ def submission_article(request, survey_id, submission_id):
             slug='yourwords-entry-%s' % cautious_slugify(submission_id),
             body=json.dumps(body)
         )
-        survey_index_page.add_child(instance=article)
+        form_index_page.add_child(instance=article)
         article.save_revision()
         article.unpublish()
 
