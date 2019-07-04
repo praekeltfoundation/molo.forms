@@ -4,9 +4,9 @@ from molo.core.models import Main, SiteLanguageRelation, Languages
 from molo.core.tests.base import MoloTestCaseMixin
 from molo.core.utils import generate_slug
 from molo.forms.models import (
-    SurveysIndexPage,
-    MoloSurveyPage,
-    MoloSurveyFormField
+    FormsIndexPage,
+    MoloFormPage,
+    MoloFormField
 )
 from wagtail.core.models import Site
 
@@ -22,28 +22,28 @@ class TestSites(TestCase, MoloTestCaseMixin):
             is_active=True)
         self.yourmind = self.mk_section(
             self.section_index, title='Your mind')
-        self.surveys_index = SurveysIndexPage.objects.child_of(
+        self.forms_index = FormsIndexPage.objects.child_of(
             self.main).first()
 
-    def create_molo_survey_page(self, parent, **kwargs):
-        molo_survey_page = MoloSurveyPage(
-            title='Test Survey', slug='test-survey',
-            introduction='Introduction to Test Survey ...',
-            thank_you_text='Thank you for taking the Test Survey',
-            submit_text='survey submission text',
+    def create_molo_form_page(self, parent, **kwargs):
+        molo_form_page = MoloFormPage(
+            title='Test Form', slug='test-form',
+            introduction='Introduction to Test Form ...',
+            thank_you_text='Thank you for taking the Test Form',
+            submit_text='form submission text',
             **kwargs
         )
 
-        parent.add_child(instance=molo_survey_page)
-        molo_survey_page.save_revision().publish()
-        molo_survey_form_field = MoloSurveyFormField.objects.create(
-            page=molo_survey_page,
+        parent.add_child(instance=molo_form_page)
+        molo_form_page.save_revision().publish()
+        molo_form_form_field = MoloFormField.objects.create(
+            page=molo_form_page,
             sort_order=1,
             label='Your favourite animal',
             field_type='singleline',
             required=True
         )
-        return molo_survey_page, molo_survey_form_field
+        return molo_form_page, molo_form_form_field
 
     def test_two_sites_point_to_one_root_page(self):
         # assert that there is only one site rooted at main
@@ -64,15 +64,15 @@ class TestSites(TestCase, MoloTestCaseMixin):
         # assert that there are now two sites rooted at main
         self.assertEquals(self.main.sites_rooted_here.count(), 2)
 
-        # create molo survey page
-        molo_survey_page, molo_survey_form_field = \
-            self.create_molo_survey_page(
-                parent=self.surveys_index,
+        # create molo form page
+        molo_form_page, molo_form_form_field = \
+            self.create_molo_form_page(
+                parent=self.forms_index,
                 homepage_button_text='share your story yo')
 
-        # assert that both sites render the survey
-        response = client_1.get('/surveys-main-1/test-survey/')
+        # assert that both sites render the form
+        response = client_1.get('/forms-main-1/test-form/')
         self.assertEquals(response.status_code, 200)
         response = client_2.get(
-            site_2.root_url + '/surveys-main-1/test-survey/')
+            site_2.root_url + '/forms-main-1/test-form/')
         self.assertEquals(response.status_code, 200)

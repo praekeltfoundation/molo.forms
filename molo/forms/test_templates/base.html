@@ -1,4 +1,4 @@
-{% load wagtailcore_tags compress static wagtailuserbar core_tags molo_survey_tags i18n %}
+{% load wagtailcore_tags compress static wagtailuserbar core_tags molo_form_tags i18n %}
 {% load wagtailsettings_tags wagtailimages_tags %}
 {% load google_analytics_tags %}
 {% get_settings %}
@@ -96,7 +96,7 @@
         {% endblock %}
 
         {% block footer %}
-          {% surveys_list_headline %}
+          {% forms_list_headline %}
           {% social_media_footer %}
           {% footer_page %}
         {% endblock %}

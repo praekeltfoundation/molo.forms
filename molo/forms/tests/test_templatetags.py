@@ -6,13 +6,13 @@ from django.contrib.sessions.middleware import SessionMiddleware
 
 from molo.core.models import Main, Languages, SiteLanguageRelation
 from molo.core.tests.base import MoloTestCaseMixin
-from molo.forms.models import (MoloSurveyPage, MoloSurveyFormField,
-                                 SurveysIndexPage, PersonalisableSurvey,
-                                 MoloSurveySubmission)
+from molo.forms.models import (MoloFormPage, MoloFormField,
+                                 FormsIndexPage, PersonalisableForm,
+                                 MoloFormSubmission)
 
-from molo.forms.templatetags.molo_survey_tags import (
-    get_survey_list, load_user_choice_poll_survey)
-from .base import create_survey
+from molo.forms.templatetags.molo_form_tags import (
+    get_form_list, load_user_choice_poll_form)
+from .base import create_form
 
 
 def add_session_to_request(request):
@@ -22,7 +22,7 @@ def add_session_to_request(request):
     request.session.save()
 
 
-class LoadUserChoicePollSurvey(TestCase, MoloTestCaseMixin):
+class LoadUserChoicePollForm(TestCase, MoloTestCaseMixin):
 
     def setUp(self):
         self.mk_main()
@@ -33,7 +33,7 @@ class LoadUserChoicePollSurvey(TestCase, MoloTestCaseMixin):
             language_setting=self.language_setting,
             locale='en',
             is_active=True)
-        self.surveys_index = SurveysIndexPage.objects.child_of(
+        self.forms_index = FormsIndexPage.objects.child_of(
             self.main).first()
         self.user = self.login()
         # create a requset object
@@ -43,8 +43,8 @@ class LoadUserChoicePollSurvey(TestCase, MoloTestCaseMixin):
         self.request.user = self.user
         add_session_to_request(self.request)
 
-    def test_load_user_choice_poll_survey(self):
-        create_survey([
+    def test_load_user_choice_poll_form(self):
+        create_form([
             {
                 "question": "I feel I can be myself around other people",
                 "type": 'radio',
@@ -54,87 +54,87 @@ class LoadUserChoicePollSurvey(TestCase, MoloTestCaseMixin):
             },
         ],
             language=self.english)
-        survey = MoloSurveyPage.objects.last()
-        self.client.post(survey.url, {
+        form = MoloFormPage.objects.last()
+        self.client.post(form.url, {
             'i-feel-i-can-be-myself-around-other-people':
                 'agree',
             'ajax': 'True'
         })
-        self.assertEquals(MoloSurveySubmission.objects.count(), 1)
-        self.assertTrue(load_user_choice_poll_survey(
+        self.assertEquals(MoloFormSubmission.objects.count(), 1)
+        self.assertTrue(load_user_choice_poll_form(
             {'request': self.request},
-            survey, 'i-feel-i-can-be-myself-around-other-people',
+            form, 'i-feel-i-can-be-myself-around-other-people',
             'agree'))
-        self.assertFalse(load_user_choice_poll_survey(
+        self.assertFalse(load_user_choice_poll_form(
             {'request': self.request},
-            survey, 'i-feel-i-can-be-myself-around-other-people',
+            form, 'i-feel-i-can-be-myself-around-other-people',
             'disagree'))
-        self.client.post(survey.url, {
+        self.client.post(form.url, {
             'i-feel-i-can-be-myself-around-other-people':
                 'disagree',
             'ajax': 'True'
         })
-        self.assertEquals(MoloSurveySubmission.objects.count(), 1)
-        self.assertFalse(load_user_choice_poll_survey(
+        self.assertEquals(MoloFormSubmission.objects.count(), 1)
+        self.assertFalse(load_user_choice_poll_form(
             {'request': self.request},
-            survey, 'i-feel-i-can-be-myself-around-other-people',
+            form, 'i-feel-i-can-be-myself-around-other-people',
             'agree'))
-        self.assertTrue(load_user_choice_poll_survey(
+        self.assertTrue(load_user_choice_poll_form(
             {'request': self.request},
-            survey, 'i-feel-i-can-be-myself-around-other-people',
+            form, 'i-feel-i-can-be-myself-around-other-people',
             'disagree'))
 
 
-class SurveyListTest(TestCase, MoloTestCaseMixin):
+class FormListTest(TestCase, MoloTestCaseMixin):
 
-    def create_molo_survey_page(self,
+    def create_molo_form_page(self,
                                 parent,
-                                title="Test Survey",
-                                slug="test-survey",
+                                title="Test Form",
+                                slug="test-form",
                                 **kwargs):
-        molo_survey_page = MoloSurveyPage(
+        molo_form_page = MoloFormPage(
             title=title,
             slug=slug,
-            introduction='Introduction to Test Survey ...',
-            thank_you_text='Thank you for taking the Test Survey',
+            introduction='Introduction to Test Form ...',
+            thank_you_text='Thank you for taking the Test Form',
             **kwargs
         )
 
-        parent.add_child(instance=molo_survey_page)
-        molo_survey_page.save_revision().publish()
-        molo_survey_form_field = MoloSurveyFormField.objects.create(
-            page=molo_survey_page,
+        parent.add_child(instance=molo_form_page)
+        molo_form_page.save_revision().publish()
+        molo_form_form_field = MoloFormField.objects.create(
+            page=molo_form_page,
             sort_order=1,
             label='Your favourite animal',
             field_type='singleline',
             required=True
         )
-        return molo_survey_page, molo_survey_form_field
+        return molo_form_page, molo_form_form_field
 
-    def create_personalisable_survey(
+    def create_personalisable_form(
             self,
             parent,
-            title="Test Survey",
-            slug="test-survey",
+            title="Test Form",
+            slug="test-form",
             **kwargs):
-        personalisable_survey = PersonalisableSurvey(
+        personalisable_form = PersonalisableForm(
             title=title,
             slug=slug,
-            introduction='Introduction to Test Survey ...',
-            thank_you_text='Thank you for taking the Test Survey',
+            introduction='Introduction to Test Form ...',
+            thank_you_text='Thank you for taking the Test Form',
             **kwargs
         )
 
-        parent.add_child(instance=personalisable_survey)
-        personalisable_survey.save_revision().publish()
-        survey_form_field = MoloSurveyFormField.objects.create(
-            page=personalisable_survey,
+        parent.add_child(instance=personalisable_form)
+        personalisable_form.save_revision().publish()
+        form_form_field = MoloFormField.objects.create(
+            page=personalisable_form,
             sort_order=1,
             label='Your favourite animal',
             field_type='singleline',
             required=True
         )
-        return personalisable_survey, survey_form_field
+        return personalisable_form, form_form_field
 
     def setUp(self):
         self.mk_main()
@@ -149,7 +149,7 @@ class SurveyListTest(TestCase, MoloTestCaseMixin):
             language_setting=self.language_setting,
             locale='fr',
             is_active=True)
-        self.surveys_index = SurveysIndexPage.objects.child_of(
+        self.forms_index = FormsIndexPage.objects.child_of(
             self.main).first()
 
         self.user = User.objects.create_user(
@@ -164,146 +164,146 @@ class SurveyListTest(TestCase, MoloTestCaseMixin):
         self.user = self.login()
 
         # create direct questions
-        self.direct_molo_survey_page, direct_molo_survey_form_field = (
-            self.create_molo_survey_page(
-                parent=self.surveys_index,
-                title="direct survey title",
-                slug="direct_survey_title",
-                display_survey_directly=True,
+        self.direct_molo_form_page, direct_molo_form_form_field = (
+            self.create_molo_form_page(
+                parent=self.forms_index,
+                title="direct form title",
+                slug="direct_form_title",
+                display_form_directly=True,
             ))
         self.client.post(reverse(
-            'add_translation', args=[self.direct_molo_survey_page.id, 'fr']))
-        self.translated_direct_survey = MoloSurveyPage.objects.get(
-            slug='french-translation-of-direct-survey-title')
-        self.translated_direct_survey.save_revision().publish()
+            'add_translation', args=[self.direct_molo_form_page.id, 'fr']))
+        self.translated_direct_form = MoloFormPage.objects.get(
+            slug='french-translation-of-direct-form-title')
+        self.translated_direct_form.save_revision().publish()
 
-        self.linked_molo_survey_page, linked_molo_survey_form_field = (
-            self.create_molo_survey_page(
-                parent=self.surveys_index,
-                title="linked survey title",
-                slug="linked_survey_title",
-                display_survey_directly=False,
+        self.linked_molo_form_page, linked_molo_form_form_field = (
+            self.create_molo_form_page(
+                parent=self.forms_index,
+                title="linked form title",
+                slug="linked_form_title",
+                display_form_directly=False,
             ))
-        self.yourwords_molo_survey_page, yourwords_molo_survey_form_field = (
-            self.create_molo_survey_page(
-                parent=self.surveys_index,
-                title="yourwords survey title",
-                slug="yourwords_survey_title",
+        self.yourwords_molo_form_page, yourwords_molo_form_form_field = (
+            self.create_molo_form_page(
+                parent=self.forms_index,
+                title="yourwords form title",
+                slug="yourwords_form_title",
                 your_words_competition=True,
             ))
         self.client.post(reverse(
-            'add_translation', args=[self.linked_molo_survey_page.id, 'fr']))
-        self.translated_linked_survey = MoloSurveyPage.objects.get(
-            slug='french-translation-of-linked-survey-title')
-        self.translated_linked_survey.save_revision().publish()
+            'add_translation', args=[self.linked_molo_form_page.id, 'fr']))
+        self.translated_linked_form = MoloFormPage.objects.get(
+            slug='french-translation-of-linked-form-title')
+        self.translated_linked_form.save_revision().publish()
 
-        self.personalisable_survey, personalisable_survey_form_field = (
-            self.create_personalisable_survey(
-                parent=self.surveys_index,
-                title="personalisable survey title",
-                slug="personalisable_survey_title",
+        self.personalisable_form, personalisable_form_form_field = (
+            self.create_personalisable_form(
+                parent=self.forms_index,
+                title="personalisable form title",
+                slug="personalisable_form_title",
             ))
         self.client.post(reverse(
-            'add_translation', args=[self.personalisable_survey.id, 'fr']))
-        self.trans_personalisable_survey = PersonalisableSurvey.objects.get(
-            slug='french-translation-of-personalisable-survey-title')
-        self.trans_personalisable_survey.save_revision().publish()
+            'add_translation', args=[self.personalisable_form.id, 'fr']))
+        self.trans_personalisable_form = PersonalisableForm.objects.get(
+            slug='french-translation-of-personalisable-form-title')
+        self.trans_personalisable_form.save_revision().publish()
 
-    def test_get_survey_list_default(self):
+    def test_get_form_list_default(self):
         context = Context({
             'locale_code': 'en',
             'request': self.request,
         })
-        context = get_survey_list(context)
-        self.assertEqual(len(context['surveys']), 3)
-        self.assertTrue(self.direct_molo_survey_page in context['surveys'])
-        self.assertTrue(self.linked_molo_survey_page in context['surveys'])
+        context = get_form_list(context)
+        self.assertEqual(len(context['forms']), 3)
+        self.assertTrue(self.direct_molo_form_page in context['forms'])
+        self.assertTrue(self.linked_molo_form_page in context['forms'])
 
         context = Context({
             'locale_code': 'fr',
             'request': self.request,
         })
-        context = get_survey_list(context)
-        self.assertEqual(len(context['surveys']), 3)
-        self.assertTrue(self.translated_direct_survey in context['surveys'])
-        self.assertTrue(self.translated_linked_survey in context['surveys'])
-        self.assertTrue(self.yourwords_molo_survey_page in context['surveys'])
+        context = get_form_list(context)
+        self.assertEqual(len(context['forms']), 3)
+        self.assertTrue(self.translated_direct_form in context['forms'])
+        self.assertTrue(self.translated_linked_form in context['forms'])
+        self.assertTrue(self.yourwords_molo_form_page in context['forms'])
 
-    def test_get_survey_list_only_direct(self):
+    def test_get_form_list_only_direct(self):
         context = Context({
             'locale_code': 'en',
             'request': self.request,
         })
-        context = get_survey_list(context, only_direct_surveys=True)
-        self.assertEqual(len(context['surveys']), 1)
-        self.assertTrue(self.direct_molo_survey_page in context['surveys'])
-        self.assertTrue(self.linked_molo_survey_page not in context['surveys'])
+        context = get_form_list(context, only_direct_forms=True)
+        self.assertEqual(len(context['forms']), 1)
+        self.assertTrue(self.direct_molo_form_page in context['forms'])
+        self.assertTrue(self.linked_molo_form_page not in context['forms'])
         context = Context({
             'locale_code': 'fr',
             'request': self.request,
         })
-        context = get_survey_list(context, only_direct_surveys=True)
-        self.assertEqual(len(context['surveys']), 1)
-        self.assertTrue(self.translated_direct_survey in context['surveys'])
+        context = get_form_list(context, only_direct_forms=True)
+        self.assertEqual(len(context['forms']), 1)
+        self.assertTrue(self.translated_direct_form in context['forms'])
         self.assertTrue(
-            self.translated_linked_survey not in context['surveys'])
+            self.translated_linked_form not in context['forms'])
 
-    def test_get_survey_list_only_yourwords(self):
+    def test_get_form_list_only_yourwords(self):
         context = Context({
             'locale_code': 'en',
             'request': self.request,
         })
-        context = get_survey_list(context, only_yourwords=True)
-        self.assertEqual(len(context['surveys']), 1)
-        self.assertTrue(self.yourwords_molo_survey_page in context['surveys'])
-        self.assertTrue(self.linked_molo_survey_page not in context['surveys'])
+        context = get_form_list(context, only_yourwords=True)
+        self.assertEqual(len(context['forms']), 1)
+        self.assertTrue(self.yourwords_molo_form_page in context['forms'])
+        self.assertTrue(self.linked_molo_form_page not in context['forms'])
 
-    def test_get_survey_list_only_linked(self):
+    def test_get_form_list_only_linked(self):
         context = Context({
             'locale_code': 'en',
             'request': self.request,
         })
-        context = get_survey_list(context, only_linked_surveys=True)
-        self.assertEqual(len(context['surveys']), 1)
-        self.assertTrue(self.direct_molo_survey_page not in context['surveys'])
-        self.assertTrue(self.linked_molo_survey_page in context['surveys'])
+        context = get_form_list(context, only_linked_forms=True)
+        self.assertEqual(len(context['forms']), 1)
+        self.assertTrue(self.direct_molo_form_page not in context['forms'])
+        self.assertTrue(self.linked_molo_form_page in context['forms'])
         context = Context({
             'locale_code': 'fr',
             'request': self.request,
         })
-        context = get_survey_list(context, only_linked_surveys=True)
-        self.assertEqual(len(context['surveys']), 1)
+        context = get_form_list(context, only_linked_forms=True)
+        self.assertEqual(len(context['forms']), 1)
         self.assertTrue(
-            self.translated_direct_survey not in context['surveys'])
-        self.assertTrue(self.translated_linked_survey in context['surveys'])
+            self.translated_direct_form not in context['forms'])
+        self.assertTrue(self.translated_linked_form in context['forms'])
 
-    def test_get_survey_list_arg_error(self):
+    def test_get_form_list_arg_error(self):
         context = Context({
             'locale_code': 'en',
             'request': self.request,
         })
         with self.assertRaises(ValueError):
-            context = get_survey_list(context,
-                                      only_linked_surveys=True,
-                                      only_direct_surveys=True,)
+            context = get_form_list(context,
+                                      only_linked_forms=True,
+                                      only_direct_forms=True,)
 
-    def test_get_survey_list_personalisable_survey(self):
+    def test_get_form_list_personalisable_form(self):
         context = Context({
             'locale_code': 'en',
             'request': self.request,
         })
-        context = get_survey_list(context, personalisable_survey=True)
-        self.assertEqual(len(context['surveys']), 1)
+        context = get_form_list(context, personalisable_form=True)
+        self.assertEqual(len(context['forms']), 1)
         self.assertTrue(
-            self.direct_molo_survey_page not in context['surveys'])
-        self.assertTrue(self.personalisable_survey in context['surveys'])
+            self.direct_molo_form_page not in context['forms'])
+        self.assertTrue(self.personalisable_form in context['forms'])
         context = Context({
             'locale_code': 'fr',
             'request': self.request,
         })
-        context = get_survey_list(context, personalisable_survey=True)
-        self.assertEqual(len(context['surveys']), 1)
+        context = get_form_list(context, personalisable_form=True)
+        self.assertEqual(len(context['forms']), 1)
         self.assertTrue(
-            self.translated_direct_survey not in context['surveys'])
+            self.translated_direct_form not in context['forms'])
         self.assertTrue(
-            self.trans_personalisable_survey in context['surveys'])
+            self.trans_personalisable_form in context['forms'])

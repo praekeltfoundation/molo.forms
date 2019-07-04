@@ -6,7 +6,7 @@ from django.test import TestCase
 from django.utils import timezone
 
 from molo.core.tests.base import MoloTestCaseMixin
-from molo.forms.models import MoloSurveyPageView
+from molo.forms.models import MoloFormPageView
 
 
 class TestDeduplicatePageviewData(TestCase, MoloTestCaseMixin):
@@ -21,7 +21,7 @@ class TestDeduplicatePageviewData(TestCase, MoloTestCaseMixin):
             page = self.page
         if user is None:
             user = self.user
-        return MoloSurveyPageView.objects.create(
+        return MoloFormPageView.objects.create(
             page=page,
             user=user,
         )
@@ -30,7 +30,7 @@ class TestDeduplicatePageviewData(TestCase, MoloTestCaseMixin):
         self.create_pageview()
         self.create_pageview()
         call_command('deduplicate_pageview_data')
-        self.assertEqual(MoloSurveyPageView.objects.count(), 1)
+        self.assertEqual(MoloFormPageView.objects.count(), 1)
 
     def test_does_not_delete_pageviews_from_same_user_page_after_minutes(self):
         pageview_one = self.create_pageview()
@@ -38,18 +38,18 @@ class TestDeduplicatePageviewData(TestCase, MoloTestCaseMixin):
         pageview_one.visited_at = timezone.now() - timedelta(minutes=2)
         pageview_one.save()
         call_command('deduplicate_pageview_data')
-        self.assertEqual(MoloSurveyPageView.objects.count(), 2)
+        self.assertEqual(MoloFormPageView.objects.count(), 2)
 
     def test_does_not_delete_pageviews_from_different_user(self):
         new_user = get_user_model().objects.create_user('testuser')
         self.create_pageview()
         self.create_pageview(user=new_user)
         call_command('deduplicate_pageview_data')
-        self.assertEqual(MoloSurveyPageView.objects.count(), 2)
+        self.assertEqual(MoloFormPageView.objects.count(), 2)
 
     def test_does_not_delete_pageviews_for_different_page(self):
         new_page = self.mk_article(parent=self.section)
         self.create_pageview()
         self.create_pageview(page=new_page)
         call_command('deduplicate_pageview_data')
-        self.assertEqual(MoloSurveyPageView.objects.count(), 2)
+        self.assertEqual(MoloFormPageView.objects.count(), 2)

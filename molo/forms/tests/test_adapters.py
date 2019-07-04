@@ -23,9 +23,9 @@ from molo.forms.adapters import (
     index_rules_by_type,
     transform_into_boolean_list,
     evaluate,
-    PersistentSurveysSegmentsAdapter,
+    PersistentFormsSegmentsAdapter,
 )
-from molo.forms.models import MoloSurveyPageView, SegmentUserGroup
+from molo.forms.models import MoloFormPageView, SegmentUserGroup
 
 from molo.forms.rules import GroupMembershipRule
 
@@ -198,7 +198,7 @@ class TestAdapterUtils(TestCase, MoloTestCaseMixin):
         )
 
 
-class TestPersistentSurveysSegmentsAdapter(TestCase, MoloTestCaseMixin):
+class TestPersistentFormsSegmentsAdapter(TestCase, MoloTestCaseMixin):
     def setUp(self):
         self.mk_main()
         self.request = RequestFactory().get('/')
@@ -227,7 +227,7 @@ class TestPersistentSurveysSegmentsAdapter(TestCase, MoloTestCaseMixin):
                 page=self.page,
             )
 
-        self.adapter = PersistentSurveysSegmentsAdapter(self.request)
+        self.adapter = PersistentFormsSegmentsAdapter(self.request)
 
     def test_no_exception_raised_if_user_not_set(self):
         del self.request.user
@@ -238,17 +238,17 @@ class TestPersistentSurveysSegmentsAdapter(TestCase, MoloTestCaseMixin):
 
     def test_no_pageview_stored_if_not_articlepage(self):
         self.adapter.add_page_visit(self.section)
-        self.assertEqual(MoloSurveyPageView.objects.all().count(), 0)
+        self.assertEqual(MoloFormPageView.objects.all().count(), 0)
 
     def test_no_pageview_stored_for_anonymous_user(self):
         self.request.user = AnonymousUser()
         self.adapter.add_page_visit(self.page)
-        self.assertEqual(MoloSurveyPageView.objects.all().count(), 0)
+        self.assertEqual(MoloFormPageView.objects.all().count(), 0)
 
     def test_pageview_stored(self):
         self.adapter.add_page_visit(self.page)
 
-        pageviews = MoloSurveyPageView.objects.all()
+        pageviews = MoloFormPageView.objects.all()
 
         self.assertEqual(pageviews.count(), 1)
 
@@ -277,29 +277,29 @@ class TestPersistentSurveysSegmentsAdapter(TestCase, MoloTestCaseMixin):
             email='another_user@example.com',
             password='x',
         )
-        MoloSurveyPageView.objects.create(
+        MoloFormPageView.objects.create(
             user=self.request.user,
             page=self.page,
         )
-        MoloSurveyPageView.objects.create(
+        MoloFormPageView.objects.create(
             user=another_user,
             page=self.page,
         )
         self.assertEqual(self.adapter.get_tag_count(self.important_tag), 1)
 
     def test_get_tag_count_only_counts_specified_tag(self):
-        MoloSurveyPageView.objects.create(
+        MoloFormPageView.objects.create(
             user=self.request.user,
             page=self.page,
         )
-        MoloSurveyPageView.objects.create(
+        MoloFormPageView.objects.create(
             user=self.request.user,
             page=self.page,
         )
         self.assertEqual(self.adapter.get_tag_count(self.important_tag), 1)
 
     def test_get_tag_count_uses_date_from_if_provided(self):
-        MoloSurveyPageView.objects.create(
+        MoloFormPageView.objects.create(
             user=self.request.user,
             page=self.page,
         )
@@ -309,7 +309,7 @@ class TestPersistentSurveysSegmentsAdapter(TestCase, MoloTestCaseMixin):
         ), 0)
 
     def test_get_tag_count_uses_date_to_if_provided(self):
-        MoloSurveyPageView.objects.create(
+        MoloFormPageView.objects.create(
             user=self.request.user,
             page=self.page,
         )
@@ -319,11 +319,11 @@ class TestPersistentSurveysSegmentsAdapter(TestCase, MoloTestCaseMixin):
         ), 0)
 
     def test_get_tag_count_groups_by_unique_article(self):
-        MoloSurveyPageView.objects.create(
+        MoloFormPageView.objects.create(
             user=self.request.user,
             page=self.page,
         )
-        MoloSurveyPageView.objects.create(
+        MoloFormPageView.objects.create(
             user=self.request.user,
             page=self.page,
         )
@@ -341,7 +341,7 @@ class TestPersistentSurveysSegmentsAdapter(TestCase, MoloTestCaseMixin):
         self.assertEqual(self.adapter.get_visit_count(), 0)
 
     def test_get_visit_counts_pageviews_for_user_and_page(self):
-        MoloSurveyPageView.objects.create(
+        MoloFormPageView.objects.create(
             user=self.request.user,
             page=self.page,
         )

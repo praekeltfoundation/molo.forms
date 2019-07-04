@@ -5,14 +5,14 @@ from django.test.client import Client
 
 from molo.core.models import SiteLanguageRelation, Main, Languages
 from molo.core.tests.base import MoloTestCaseMixin
-from molo.forms.models import (MoloSurveyPage, MoloSurveyFormField,
-                                 SurveysIndexPage, SurveyTermsConditions,
+from molo.forms.models import (MoloFormPage, MoloFormField,
+                                 FormsIndexPage, FormTermsConditions,
                                  TermsAndConditionsIndexPage)
 
 User = get_user_model()
 
 
-class TestSurveyViews(TestCase, MoloTestCaseMixin):
+class TestFormViews(TestCase, MoloTestCaseMixin):
     def setUp(self):
         self.client = Client()
         self.mk_main()
@@ -24,14 +24,14 @@ class TestSurveyViews(TestCase, MoloTestCaseMixin):
             locale='en',
             is_active=True)
 
-        # Create surveys index pages
-        self.surveys_index = SurveysIndexPage.objects.child_of(
+        # Create forms index pages
+        self.forms_index = FormsIndexPage.objects.child_of(
             self.main).first()
 
         # create terms and conditions index_page
         terms_conditions_index = TermsAndConditionsIndexPage(
             title='terms and conditions pages', slug='terms-1')
-        self.surveys_index.add_child(instance=terms_conditions_index)
+        self.forms_index.add_child(instance=terms_conditions_index)
         terms_conditions_index.save_revision().publish()
 
         # create terms and conditions page
@@ -54,37 +54,37 @@ class TestSurveyViews(TestCase, MoloTestCaseMixin):
         self.mk_main2(title='main3', slug='main3', path="00010003")
         self.client2 = Client(HTTP_HOST=self.main2.get_site().hostname)
 
-    def create_molo_survey_page(self, parent, **kwargs):
-        molo_survey_page = MoloSurveyPage(
-            title='Test Survey', slug='test-survey',
-            introduction='Introduction to Test Survey ...',
-            thank_you_text='Thank you for taking the Test Survey',
-            submit_text='survey submission text',
+    def create_molo_form_page(self, parent, **kwargs):
+        molo_form_page = MoloFormPage(
+            title='Test Form', slug='test-form',
+            introduction='Introduction to Test Form ...',
+            thank_you_text='Thank you for taking the Test Form',
+            submit_text='form submission text',
             **kwargs
         )
 
-        parent.add_child(instance=molo_survey_page)
-        molo_survey_page.save_revision().publish()
-        molo_survey_form_field = MoloSurveyFormField.objects.create(
-            page=molo_survey_page,
+        parent.add_child(instance=molo_form_page)
+        molo_form_page.save_revision().publish()
+        molo_form_form_field = MoloFormField.objects.create(
+            page=molo_form_page,
             sort_order=1,
             label='Your favourite animal',
             field_type='singleline',
             required=True
         )
-        return molo_survey_page, molo_survey_form_field
+        return molo_form_page, molo_form_form_field
 
-    def test_copying_main_copies_surveys_relations_correctly(self):
+    def test_copying_main_copies_forms_relations_correctly(self):
         self.user = self.login()
-        # create survey page
-        molo_survey_page, molo_survey_form_field = \
-            self.create_molo_survey_page(
-                parent=self.surveys_index,
+        # create form page
+        molo_form_page, molo_form_form_field = \
+            self.create_molo_form_page(
+                parent=self.forms_index,
                 homepage_button_text='share your story yo')
 
-        # create the terms and conditions relation with survey page
-        SurveyTermsConditions.objects.create(
-            page=molo_survey_page, terms_and_conditions=self.article)
+        # create the terms and conditions relation with form page
+        FormTermsConditions.objects.create(
+            page=molo_form_page, terms_and_conditions=self.article)
         # copy one main to create another
         response = self.client.post(reverse(
             'wagtailadmin_pages:copy',
@@ -101,6 +101,6 @@ class TestSurveyViews(TestCase, MoloTestCaseMixin):
             main3.get_children().count(), self.main.get_children().count())
 
         # it should replace the terms and conditions page with the new one
-        relation = MoloSurveyPage.objects.descendant_of(
+        relation = MoloFormPage.objects.descendant_of(
             main3).first().terms_and_conditions.first()
         self.assertTrue(relation.terms_and_conditions.is_descendant_of(main3))

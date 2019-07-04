@@ -2,7 +2,7 @@
 {% extends "base.html" %}
 
 {% load static core_tags %}
-{% load wagtailcore_tags wagtailimages_tags molo_survey_tags %}
+{% load wagtailcore_tags wagtailimages_tags molo_form_tags %}
 
 {% block body_class %}template-{{ self.get_verbose_name|slugify }}{% endblock %}
 
@@ -35,6 +35,6 @@
       {% endif %}
   {% endfor %}
 </article>
-  {% surveys_list_for_pages page=self %}
+  {% forms_list_for_pages page=self %}
 </div>
 {% endblock %}
