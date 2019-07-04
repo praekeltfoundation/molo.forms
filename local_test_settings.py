@@ -17,5 +17,5 @@ ALLOWED_HOSTS = [
 ]
 
 PERSONALISATION_SEGMENTS_ADAPTER = (
-    'molo.forms.adapters.PersistentSurveysSegmentsAdapter'
+    'molo.forms.adapters.PersistentFormsSegmentsAdapter'
 )

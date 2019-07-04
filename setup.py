@@ -23,10 +23,10 @@ with open('VERSION') as fp:
 setup(
     name='molo.forms',
     version=version,
-    description="This is the molo.forms project.",
+    description="A form builder for Molo applications.",
     long_description=readme,
-    author="Praekelt Foundation",
-    author_email='dev@praekeltfoundation.org',
+    author="Praekelt.org",
+    author_email='dev@praekelt.org',
     url='https://github.com/praekelt/molo.forms',
     packages=find_packages(exclude='molo.project'),
     namespace_packages=['molo'],
