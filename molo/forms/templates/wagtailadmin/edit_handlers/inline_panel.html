@@ -7,7 +7,7 @@
 BEGIN CUSTOM TEMPLATE LOGIC
 Add formsets for Segmentation Rules
 {% endcomment %}
-{% if 'wagtail_personalisation_' in self.formset.prefix or 'surveys_' in self.formset.prefix %}
+{% if 'wagtail_personalisation_' in self.formset.prefix or 'forms_' in self.formset.prefix %}
     {% blocktrans with heading=self.heading|lower %}
         <h2>{{ heading }}</h2>
     {% endblocktrans %}
@@ -83,16 +83,16 @@ Add formsets for Segmentation Rules
         </p>
     {% endif %}
 
-    {% if self.formset.prefix == 'surveys_surveysubmissiondatarule_related' %}
+    {% if self.formset.prefix == 'forms_formsubmissiondatarule_related' %}
         <p>
             {% blocktrans %}
                 This rule allows you to segment content to users based
-                on their previous answers to surveys.
+                on their previous answers to forms.
             {% endblocktrans %}
         </p>
     {% endif %}
 
-    {% if self.formset.prefix == 'surveys_groupmembershiprule_related' %}
+    {% if self.formset.prefix == 'forms_groupmembershiprule_related' %}
         <p>
             {% blocktrans %}
                 This rule allows you to segment content to users based
@@ -101,7 +101,7 @@ Add formsets for Segmentation Rules
         </p>
     {% endif %}
 
-    {% if self.formset.prefix == 'surveys_articletagrule_related' %}
+    {% if self.formset.prefix == 'forms_articletagrule_related' %}
         <p>
             {% blocktrans %}
             This rule allows you to segment users that visited a certain number of unique articles with a specific tag during a specified time period, e.g. you can segment users who visited more than 3 articles with the “health” tag between January and March this year.
@@ -109,7 +109,7 @@ Add formsets for Segmentation Rules
         </p>
     {% endif %}
 
-    {% if self.formset.prefix == 'surveys_combinationrule_related' %}
+    {% if self.formset.prefix == 'forms_combinationrule_related' %}
         <p>
             {% blocktrans %}
             Use the Rule Combination to connect the defined rules with a combination of AND/OR statements. Include the statements that you want to be calculated first as Nested Logic as this will place the statements in parentheses. If you do not use Nested Logic, the system will read the combination in order from top to bottom.
@@ -165,7 +165,7 @@ Add formsets for Segmentation Rules
 {# BEGIN CUSTOM TEMPLATE LOGIC #}
 </p>
 
-{% if 'wagtail_personalisation_' in self.formset.prefix or 'surveys_' in self.formset.prefix %}
+{% if 'wagtail_personalisation_' in self.formset.prefix or 'forms_' in self.formset.prefix %}
     <hr>
 {% endif %}
 {# END CUSTOM TEMPLATE LOGIC #}
