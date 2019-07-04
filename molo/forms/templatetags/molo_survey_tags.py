@@ -4,7 +4,7 @@ from django.forms.fields import MultipleChoiceField
 from copy import copy
 from wagtail.core.models import Page
 from molo.forms.models import (
-    MoloSurveyPage, SurveysIndexPage, PersonalisableSurvey)
+    MoloFormPage, FormsIndexPage, PersonalisableForm)
 
 from molo.core.templatetags.core_tags import get_pages
 from django.shortcuts import get_object_or_404
@@ -12,101 +12,101 @@ from django.shortcuts import get_object_or_404
 register = template.Library()
 
 
-def get_survey_list(context,
-                    only_linked_surveys=False,
-                    only_direct_surveys=False,
+def get_form_list(context,
+                    only_linked_forms=False,
+                    only_direct_forms=False,
                     only_yourwords=False,
-                    personalisable_survey=False):
-    if only_linked_surveys and only_direct_surveys:
-        raise ValueError('arguments "only_linked_surveys" and '
-                         '"only_direct_surveys" cannot both be True')
+                    personalisable_form=False):
+    if only_linked_forms and only_direct_forms:
+        raise ValueError('arguments "only_linked_forms" and '
+                         '"only_direct_forms" cannot both be True')
 
     context = copy(context)
     locale_code = context.get('locale_code')
     main = context['request'].site.root_page
-    page = SurveysIndexPage.objects.child_of(main).live().first()
+    page = FormsIndexPage.objects.child_of(main).live().first()
     if page:
-        surveys = []
-        if only_linked_surveys:
-            surveys = (MoloSurveyPage.objects.child_of(page)
+        forms = []
+        if only_linked_forms:
+            forms = (MoloFormPage.objects.child_of(page)
                        .filter(language__is_main_language=True,
-                               display_survey_directly=False,
+                               display_form_directly=False,
                                your_words_competition=False)
-                       .exact_type(MoloSurveyPage).specific())
-        elif only_direct_surveys:
-            surveys = (MoloSurveyPage.objects.child_of(page)
+                       .exact_type(MoloFormPage).specific())
+        elif only_direct_forms:
+            forms = (MoloFormPage.objects.child_of(page)
                        .filter(language__is_main_language=True,
-                               display_survey_directly=True,
+                               display_form_directly=True,
                                your_words_competition=False)
-                       .exact_type(MoloSurveyPage).specific())
+                       .exact_type(MoloFormPage).specific())
         elif only_yourwords:
-            surveys = (MoloSurveyPage.objects.child_of(page)
+            forms = (MoloFormPage.objects.child_of(page)
                        .filter(language__is_main_language=True,
                                your_words_competition=True)
-                       .exact_type(MoloSurveyPage).specific())
-        elif personalisable_survey:
-            surveys = (PersonalisableSurvey.objects.child_of(page)
+                       .exact_type(MoloFormPage).specific())
+        elif personalisable_form:
+            forms = (PersonalisableForm.objects.child_of(page)
                        .filter(language__is_main_language=True)
-                       .exact_type(PersonalisableSurvey).specific())
+                       .exact_type(PersonalisableForm).specific())
         else:
-            surveys = (MoloSurveyPage.objects.child_of(page)
+            forms = (MoloFormPage.objects.child_of(page)
                        .filter(language__is_main_language=True)
-                       .exact_type(MoloSurveyPage).specific())
+                       .exact_type(MoloFormPage).specific())
     else:
-        surveys = MoloSurveyPage.objects.none()
+        forms = MoloFormPage.objects.none()
     context.update({
-        'surveys': get_pages(context, surveys, locale_code)
+        'forms': get_pages(context, forms, locale_code)
     })
     return context
 
 
-def add_form_objects_to_surveys(context):
-    surveys = []
-    for survey in context['surveys']:
+def add_form_objects_to_forms(context):
+    forms = []
+    for form in context['forms']:
         form = None
-        if (survey.allow_multiple_submissions_per_user or
-                not survey.has_user_submitted_survey(
-                    context['request'], survey.id)):
-            form = survey.get_form()
+        if (form.allow_multiple_submissions_per_user or
+                not form.has_user_submitted_form(
+                    context['request'], form.id)):
+            form = form.get_form()
 
-        surveys.append({
-            'molo_survey_page': survey,
+        forms.append({
+            'molo_form_page': form,
             'form': form,
         })
 
     context.update({
-        'surveys': surveys,
+        'forms': forms,
     })
 
     return context
 
 
-@register.inclusion_tag('surveys/surveys_headline.html', takes_context=True)
-def surveys_list_headline(context):
-    return get_survey_list(context)
+@register.inclusion_tag('forms/forms_headline.html', takes_context=True)
+def forms_list_headline(context):
+    return get_form_list(context)
 
 
-@register.inclusion_tag('surveys/surveys_list.html', takes_context=True)
-def surveys_list(context, pk=None, only_linked_surveys=False,
-                 only_direct_surveys=False, only_yourwords=False,
-                 personalisable_survey=False):
-    context = get_survey_list(context,
-                              only_linked_surveys=only_linked_surveys,
-                              only_direct_surveys=only_direct_surveys,
+@register.inclusion_tag('forms/forms_list.html', takes_context=True)
+def forms_list(context, pk=None, only_linked_forms=False,
+                 only_direct_forms=False, only_yourwords=False,
+                 personalisable_form=False):
+    context = get_form_list(context,
+                              only_linked_forms=only_linked_forms,
+                              only_direct_forms=only_direct_forms,
                               only_yourwords=only_yourwords,
-                              personalisable_survey=personalisable_survey)
-    return add_form_objects_to_surveys(context)
+                              personalisable_form=personalisable_form)
+    return add_form_objects_to_forms(context)
 
 
 @register.simple_tag(takes_context=True)
-def load_user_choice_poll_survey(context, survey, field, choice):
-    if not survey or not field:
+def load_user_choice_poll_form(context, form, field, choice):
+    if not form or not field:
         return False
     request = context['request']
-    survey = survey.specific.get_main_language_page()
-    SubmissionClass = survey.specific.get_submission_class()
+    form = form.specific.get_main_language_page()
+    SubmissionClass = form.specific.get_submission_class()
     submissions = SubmissionClass.objects.filter(
-        page=survey, user=request.user)
+        page=form, user=request.user)
     if not submissions.exists():
         return False
     for submission in submissions:
@@ -117,31 +117,31 @@ def load_user_choice_poll_survey(context, survey, field, choice):
 
 
 @register.simple_tag(takes_context=True)
-def submission_has_article(context, survey_id, submission_id):
-    survey_page = get_object_or_404(Page, id=survey_id).specific
-    SubmissionClass = survey_page.get_submission_class()
+def submission_has_article(context, form_id, submission_id):
+    form_page = get_object_or_404(Page, id=form_id).specific
+    SubmissionClass = form_page.get_submission_class()
     submission = SubmissionClass.objects.filter(
-        page=survey_page).filter(pk=submission_id).first()
+        page=form_page).filter(pk=submission_id).first()
     if submission.article_page is None:
         return False
     return True
 
 
-@register.inclusion_tag('surveys/surveys_list.html', takes_context=True)
-def surveys_list_for_pages(context, pk=None, page=None):
+@register.inclusion_tag('forms/forms_list.html', takes_context=True)
+def forms_list_for_pages(context, pk=None, page=None):
     context = copy(context)
     locale_code = context.get('locale_code')
     if page:
-        surveys = (
-            MoloSurveyPage.objects.child_of(page).filter(
+        forms = (
+            MoloFormPage.objects.child_of(page).filter(
                 language__is_main_language=True).specific())
     else:
-        surveys = MoloSurveyPage.objects.none()
+        forms = MoloFormPage.objects.none()
 
     context.update({
-        'surveys': get_pages(context, surveys, locale_code)
+        'forms': get_pages(context, forms, locale_code)
     })
-    return add_form_objects_to_surveys(context)
+    return add_form_objects_to_forms(context)
 
 
 @register.filter(name='is_multiple_choice_field')

@@ -192,10 +192,10 @@ class SkipLogicPage(Page):
         return self.last_question.is_next_action(question_response, *actions)
 
     def is_end(self):
-        return self.is_next_action(SkipState.END, SkipState.SURVEY)
+        return self.is_next_action(SkipState.END, SkipState.FORM)
 
     def success(self, slug):
-        if self.is_next_action(SkipState.SURVEY):
+        if self.is_next_action(SkipState.FORM):
             return redirect(
                 self.last_question.next_page(self.last_response).url
             )

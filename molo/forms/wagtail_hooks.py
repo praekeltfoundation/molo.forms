@@ -5,7 +5,7 @@ from django.utils.html import format_html_join
 from wagtail.contrib.modeladmin.options import modeladmin_register
 from wagtail.core import hooks
 
-from molo.forms.models import MoloSurveyPage, SurveyTermsConditions
+from molo.forms.models import MoloFormPage, FormTermsConditions
 from molo.forms import admin_urls
 from molo.core.models import ArticlePage
 
@@ -18,7 +18,7 @@ modeladmin_register(SegmentUserGroupAdmin)
 @hooks.register('insert_global_admin_js')
 def global_admin_js():
     js_files = [
-        'js/survey-admin.js',
+        'js/form-admin.js',
     ]
 
     js_includes = format_html_join(
@@ -33,10 +33,10 @@ def create_new_page_relations(request, page, new_page):
     if page and new_page:
         if new_page.get_descendants().count() >= \
                 page.get_descendants().count():
-            for survey in MoloSurveyPage.objects.descendant_of(
+            for form in MoloFormPage.objects.descendant_of(
                     new_page.get_site().root_page):
                 # replace old terms and conditions with new one, if it exists
-                relations = SurveyTermsConditions.objects.filter(page=survey)
+                relations = FormTermsConditions.objects.filter(page=form)
                 for relation in relations:
                     if relation.terms_and_conditions:
                         new_article = ArticlePage.objects.descendant_of(
@@ -48,9 +48,9 @@ def create_new_page_relations(request, page, new_page):
 
 
 # This overrwrites the wagtailsuveys admin urls in order to use custom
-# survey index view
+# form index view
 @hooks.register('register_admin_urls')
 def register_admin_urls():
     return [
-        url(r'^surveys/', include(admin_urls)),
+        url(r'^forms/', include(admin_urls)),
     ]

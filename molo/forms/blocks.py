@@ -13,7 +13,7 @@ class SkipState:
     NEXT = 'next'
     END = 'end'
     QUESTION = 'question'
-    SURVEY = 'survey'
+    FORM = 'form'
 
 
 VALID_SKIP_SELECTORS = ['radio', 'checkbox', 'dropdown']
@@ -93,21 +93,21 @@ class SkipLogicBlock(blocks.StructBlock):
     skip_logic = blocks.ChoiceBlock(
         choices=[
             (SkipState.NEXT, _('Next default question')),
-            (SkipState.END, _('End of survey')),
+            (SkipState.END, _('End of form')),
             (SkipState.QUESTION, _('Another question')),
-            (SkipState.SURVEY, _('Another survey')),
+            (SkipState.FORM, _('Another form')),
         ],
         default=SkipState.NEXT,
         required=True,
     )
-    survey = blocks.PageChooserBlock(
-        target_model='surveys.MoloSurveyPage',
+    form = blocks.PageChooserBlock(
+        target_model='forms.MoloFormPage',
         required=False,
     )
     question = QuestionSelectBlock(
         required=False,
         help_text=_(
-            ('Please save the survey as a draft to populate or update '
+            ('Please save the form as a draft to populate or update '
              'the list of questions.')
         ),
     )
@@ -123,11 +123,11 @@ class SkipLogicBlock(blocks.StructBlock):
     def clean(self, value):
         cleaned_data = super(SkipLogicBlock, self).clean(value)
         logic = cleaned_data['skip_logic']
-        if logic == SkipState.SURVEY:
-            if not cleaned_data['survey']:
+        if logic == SkipState.FORM:
+            if not cleaned_data['form']:
                 raise ValidationError(
-                    'A Survey must be selected to progress to.',
-                    params={'survey': [_('Please select a survey.')]}
+                    'A Form must be selected to progress to.',
+                    params={'form': [_('Please select a form.')]}
                 )
             cleaned_data['question'] = None
 
@@ -137,10 +137,10 @@ class SkipLogicBlock(blocks.StructBlock):
                     'A Question must be selected to progress to.',
                     params={'question': [_('Please select a question.')]}
                 )
-            cleaned_data['survey'] = None
+            cleaned_data['form'] = None
 
         if logic in [SkipState.END, SkipState.NEXT]:
-            cleaned_data['survey'] = None
+            cleaned_data['form'] = None
             cleaned_data['question'] = None
 
         return cleaned_data

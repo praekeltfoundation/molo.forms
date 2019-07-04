@@ -1,7 +1,7 @@
 
 from django.conf.urls import url
 from molo.forms.views import (
-    SurveySuccess, ResultsPercentagesJson, submission_article,
+    FormSuccess, ResultsPercentagesJson, submission_article,
     get_segment_user_count
 )
 
@@ -9,7 +9,7 @@ from molo.forms.views import (
 urlpatterns = [
     url(
         r"^(?P<slug>[\w-]+)/success/$",
-        SurveySuccess.as_view(),
+        FormSuccess.as_view(),
         name="success"
     ),
     url(

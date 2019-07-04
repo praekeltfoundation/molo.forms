@@ -58,7 +58,7 @@ class FieldNameField(models.CharField):
         return obj.get_expected_field().label
 
 
-class SurveySubmissionDataRule(AbstractBaseRule):
+class FormSubmissionDataRule(AbstractBaseRule):
     static = True
 
     EQUALS = 'eq'
@@ -69,8 +69,8 @@ class SurveySubmissionDataRule(AbstractBaseRule):
         (CONTAINS, _('contains')),
     )
 
-    survey = models.ForeignKey('PersonalisableSurvey',
-                               verbose_name=_('survey'),
+    form = models.ForeignKey('PersonalisableForm',
+                               verbose_name=_('form'),
                                on_delete=models.CASCADE)
     field_name = FieldNameField(
         _('field name'), max_length=255,
@@ -96,28 +96,28 @@ class SurveySubmissionDataRule(AbstractBaseRule):
                     '"expected response".'))
 
     panels = [
-        PageChooserPanel('survey'),
+        PageChooserPanel('form'),
         FieldPanel('field_name'),
         FieldPanel('operator'),
         FieldPanel('expected_response')
     ]
 
     class Meta:
-        verbose_name = _('Survey submission rule')
+        verbose_name = _('Form submission rule')
 
     @cached_property
     def field_model(self):
-        return apps.get_model('surveys', 'PersonalisableSurveyFormField')
+        return apps.get_model('forms', 'PersonalisableFormField')
 
     @property
-    def survey_submission_model(self):
-        from molo.forms.models import MoloSurveySubmission
+    def form_submission_model(self):
+        from molo.forms.models import MoloFormSubmission
 
-        return MoloSurveySubmission
+        return MoloFormSubmission
 
     def get_expected_field(self):
         try:
-            return self.survey.get_form().fields[self.field_name]
+            return self.form.get_form().fields[self.field_name]
         except KeyError:
             raise self.field_model.DoesNotExist
 
@@ -152,23 +152,23 @@ class SurveySubmissionDataRule(AbstractBaseRule):
             if raise_exceptions:
                 raise
 
-    def get_survey_submission_of_user(self, user):
-        return self.survey_submission_model.objects.get(
-            user=user, page_id=self.survey_id)
+    def get_form_submission_of_user(self, user):
+        return self.form_submission_model.objects.get(
+            user=user, page_id=self.form_id)
 
     def clean(self):
-        # Do not call clean() if we have no survey set.
-        if not self.survey_id:
+        # Do not call clean() if we have no form set.
+        if not self.form_id:
             return
 
         # Make sure field name is in correct format
         self.field_name = str(slugify(text_type(unidecode(self.field_name))))
 
         # Make sure field name is a valid name
-        field_names = [f.clean_name for f in self.survey.get_form_fields()]
+        field_names = [f.clean_name for f in self.form.get_form_fields()]
 
         if self.field_name not in field_names:
-            field_labels = [f.label for f in self.survey.get_form_fields()]
+            field_labels = [f.label for f in self.form.get_form_fields()]
             raise ValidationError({
                 'field_name': [_('You need to choose valid field name out '
                                  'of: "%s".') % '", "'.join(field_labels)]
@@ -177,7 +177,7 @@ class SurveySubmissionDataRule(AbstractBaseRule):
         # Convert value from the rule into Python value.
         python_value = self.get_expected_field_python_value()
 
-        # Get this particular's field instance from the survey's form
+        # Get this particular's field instance from the form's form
         # so we can do validation on the value.
         try:
             self.get_expected_field().clean(python_value)
@@ -197,18 +197,18 @@ class SurveySubmissionDataRule(AbstractBaseRule):
             return False
 
         try:
-            survey_submission = self.get_survey_submission_of_user(user)
-        except self.survey_submission_model.DoesNotExist:
-            # No survey found so return false
+            form_submission = self.get_form_submission_of_user(user)
+        except self.form_submission_model.DoesNotExist:
+            # No form found so return false
             return False
-        except self.survey_submission_model.MultipleObjectsReturned:
-            # There should not be two survey submissions, but just in case
+        except self.form_submission_model.MultipleObjectsReturned:
+            # There should not be two form submissions, but just in case
             # let's return false since we don't want to be guessing what user
             # meant in their response.
             return False
 
-        # Get dict with user's survey submission to a particular question
-        user_response = survey_submission.get_data().get(self.field_name)
+        # Get dict with user's form submission to a particular question
+        user_response = form_submission.get_data().get(self.field_name)
 
         if not user_response:
             return False
@@ -241,13 +241,13 @@ class SurveySubmissionDataRule(AbstractBaseRule):
 
             return python_value == user_response
         except ValidationError:
-            # In case survey has been modified and we cannot obtain Python
+            # In case form has been modified and we cannot obtain Python
             # value, we want to return false.
             return False
         except self.field_model.DoesNotExist:
-            # In case field does not longer exist on the survey
+            # In case field does not longer exist on the form
             # return false. We cannot compare its value if
-            # we do not know its type (hence it needs to be on the survey).
+            # we do not know its type (hence it needs to be on the form).
             return False
 
     def description(self):
@@ -257,9 +257,9 @@ class SurveySubmissionDataRule(AbstractBaseRule):
             field_name = self.field_name
 
         return {
-            'title': _('Based on survey submission of users'),
+            'title': _('Based on form submission of users'),
             'value': _('%s - %s  "%s"') % (
-                self.survey,
+                self.form,
                 field_name,
                 self.expected_response
             )
@@ -271,21 +271,21 @@ class SurveySubmissionDataRule(AbstractBaseRule):
         except self.field_model.DoesNotExist:
             field_name = self.field_name
 
-        return '%s - %s' % (self.survey, field_name)
+        return '%s - %s' % (self.form, field_name)
 
     def get_user_info_string(self, user):
         try:
-            survey_submission = self.get_survey_submission_of_user(user)
-        except self.survey_submission_model.DoesNotExist:
-            # No survey found so return false
+            form_submission = self.get_form_submission_of_user(user)
+        except self.form_submission_model.DoesNotExist:
+            # No form found so return false
             return "No submission"
-        except self.survey_submission_model.MultipleObjectsReturned:
-            # There should not be two survey submissions, but just in case
+        except self.form_submission_model.MultipleObjectsReturned:
+            # There should not be two form submissions, but just in case
             # let's return false since we don't want to be guessing what user
             # meant in their response.
             return "Too many submissions"
 
-        user_response = survey_submission.get_data().get(self.field_name)
+        user_response = form_submission.get_data().get(self.field_name)
         if not user_response:
             return "Not answered"
         if isinstance(user_response, list):
@@ -293,19 +293,19 @@ class SurveySubmissionDataRule(AbstractBaseRule):
         return str(user_response)
 
 
-class SurveyResponseRule(AbstractBaseRule):
+class FormResponseRule(AbstractBaseRule):
     static = True
 
-    survey = models.ForeignKey('MoloSurveyPage',
-                               verbose_name=_('survey'),
+    form = models.ForeignKey('MoloFormPage',
+                               verbose_name=_('form'),
                                on_delete=models.CASCADE)
 
     panels = [
-        PageChooserPanel('survey')
+        PageChooserPanel('form')
     ]
 
     class Meta:
-        verbose_name = _('Survey response rule')
+        verbose_name = _('Form response rule')
 
     def test_user(self, request, user=None):
         if request:
@@ -317,31 +317,31 @@ class SurveyResponseRule(AbstractBaseRule):
 
         # Django formsets don't honour 'required' fields so check rule is valid
         try:
-            submission_class = self.survey.get_submission_class()
+            submission_class = self.form.get_submission_class()
         except ObjectDoesNotExist:
             return False
 
         return submission_class.objects.filter(
             user=user,
-            page=self.survey,
+            page=self.form,
         ).exists()
 
     def description(self):
         return {
-            'title': _('Based on responses to surveys.'),
+            'title': _('Based on responses to forms.'),
             'value': _('Have responsed to: %s') % (
-                self.survey,
+                self.form,
             )
         }
 
     def get_column_header(self):
-        return self.survey.title
+        return self.form.title
 
     def get_user_info_string(self, user):
-        submission_class = self.survey.get_submission_class()
+        submission_class = self.form.get_submission_class()
         submission = submission_class.objects.filter(
             user=user,
-            page=self.survey,
+            page=self.form,
         ).last()
         if not submission:
             return "No submission"
@@ -355,7 +355,7 @@ class GroupMembershipRule(AbstractBaseRule):
     """wagtail-personalisation rule based on user's group membership."""
     static = True
 
-    group = models.ForeignKey('surveys.segmentusergroup')
+    group = models.ForeignKey('forms.segmentusergroup')
 
     panels = [
         FieldPanel('group')
@@ -366,7 +366,7 @@ class GroupMembershipRule(AbstractBaseRule):
 
     def description(self):
         return {
-            'title': _('Based on survey group memberships of users'),
+            'title': _('Based on form group memberships of users'),
             'value': _('Member of: "%s"') % self.group
         }
 

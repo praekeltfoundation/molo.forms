@@ -106,9 +106,9 @@ def evaluate(list_):
         return evaluate([evaluate(list_[:3])] + list_[3:])
 
 
-class SurveysSegmentsAdapter(SessionSegmentsAdapter):
+class FormsSegmentsAdapter(SessionSegmentsAdapter):
     def add_page_visit(self, page):
-        super(SurveysSegmentsAdapter, self).add_page_visit(page)
+        super(FormsSegmentsAdapter, self).add_page_visit(page)
         tag_visits = self.request.session.setdefault(
             'tag_count',
             defaultdict(dict),
@@ -173,7 +173,7 @@ class SurveysSegmentsAdapter(SessionSegmentsAdapter):
             return evaluate(nested_list_of_booleans)
 
 
-class PersistentSurveysSegmentsAdapter(SurveysSegmentsAdapter):
+class PersistentFormsSegmentsAdapter(FormsSegmentsAdapter):
     '''
     Implements a segments adapter which includes support for persistence.
 
@@ -191,17 +191,17 @@ class PersistentSurveysSegmentsAdapter(SurveysSegmentsAdapter):
         '''
         Persist pageview data in a model.
         '''
-        super(PersistentSurveysSegmentsAdapter, self).add_page_visit(page)
+        super(PersistentFormsSegmentsAdapter, self).add_page_visit(page)
 
         if not hasattr(self.request, 'user'):
             return
 
         if isinstance(page.specific, ArticlePage):
-            MoloSurveyPageView = apps.get_model('surveys.MoloSurveyPageView')
+            MoloFormPageView = apps.get_model('forms.MoloFormPageView')
             user = self.request.user
 
             if user.is_authenticated():
-                pageview = MoloSurveyPageView.objects.create(
+                pageview = MoloFormPageView.objects.create(
                     user=user,
                     page=page.specific,
                 )
@@ -220,7 +220,7 @@ class PersistentSurveysSegmentsAdapter(SurveysSegmentsAdapter):
         if user.is_anonymous():
             return 0
 
-        MoloSurveyPageView = apps.get_model('surveys.MoloSurveyPageView')
+        MoloFormPageView = apps.get_model('forms.MoloFormPageView')
 
         page_ids = ArticlePageTags.objects.filter(tag=tag).values('page_id')
 
@@ -235,7 +235,7 @@ class PersistentSurveysSegmentsAdapter(SurveysSegmentsAdapter):
         if date_to:
             query_parameters['visited_at__lte'] = date_to
 
-        pageviews = MoloSurveyPageView.objects.filter(**query_parameters)
+        pageviews = MoloFormPageView.objects.filter(**query_parameters)
         unique_pages = pageviews.values('page_id').annotate(Count('page_id'))
 
         return unique_pages.count()
@@ -252,11 +252,11 @@ class PersistentSurveysSegmentsAdapter(SurveysSegmentsAdapter):
         if page is None:
             return 0
 
-        MoloSurveyPageView = apps.get_model('surveys.MoloSurveyPageView')
+        MoloFormPageView = apps.get_model('forms.MoloFormPageView')
 
         query_parameters = {
             'user': user,
             'page_id': page.id,
         }
 
-        return MoloSurveyPageView.objects.filter(**query_parameters).count()
+        return MoloFormPageView.objects.filter(**query_parameters).count()

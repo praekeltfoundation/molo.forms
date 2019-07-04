@@ -4,7 +4,7 @@ import json
 from wagtail.core.models import Page
 
 from django.views.generic import TemplateView, View
-from molo.forms.models import MoloSurveyPage, SurveysIndexPage
+from molo.forms.models import MoloFormPage, FormsIndexPage
 from molo.core.models import ArticlePage
 from django.shortcuts import get_object_or_404, redirect
 
@@ -81,7 +81,7 @@ class ResultsPercentagesJson(View):
         for page in pages:
             ids.append(page.id)
         form = get_object_or_404(
-            MoloSurveyPage, slug=kwargs['slug'], id__in=ids)
+            MoloFormPage, slug=kwargs['slug'], id__in=ids)
         # Get information about form fields
         data_fields = [
             (field.clean_name, field.label)
@@ -121,7 +121,7 @@ class ResultsPercentagesJson(View):
         return JsonResponse(results)
 
 
-class SurveySuccess(TemplateView):
+class FormSuccess(TemplateView):
     template_name = "forms/molo_form_page_success.html"
 
     def get_context_data(self, *args, **kwargs):
@@ -131,7 +131,7 @@ class SurveySuccess(TemplateView):
         for page in pages:
             ids.append(page.id)
         form = get_object_or_404(
-            MoloSurveyPage, slug=kwargs['slug'], id__in=ids)
+            MoloFormPage, slug=kwargs['slug'], id__in=ids)
         results = dict()
         if form.show_results:
             # Get information about form fields
@@ -181,7 +181,7 @@ def submission_article(request, form_id, submission_id):
         page=form_page).filter(pk=submission_id).first()
     if not submission.article_page:
         form_index_page = (
-            SurveysIndexPage.objects.descendant_of(
+            FormsIndexPage.objects.descendant_of(
                 request.site.root_page).live().first())
         body = []
         for value in submission.get_data().values():

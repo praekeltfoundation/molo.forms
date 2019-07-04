@@ -13,7 +13,7 @@ from django.utils.translation import ugettext_lazy as _
 from django.utils import six
 
 from wagtail.admin.forms import WagtailAdminPageForm
-from wagtailsurveys.forms import FormBuilder
+from wagtailforms.forms import FormBuilder
 
 from .blocks import SkipState, VALID_SKIP_LOGIC, VALID_SKIP_SELECTORS
 from .widgets import NaturalDateInput
@@ -83,10 +83,10 @@ class CharacterCountCheckboxInput(
     """ Limit character count for checkbox fields """
 
 
-class SurveysFormBuilder(FormBuilder):
+class FormsFormBuilder(FormBuilder):
     def create_singleline_field(self, field, options):
         options['widget'] = CharacterCountWidget
-        return super(SurveysFormBuilder, self).create_singleline_field(field,
+        return super(FormsFormBuilder, self).create_singleline_field(field,
                                                                        options)
 
     def create_multiline_field(self, field, options):
@@ -96,12 +96,12 @@ class SurveysFormBuilder(FormBuilder):
     def create_date_field(self, field, options):
         options['widget'] = NaturalDateInput
         return super(
-            SurveysFormBuilder, self).create_date_field(field, options)
+            FormsFormBuilder, self).create_date_field(field, options)
 
     def create_datetime_field(self, field, options):
         options['widget'] = NaturalDateInput
         return super(
-            SurveysFormBuilder, self).create_datetime_field(field, options)
+            FormsFormBuilder, self).create_datetime_field(field, options)
 
     def create_positive_number_field(self, field, options):
         return forms.DecimalField(min_value=0, **options)
@@ -227,9 +227,9 @@ class CSVGroupCreationForm(forms.ModelForm):
         group.user_set.add(*self.__initial_users)
 
 
-class BaseMoloSurveyForm(WagtailAdminPageForm):
+class BaseMoloFormForm(WagtailAdminPageForm):
     def clean(self):
-        cleaned_data = super(BaseMoloSurveyForm, self).clean()
+        cleaned_data = super(BaseMoloForm, self).clean()
 
         question_data = {}
         for form in self.formsets[self.form_field_name]:
@@ -244,7 +244,7 @@ class BaseMoloSurveyForm(WagtailAdminPageForm):
                 if 'label' not in form._errors:
                     form._errors['label'] = []
                 form._errors['label'].append(_(
-                    "This question appears elsewhere in the survey. Please "
+                    "This question appears elsewhere in the form. Please "
                     "rephrase one of the questions."))
             field_names.append(field_name)
 
@@ -282,9 +282,9 @@ class BaseMoloSurveyForm(WagtailAdminPageForm):
                         )
 
                 for i, logic in enumerate(data['skip_logic']):
-                    if logic.value['skip_logic'] == SkipState.SURVEY:
-                        survey = logic.value['survey']
-                        self.clean_survey(i, survey)
+                    if logic.value['skip_logic'] == SkipState.FORM:
+                        form = logic.value['form']
+                        self.clean_form(i, form)
                     if logic.value['skip_logic'] == SkipState.QUESTION:
                         target = question_data.get(logic.value['question'])
                         target_data = target.cleaned_data
@@ -308,18 +308,18 @@ class BaseMoloSurveyForm(WagtailAdminPageForm):
                     for skip_logic in form.instance.skip_logic:
                         skip_logic.value['skip_logic'] = SkipState.NEXT
                         skip_logic.value['question'] = None
-                        skip_logic.value['survey'] = None
+                        skip_logic.value['form'] = None
             elif field_type == 'checkbox':
                 for skip_logic in form.instance.skip_logic:
                     skip_logic.value['choice'] = ''
 
-        return super(BaseMoloSurveyForm, self).save(commit)
+        return super(BaseMoloForm, self).save(commit)
 
     def clean_question(self, position, *args):
         self.clean_formset_field('question', position, *args)
 
-    def clean_survey(self, position, *args):
-        self.clean_formset_field('survey', position, *args)
+    def clean_form(self, position, *args):
+        self.clean_formset_field('form', position, *args)
 
     def clean_formset_field(self, field, position, *args):
         for method in getattr(self, field + '_clean_methods', []):
@@ -333,9 +333,9 @@ class BaseMoloSurveyForm(WagtailAdminPageForm):
             form.cleaned_data['field_type'] not in VALID_SKIP_LOGIC
         )
 
-    def check_doesnt_loop_to_self(self, survey):
-        if survey and self.instance == survey:
-            return _('Cannot skip to self, please select a different survey.')
+    def check_doesnt_loop_to_self(self, form):
+        if form and self.instance == form:
+            return _('Cannot skip to self, please select a different form.')
 
     def add_form_field_error(self, field, message):
         if field not in self._clean_errors:
@@ -371,29 +371,29 @@ class BaseMoloSurveyForm(WagtailAdminPageForm):
             return errors
 
 
-class MoloSurveyForm(BaseMoloSurveyForm):
-    form_field_name = 'survey_form_fields'
-    survey_clean_methods = [
+class MoloForm(BaseMoloForm):
+    form_field_name = 'form_form_fields'
+    form_clean_methods = [
         'check_doesnt_loop_to_self',
-        'check_doesnt_link_to_personalised_survey',
+        'check_doesnt_link_to_personalised_form',
     ]
 
-    def check_doesnt_link_to_personalised_survey(self, survey):
+    def check_doesnt_link_to_personalised_form(self, form):
         try:
-            segment = survey.personalisablesurvey.segment
+            segment = form.personalisableform.segment
         except AttributeError:
             pass
         else:
-            # Can only link a survey without a segments
+            # Can only link a form without a segments
             if segment:
-                return _('Cannot select a survey with a segment.')
+                return _('Cannot select a form with a segment.')
 
 
-class PersonalisableMoloSurveyForm(BaseMoloSurveyForm):
-    form_field_name = 'personalisable_survey_form_fields'
-    survey_clean_methods = [
+class PersonalisableMoloForm(BaseMoloForm):
+    form_field_name = 'personalisable_form_form_fields'
+    form_clean_methods = [
         'check_doesnt_loop_to_self',
-        'check_survey_link_valid',
+        'check_form_link_valid',
     ]
 
     question_clean_methods = [
@@ -407,12 +407,12 @@ class PersonalisableMoloSurveyForm(BaseMoloSurveyForm):
         if linked_segment and (linked_segment != current_segment):
             return _('Cannot link to a question with a different segment.')
 
-    def check_survey_link_valid(self, survey):
+    def check_form_link_valid(self, form):
         try:
-            segment = survey.personalisablesurvey.segment
+            segment = form.personalisableform.segment
         except AttributeError:
             pass
         else:
-            # Can only link a survey without segments or the same segment
+            # Can only link a form without segments or the same segment
             if segment and segment != self.instance.segment:
-                return _('Cannot select a survey with a different segment.')
+                return _('Cannot select a form with a different segment.')

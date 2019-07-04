@@ -8,7 +8,7 @@ recursive-include tests *
 
 recursive-include docs *.rst conf.py
 
-recursive-include molo/surveys *
+recursive-include molo/forms *
 
 recursive-exclude * __pycache__
 recursive-exclude * *.py[co]

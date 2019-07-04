@@ -7,7 +7,7 @@
             var fieldID = [fieldPrefix, splitPrefix[1]].join('-');
 
             var skipLogicSelect = $('#' + prefix + '-skip_logic');
-            var skipLogicSurvey = $('#' + prefix + '-survey');
+            var skipLogicForm = $('#' + prefix + '-form');
             var skipLogicChoice = $('#' + prefix + '-choice');
             var questionWidgetID = '#' + prefix + '-question';
             var questionSelect = $(questionWidgetID + '_1');
@@ -15,12 +15,12 @@
 
             var thisQuestion = question(fieldID);
 
-            var updateQuestionSurveyDisplay = function () {
-                hideElement(skipLogicSurvey);
+            var updateQuestionFormDisplay = function () {
+                hideElement(skipLogicForm);
                 hideElement(questionSelect);
                 switch (skipLogicSelect.val()) {
-                    case 'survey':
-                        showElement(skipLogicSurvey);
+                    case 'form':
+                        showElement(skipLogicForm);
                         break;
                     case 'question':
                         showElement(questionSelect);
@@ -63,14 +63,14 @@
                     showElement(skipLogicChoice);
                     showElement(skipLogicSelect);
                 }
-                updateQuestionSurveyDisplay();
+                updateQuestionFormDisplay();
             };
 
             updateChoiceLogicDisplay();
             populateQuestions();
 
             skipLogicSelect.change( function () {
-                updateQuestionSurveyDisplay();
+                updateQuestionFormDisplay();
             });
             thisQuestion.fieldSelect().change( function () {
                 updateChoiceLogicDisplay();

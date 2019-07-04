@@ -2,8 +2,8 @@ $(function(){
   var multi_step_checkbox = $('#id_multi_step');
   var multi_step_label = $('label[for=id_multi_step]');
 
-  var display_direct_checkbox = $('#id_display_survey_directly');
-  var display_direct_label = $('label[for=id_display_survey_directly]');
+  var display_direct_checkbox = $('#id_display_form_directly');
+  var display_direct_label = $('label[for=id_display_form_directly]');
 
   var disableMultiStep = function(){
     multi_step_checkbox.attr("disabled", true);
@@ -63,8 +63,8 @@ $(function(){
     'User Is Logged In Rule',
     'Comment Data Rule',
     'Profile Data Rule',
-    'Survey Submission Data Rule',
-    'Survey Response Rule',
+    'Form Submission Data Rule',
+    'Form Response Rule',
     'Group Membership Rule',
     'Comment Count Rule',
   ]
@@ -116,7 +116,7 @@ $(function(){
 
   window.addActionToExistingDeleteButtons = function(){
     var forms = $('[id*="rule_related-FORMS"]')
-      .not("#id_surveys_combinationrule_related-FORMS")
+      .not("#id_forms_combinationrule_related-FORMS")
       .filter("ul");
 
     forms.map(function(index, form) {
@@ -136,7 +136,7 @@ $(function(){
   };
 
   window.attachActionToRuleCreators = function() {
-    var some_rules = $('[id*="rule_related-ADD"]').filter("a").not("#id_surveys_combinationrule_related-ADD");
+    var some_rules = $('[id*="rule_related-ADD"]').filter("a").not("#id_forms_combinationrule_related-ADD");
     $.map(some_rules, function(val, i) {
       val.addEventListener("click", function() {
           var id = $(this).attr('id');
@@ -233,7 +233,7 @@ $(function(){
 
   // Prevent User from creating more than one rule combination
   window.addHideToRuleCombinationFunctionality = function(){
-    $('#id_surveys_combinationrule_related-ADD').click(function(){
+    $('#id_forms_combinationrule_related-ADD').click(function(){
       var id = $(this).attr("id");
       var form_id = id.replace("ADD", "FORMS");
       var form = $("#" + form_id);
@@ -241,20 +241,20 @@ $(function(){
         .children(":last")
         .find('button[title^="Delete"]');
       deleteButton.click(function(){
-        $("#id_surveys_combinationrule_related-ADD").toggle();
+        $("#id_forms_combinationrule_related-ADD").toggle();
       });
-      $("#id_surveys_combinationrule_related-ADD").toggle();
+      $("#id_forms_combinationrule_related-ADD").toggle();
     });
 
-    if($("#id_surveys_combinationrule_related-FORMS").children("li").length > 0){
-      $("#id_surveys_combinationrule_related-ADD").toggle();
+    if($("#id_forms_combinationrule_related-FORMS").children("li").length > 0){
+      $("#id_forms_combinationrule_related-ADD").toggle();
 
-      var deleteButton = $("#id_surveys_combinationrule_related-FORMS")
+      var deleteButton = $("#id_forms_combinationrule_related-FORMS")
         .children("li")
         .find('button[title^="Delete"]')
 
       deleteButton.click(function () {
-          $("#id_surveys_combinationrule_related-ADD").toggle();
+          $("#id_forms_combinationrule_related-ADD").toggle();
       });
     }
   }
