@@ -41,20 +41,20 @@ from wagtail.core.models import Orderable, Page
 from wagtail.images.blocks import ImageChooserBlock
 from wagtail.images.edit_handlers import ImageChooserPanel
 from wagtail_personalisation.adapters import get_segment_adapter
-from wagtailsurveys import models as surveys_models
-from wagtailsurveys.models import AbstractFormField
+from wagtail.contrib.forms import models as forms_models
+from wagtail.contrib.forms.models import AbstractFormField
 
 from .blocks import SkipLogicField, SkipState, SkipLogicStreamPanel
 from .forms import (  # noqa
-    MoloSurveyForm,
-    PersonalisableMoloSurveyForm,
-    SurveysFormBuilder,
+    MoloForm,
+    PersonalisableMoloForm,
+    FormsFormBuilder,
 )
 from .rules import (  # noqa
     ArticleTagRule,
     GroupMembershipRule,
-    SurveySubmissionDataRule,
-    SurveyResponseRule
+    FormsSubmissionDataRule,
+    FormsResponseRule
 )
 from .utils import SkipLogicPaginator
 from .widgets import NaturalDateInput
@@ -63,14 +63,13 @@ from .widgets import NaturalDateInput
 SKIP = 'NA (Skipped)'
 
 
-# See docs: https://github.com/torchbox/wagtailsurveys
-SectionPage.subpage_types += ['surveys.MoloSurveyPage']
-ArticlePage.subpage_types += ['surveys.MoloSurveyPage']
-FooterPage.parent_page_types += ['surveys.TermsAndConditionsIndexPage']
+SectionPage.subpage_types += ['forms.MoloFormPage']
+ArticlePage.subpage_types += ['forms.MoloFormPage']
+FooterPage.parent_page_types += ['forms.TermsAndConditionsIndexPage']
 
 
 class TermsAndConditionsIndexPage(TranslatablePageMixinNotRoutable, Page):
-    parent_page_types = ['surveys.SurveysIndexPage']
+    parent_page_types = ['forms.FormsIndexPage']
     subpage_types = ['core.Footerpage']
     language = models.ForeignKey('core.SiteLanguage',
                                  blank=True,
@@ -80,17 +79,17 @@ class TermsAndConditionsIndexPage(TranslatablePageMixinNotRoutable, Page):
     translated_pages = models.ManyToManyField("self", blank=True)
 
 
-class SurveysIndexPage(Page, PreventDeleteMixin):
+class FormsIndexPage(Page, PreventDeleteMixin):
     parent_page_types = ['core.Main']
     subpage_types = [
-        'surveys.MoloSurveyPage', 'surveys.PersonalisableSurvey',
-        'surveys.TermsAndConditionsIndexPage']
+        'forms.MoloFormPage', 'forms.PersonalisableForm',
+        'forms.TermsAndConditionsIndexPage']
 
     def copy(self, *args, **kwargs):
         site = kwargs['to'].get_site()
         main = site.root_page
-        SurveysIndexPage.objects.child_of(main).delete()
-        super(SurveysIndexPage, self).copy(*args, **kwargs)
+        FormsIndexPage.objects.child_of(main).delete()
+        super(FormsIndexPage, self).copy(*args, **kwargs)
 
     def get_site(self):
         try:
@@ -103,21 +102,21 @@ class SurveysIndexPage(Page, PreventDeleteMixin):
 
 
 @receiver(index_pages_after_copy, sender=Main)
-def create_survey_index_pages(sender, instance, **kwargs):
+def create_form_index_pages(sender, instance, **kwargs):
     if not instance.get_children().filter(
-            title='Surveys').exists():
-        survey_index = SurveysIndexPage(
-            title='Surveys', slug=('surveys-{}'.format(
+            title='Forms').exists():
+        form_index = FormsIndexPage(
+            title='Forms', slug=('forms-{}'.format(
                 generate_slug(instance.title), )))
-        instance.add_child(instance=survey_index)
-        survey_index.save_revision().publish()
+        instance.add_child(instance=form_index)
+        form_index.save_revision().publish()
 
 
-class MoloSurveyPage(
+class MoloFormPage(
         TranslatablePageMixinNotRoutable,
-        surveys_models.AbstractSurvey):
+        forms_models.AbstractForm):
     parent_page_types = [
-        'surveys.SurveysIndexPage', 'core.SectionPage', 'core.ArticlePage']
+        'forms.FormsIndexPage', 'core.SectionPage', 'core.ArticlePage']
     subpage_types = []
     language = models.ForeignKey('core.SiteLanguage',
                                  blank=True,
@@ -126,9 +125,9 @@ class MoloSurveyPage(
                                  )
     translated_pages = models.ManyToManyField("self", blank=True)
 
-    form_builder = SurveysFormBuilder
+    form_builder = FormsFormBuilder
 
-    base_form_class = MoloSurveyForm
+    base_form_class = MoloFormForm
 
     introduction = TextField(blank=True)
     homepage_introduction = TextField(blank=True)
@@ -154,22 +153,22 @@ class MoloSurveyPage(
     allow_anonymous_submissions = BooleanField(
         default=False,
         help_text='Check this to allow users who are NOT logged in to complete'
-                  ' surveys.'
+                  ' forms.'
     )
     allow_multiple_submissions_per_user = BooleanField(
         default=False,
-        help_text='Check this to allow users to complete a survey more than'
+        help_text='Check this to allow users to complete a form more than'
                   ' once.'
     )
 
     show_results = BooleanField(
         default=False,
-        help_text='Whether to show the survey results to the user after they'
+        help_text='Whether to show the form results to the user after they'
                   ' have submitted their answer(s).'
     )
     show_results_as_percentage = BooleanField(
         default=False,
-        help_text='Whether to show the survey results to the user after they'
+        help_text='Whether to show the form results to the user after they'
                   ' have submitted their answer(s) as a percentage or as'
                   ' a number.'
     )
@@ -177,16 +176,16 @@ class MoloSurveyPage(
     multi_step = BooleanField(
         default=False,
         verbose_name='Multi-step',
-        help_text='Whether to display the survey questions to the user one at'
+        help_text='Whether to display the form questions to the user one at'
                   ' a time, instead of all at once.'
     )
 
-    display_survey_directly = BooleanField(
+    display_form_directly = BooleanField(
         default=False,
         verbose_name='Display Question Directly',
         help_text='This is similar to polls, in which the questions are '
                   'displayed directly on the page, instead of displaying '
-                  'a link to another page to complete the survey.'
+                  'a link to another page to complete the form.'
 
     )
     your_words_competition = BooleanField(
@@ -200,28 +199,28 @@ class MoloSurveyPage(
         help_text=_(
             "Styling options that can be applied to this page "
             "and all its descendants"))
-    content_panels = surveys_models.AbstractSurvey.content_panels + [
+    content_panels = forms_models.AbstractForm.content_panels + [
         ImageChooserPanel('image'),
         FieldPanel('introduction', classname='full'),
         FieldPanel('homepage_introduction', classname='full'),
         FieldPanel('homepage_button_text', classname='full'),
         StreamFieldPanel('description'),
-        InlinePanel('survey_form_fields', label='Form fields'),
+        InlinePanel('form_fields', label='Form fields'),
         FieldPanel('submit_text', classname='full'),
         FieldPanel('thank_you_text', classname='full'),
         InlinePanel('terms_and_conditions', label="Terms and Conditions"),
     ]
 
-    settings_panels = surveys_models.AbstractSurvey.settings_panels + [
+    settings_panels = forms_models.AbstractForm.settings_panels + [
         MultiFieldPanel([
             FieldPanel('allow_anonymous_submissions'),
             FieldPanel('allow_multiple_submissions_per_user'),
             FieldPanel('show_results'),
             FieldPanel('show_results_as_percentage'),
             FieldPanel('multi_step'),
-            FieldPanel('display_survey_directly'),
+            FieldPanel('display_form_directly'),
             FieldPanel('your_words_competition'),
-        ], heading='Survey Settings'),
+        ], heading='Form Settings'),
         MultiFieldPanel(
             [FieldRowPanel(
                 [FieldPanel('extra_style_hints')], classname="label-above")],
@@ -246,7 +245,7 @@ class MoloSurveyPage(
         return data_fields
 
     def get_submission_class(self):
-        return MoloSurveySubmission
+        return MoloFormSubmission
 
     def get_parent_section(self):
         return SectionPage.objects.all().ancestor_of(self).last()
@@ -259,27 +258,27 @@ class MoloSurveyPage(
             page=self, user=user
         )
 
-    def has_user_submitted_survey(self, request, survey_page_id):
-        if 'completed_surveys' not in request.session:
-            request.session['completed_surveys'] = []
+    def has_user_submitted_form(self, request, form_page_id):
+        if 'completed_forms' not in request.session:
+            request.session['completed_forms'] = []
 
         if request.user.pk is not None \
             and self.get_submission_class().objects.filter(
                 page=self, user__pk=request.user.pk
             ).exists() \
-                or survey_page_id in request.session['completed_surveys']:
+                or form_page_id in request.session['completed_forms']:
             return True
         return False
 
-    def set_survey_as_submitted_for_session(self, request):
-        if 'completed_surveys' not in request.session:
-            request.session['completed_surveys'] = []
-        request.session['completed_surveys'].append(self.id)
+    def set_form_as_submitted_for_session(self, request):
+        if 'completed_forms' not in request.session:
+            request.session['completed_forms'] = []
+        request.session['completed_forms'].append(self.id)
         request.session.modified = True
 
     def get_form(self, *args, **kwargs):
         prevent_required = kwargs.pop('prevent_required', False)
-        form = super(MoloSurveyPage, self).get_form(*args, **kwargs)
+        form = super(MoloFormPage, self).get_form(*args, **kwargs)
         if prevent_required:
             for field in form.fields.values():
                 field.required = False
@@ -290,7 +289,7 @@ class MoloSurveyPage(
 
     @property
     def session_key_data(self):
-        return 'survey_data-{}'.format(self.pk)
+        return 'form_data-{}'.format(self.pk)
 
     def load_data(self, request):
         return json.loads(request.session.get(self.session_key_data, '{}'))
@@ -317,12 +316,12 @@ class MoloSurveyPage(
             if not page.language.is_main_language:
                 # if there is a translation, redirect to the translated page
                 return redirect(page.url)
-        survey_data = self.load_data(request)
+        form_data = self.load_data(request)
 
         paginator = SkipLogicPaginator(
             self.get_form_fields(),
             request.POST,
-            survey_data,
+            form_data,
         )
 
         is_last_step = False
@@ -352,8 +351,8 @@ class MoloSurveyPage(
             )
             if prev_form.is_valid():
                 # If data for step is valid, update the session
-                survey_data.update(prev_form.cleaned_data)
-                self.save_data(request, survey_data)
+                form_data.update(prev_form.cleaned_data)
+                self.save_data(request, form_data)
 
                 if prev_step.has_next():
                     # Create a new form for a following step, if the following
@@ -374,7 +373,7 @@ class MoloSurveyPage(
                         # Perform validation again for whole form.
                         # After successful validation, save data into DB,
                         # and remove from the session.
-                        self.set_survey_as_submitted_for_session(request)
+                        self.set_form_as_submitted_for_session(request)
 
                         # We fill in the missing fields which were skipped with
                         # a default value
@@ -417,13 +416,13 @@ class MoloSurveyPage(
 
     def serve(self, request, *args, **kwargs):
         if (not self.allow_multiple_submissions_per_user and
-                self.has_user_submitted_survey(request, self.id)):
+                self.has_user_submitted_form(request, self.id)):
             if not (request.method == 'POST' and 'ajax' in request.POST):
                 return render(
                     request, self.template, self.get_context(request))
 
         if ((self.has_page_breaks or self.multi_step) and
-                not self.display_survey_directly):
+                not self.display_form_directly):
             return self.serve_questions(request)
 
         if request.method == 'POST':
@@ -441,17 +440,17 @@ class MoloSurveyPage(
                         # user should be able to update their submission
                         submission.delete()
 
-                self.set_survey_as_submitted_for_session(request)
+                self.set_form_as_submitted_for_session(request)
                 self.process_form_submission(form)
 
                 # render the landing_page
                 return redirect(
                     reverse('molo.forms:success', args=(self.slug, )))
 
-        return super(MoloSurveyPage, self).serve(request, *args, **kwargs)
+        return super(MoloFormPage, self).serve(request, *args, **kwargs)
 
 
-class MoloSurveyPageView(models.Model):
+class MoloFormPageView(models.Model):
     visited_at = models.DateTimeField(auto_now_add=True)
 
     user = models.ForeignKey(
@@ -471,8 +470,8 @@ class MoloSurveyPageView(models.Model):
             self.user, self.page, self.visited_at)
 
 
-class SurveyTermsConditions(Orderable):
-    page = ParentalKey(MoloSurveyPage, related_name='terms_and_conditions')
+class FormTermsConditions(Orderable):
+    page = ParentalKey(MoloFormPage, related_name='terms_and_conditions')
     terms_and_conditions = models.ForeignKey(
         'wagtailcore.Page',
         null=True,
@@ -497,13 +496,13 @@ class QuestionPaginationMixin(models.Model):
         abstract = True
 
 
-surveys_models.AbstractFormField.panels.append(FieldPanel('page_break'))
+forms_models.AbstractFormField.panels.append(FieldPanel('page_break'))
 
 
 class AdminLabelMixin(models.Model):
     admin_label = models.CharField(
         max_length=256,
-        help_text=_('Column header used during CSV export of survey '
+        help_text=_('Column header used during CSV export of form '
                     'responses.'),
         default='',
     )
@@ -512,8 +511,8 @@ class AdminLabelMixin(models.Model):
         abstract = True
 
 
-surveys_models.AbstractFormField.panels.append(FieldPanel('admin_label'))
-surveys_models.AbstractFormField._meta.get_field('label').verbose_name = (
+forms_models.AbstractFormField.panels.append(FieldPanel('admin_label'))
+forms_models.AbstractFormField._meta.get_field('label').verbose_name = (
     'Question'
 )
 
@@ -571,7 +570,7 @@ class SkipLogicMixin(models.Model):
         return super(SkipLogicMixin, self).save(*args, **kwargs)
 
 
-class MoloSurveyFormField(SkipLogicMixin, AdminLabelMixin,
+class MoloFormFormField(SkipLogicMixin, AdminLabelMixin,
                           QuestionPaginationMixin, AbstractFormField):
     AbstractFormField.FORM_FIELD_CHOICES += (
         ('positive_number', _("Positive Number")),)
@@ -586,7 +585,7 @@ class MoloSurveyFormField(SkipLogicMixin, AdminLabelMixin,
     field_type = models.CharField(
         verbose_name=_('field type'),
         max_length=16, choices=AbstractFormField.FORM_FIELD_CHOICES)
-    page = ParentalKey(MoloSurveyPage, related_name='survey_form_fields')
+    page = ParentalKey(MoloFormPage, related_name='form_fields')
 
     class Meta(AbstractFormField.Meta):
         pass
@@ -603,10 +602,10 @@ class MoloSurveyFormField(SkipLogicMixin, AdminLabelMixin,
                         {'default_value': ["Must be a valid date", ]})
 
 
-surveys_models.AbstractFormField.panels[4] = SkipLogicStreamPanel('skip_logic')
+forms_models.AbstractFormField.panels[4] = SkipLogicStreamPanel('skip_logic')
 
 
-class MoloSurveySubmission(surveys_models.AbstractFormSubmission):
+class MoloFormSubmission(forms_models.AbstractFormSubmission):
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True
     )
@@ -620,7 +619,7 @@ class MoloSurveySubmission(surveys_models.AbstractFormSubmission):
     )
 
     def get_data(self):
-        form_data = super(MoloSurveySubmission, self).get_data()
+        form_data = super(MoloFormSubmission, self).get_data()
         for key, value in form_data.items():
             # Convert lists to strings so they display properly in the view
             if isinstance(value, list):
@@ -631,44 +630,44 @@ class MoloSurveySubmission(surveys_models.AbstractFormSubmission):
         return form_data
 
 
-# Personalised Surveys
-def get_personalisable_survey_content_panels():
+# Personalised Forms
+def get_personalisable_form_content_panels():
     """
-    Replace panel for "survey_form_fields" with
+    Replace panel for "form_fields" with
     panel pointing to the custom form field model.
     """
     panels = [
         FieldPanel('segment')
     ]
 
-    for panel in MoloSurveyPage.content_panels:
+    for panel in MoloFormPage.content_panels:
         if isinstance(panel, InlinePanel) and \
-                panel.relation_name == 'survey_form_fields':
-            panel = InlinePanel('personalisable_survey_form_fields',
+                panel.relation_name == 'form_fields':
+            panel = InlinePanel('personalisable_form_fields',
                                 label=_('personalisable form fields'))
         panels.append(panel)
 
     return panels
 
 
-class PersonalisableSurvey(MoloSurveyPage):
+class PersonalisableForm(MoloFormPage):
     """
-    Survey page that enables form fields to be segmented with
+    Form page that enables form fields to be segmented with
     wagtail-personalisation.
     """
     segment = models.ForeignKey('wagtail_personalisation.Segment',
                                 on_delete=models.SET_NULL, blank=True,
                                 null=True,
                                 help_text=_(
-                                    'Leave it empty to show this survey'
+                                    'Leave it empty to show this form'
                                     'to every user.'))
-    content_panels = get_personalisable_survey_content_panels()
-    template = MoloSurveyPage.template
+    content_panels = get_personalisable_form_content_panels()
+    template = MoloFormPage.template
 
-    base_form_class = PersonalisableMoloSurveyForm
+    base_form_class = PersonalisableMoloForm
 
     class Meta:
-        verbose_name = _('personalisable survey')
+        verbose_name = _('personalisable form')
 
     def is_front_end_request(self):
         return (hasattr(self, 'request') and
@@ -683,17 +682,17 @@ class PersonalisableSurvey(MoloSurveyPage):
                 s.id for s in get_segment_adapter(self.request).get_segments()
             ]
 
-            return self.personalisable_survey_form_fields.filter(
+            return self.personalisable_form_fields.filter(
                 Q(segment=None) | Q(segment_id__in=user_segments_ids)
             )
 
         # Return all form fields if there's no request passed
         # (used on the admin site so serve() will not be called).
-        return self.personalisable_survey_form_fields.select_related('segment')
+        return self.personalisable_form_fields.select_related('segment')
 
     def get_data_fields(self):
         """
-        Get survey's form field's labels with segment names
+        Get form's form field's labels with segment names
         if there's one associated.
         """
         data_fields = [
@@ -723,13 +722,13 @@ class PersonalisableSurvey(MoloSurveyPage):
             if (self.segment_id and
                 get_segment_adapter(request).get_segment_by_id(
                     self.segment_id) is None):
-                raise Http404("Survey does not match your segments.")
+                raise Http404("Form does not match your segments.")
 
-        return super(PersonalisableSurvey, self).serve(
+        return super(PersonalisableForm, self).serve(
             request, *args, **kwargs)
 
 
-class PersonalisableSurveyFormField(SkipLogicMixin, AdminLabelMixin,
+class PersonalisableFormField(SkipLogicMixin, AdminLabelMixin,
                                     QuestionPaginationMixin,
                                     AbstractFormField):
     """
@@ -738,8 +737,8 @@ class PersonalisableSurveyFormField(SkipLogicMixin, AdminLabelMixin,
     field_type = models.CharField(
         verbose_name=_('field type'),
         max_length=16, choices=AbstractFormField.FORM_FIELD_CHOICES)
-    page = ParentalKey(PersonalisableSurvey, on_delete=models.CASCADE,
-                       related_name='personalisable_survey_form_fields')
+    page = ParentalKey(PersonalisableForm, on_delete=models.CASCADE,
+                       related_name='personalisable_form_fields')
     segment = models.ForeignKey(
         'wagtail_personalisation.Segment',
         on_delete=models.PROTECT, blank=True, null=True,
