@@ -42,7 +42,7 @@ from wagtail.images.blocks import ImageChooserBlock
 from wagtail.images.edit_handlers import ImageChooserPanel
 from wagtail_personalisation.adapters import get_segment_adapter
 from wagtail.contrib.forms import models as forms_models
-from wagtail.contrib.forms.models import AbstractFormField
+from wagtail.contrib.forms.models import AbstractFormField, FORM_FIELD_CHOICES
 
 from .blocks import SkipLogicField, SkipState, SkipLogicStreamPanel
 from .forms import (  # noqa
@@ -53,8 +53,8 @@ from .forms import (  # noqa
 from .rules import (  # noqa
     ArticleTagRule,
     GroupMembershipRule,
-    FormsSubmissionDataRule,
-    FormsResponseRule
+    FormSubmissionDataRule,
+    FormResponseRule
 )
 from .utils import SkipLogicPaginator
 from .widgets import NaturalDateInput
@@ -127,7 +127,7 @@ class MoloFormPage(
 
     form_builder = FormsFormBuilder
 
-    base_form_class = MoloFormForm
+    base_form_class = MoloForm
 
     introduction = TextField(blank=True)
     homepage_introduction = TextField(blank=True)
@@ -572,7 +572,7 @@ class SkipLogicMixin(models.Model):
 
 class MoloFormFormField(SkipLogicMixin, AdminLabelMixin,
                           QuestionPaginationMixin, AbstractFormField):
-    AbstractFormField.FORM_FIELD_CHOICES += (
+    FORM_FIELD_CHOICES += (
         ('positive_number', _("Positive Number")),)
     choices = models.TextField(
         verbose_name=_('choices'),
@@ -584,7 +584,7 @@ class MoloFormFormField(SkipLogicMixin, AdminLabelMixin,
     )
     field_type = models.CharField(
         verbose_name=_('field type'),
-        max_length=16, choices=AbstractFormField.FORM_FIELD_CHOICES)
+        max_length=16, choices=FORM_FIELD_CHOICES)
     page = ParentalKey(MoloFormPage, related_name='form_fields')
 
     class Meta(AbstractFormField.Meta):
@@ -736,7 +736,7 @@ class PersonalisableFormField(SkipLogicMixin, AdminLabelMixin,
     """
     field_type = models.CharField(
         verbose_name=_('field type'),
-        max_length=16, choices=AbstractFormField.FORM_FIELD_CHOICES)
+        max_length=16, choices=FORM_FIELD_CHOICES)
     page = ParentalKey(PersonalisableForm, on_delete=models.CASCADE,
                        related_name='personalisable_form_fields')
     segment = models.ForeignKey(

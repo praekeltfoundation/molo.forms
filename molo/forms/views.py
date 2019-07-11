@@ -22,7 +22,7 @@ from wagtail.admin.utils import permission_required
 from wagtail_personalisation.forms import SegmentAdminForm
 from wagtail_personalisation.models import Segment
 
-from wagtai.contrib.forms.utils import get_forms_for_user
+from wagtail.contrib.forms.utils import get_forms_for_user
 
 from .forms import CSVGroupCreationForm
 

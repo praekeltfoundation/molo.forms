@@ -13,7 +13,7 @@ from django.utils.translation import ugettext_lazy as _
 from django.utils import six
 
 from wagtail.admin.forms import WagtailAdminPageForm
-from wagtailforms.forms import FormBuilder
+from wagtail.contrib.forms.forms import FormBuilder
 
 from .blocks import SkipState, VALID_SKIP_LOGIC, VALID_SKIP_SELECTORS
 from .widgets import NaturalDateInput
@@ -227,7 +227,7 @@ class CSVGroupCreationForm(forms.ModelForm):
         group.user_set.add(*self.__initial_users)
 
 
-class BaseMoloFormForm(WagtailAdminPageForm):
+class BaseMoloForm(WagtailAdminPageForm):
     def clean(self):
         cleaned_data = super(BaseMoloForm, self).clean()
 
