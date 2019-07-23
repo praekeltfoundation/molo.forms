@@ -12,11 +12,12 @@ from django.shortcuts import get_object_or_404
 register = template.Library()
 
 
-def get_form_list(context,
-                    only_linked_forms=False,
-                    only_direct_forms=False,
-                    only_yourwords=False,
-                    personalisable_form=False):
+def get_form_list(
+        context,
+        only_linked_forms=False,
+        only_direct_forms=False,
+        only_yourwords=False,
+        personalisable_form=False):
     if only_linked_forms and only_direct_forms:
         raise ValueError('arguments "only_linked_forms" and '
                          '"only_direct_forms" cannot both be True')
@@ -62,15 +63,15 @@ def get_form_list(context,
 
 def add_form_objects_to_forms(context):
     forms = []
-    for form in context['forms']:
+    for form_page in context['forms']:
         form = None
-        if (form.allow_multiple_submissions_per_user or
-                not form.has_user_submitted_form(
-                    context['request'], form.id)):
-            form = form.get_form()
+        if (form_page.allow_multiple_submissions_per_user or
+                not form_page.has_user_submitted_form(
+                    context['request'], form_page.id)):
+            form = form_page.get_form()
 
         forms.append({
-            'molo_form_page': form,
+            'molo_form_page': form_page,
             'form': form,
         })
 
@@ -87,14 +88,16 @@ def forms_list_headline(context):
 
 
 @register.inclusion_tag('forms/forms_list.html', takes_context=True)
-def forms_list(context, pk=None, only_linked_forms=False,
-                 only_direct_forms=False, only_yourwords=False,
-                 personalisable_form=False):
-    context = get_form_list(context,
-                              only_linked_forms=only_linked_forms,
-                              only_direct_forms=only_direct_forms,
-                              only_yourwords=only_yourwords,
-                              personalisable_form=personalisable_form)
+def forms_list(
+        context, pk=None, only_linked_forms=False,
+        only_direct_forms=False, only_yourwords=False,
+        personalisable_form=False):
+    context = get_form_list(
+        context,
+        only_linked_forms=only_linked_forms,
+        only_direct_forms=only_direct_forms,
+        only_yourwords=only_yourwords,
+        personalisable_form=personalisable_form)
     return add_form_objects_to_forms(context)
 
 
