@@ -86,8 +86,8 @@ class CharacterCountCheckboxInput(
 class FormsFormBuilder(FormBuilder):
     def create_singleline_field(self, field, options):
         options['widget'] = CharacterCountWidget
-        return super(FormsFormBuilder, self).create_singleline_field(field,
-                                                                       options)
+        return super(FormsFormBuilder, self).create_singleline_field(
+            field, options)
 
     def create_multiline_field(self, field, options):
         options['widget'] = MultiLineWidget
@@ -128,28 +128,28 @@ class FormsFormBuilder(FormBuilder):
         return CharacterCountMultipleChoiceField(
             widget=forms.CheckboxSelectMultiple, **options)
 
-    @property
-    def formfields(self):
-        '''
-        Override parent function in order to ensure that the
-        overridden create_..._field methods are referenced
-        instead of the parent class methods.
-        '''
-        formfields = OrderedDict()
-        self.FIELD_TYPES.update({
-            'positive_number': self.create_positive_number_field})
+    # @property
+    # def formfields(self):
+    #     '''
+    #     Override parent function in order to ensure that the
+    #     overridden create_..._field methods are referenced
+    #     instead of the parent class methods.
+    #     '''
+    #     formfields = OrderedDict()
+    #     self.formfields.update({
+    #         'positive_number': self.create_positive_number_field})
 
-        for field in self.fields:
-            options = self.get_field_options(field)
+    #     for field in self.fields:
+    #         options = self.get_field_options(field)
 
-            if field.field_type in self.FIELD_TYPES:
-                method = getattr(self,
-                                 self.FIELD_TYPES[field.field_type].__name__)
-                formfields[field.clean_name] = method(field, options)
-            else:
-                raise Exception("Unrecognised field type: " + field.field_type)
+    #         if field.field_type in self.formfields:
+    #             method = getattr(self,
+    #                              self.formfields[field.field_type].__name__)
+    #             formfields[field.clean_name] = method(field, options)
+    #         else:
+    #             raise Exception("Unrecognised field type: " + field.field_type)
 
-        return formfields
+    #     return formfields
 
 
 class CSVGroupCreationForm(forms.ModelForm):
