@@ -1,24 +1,24 @@
-{% load wagtailcore_tags i18n personalise_extras %}
+{% load wagtailcore_tags i18n forms_personalise_extras %}
 
 {% block content %}
 {% filter_forms_by_segments forms request as filtered_forms %}
-	{% for form in filtered_forms %}
-		{% with form=form.molo_form_page form=form.form %}
+	{% for item in filtered_forms %}
+		{% with form_page=item.molo_form_page form=item.form %}
 			<div class="forms forms{{form.get_effective_extra_style_hints}}">
 				<div class="forms__item">
-					<h1 class="forms__title">{{ form.title }}</h1>
-					<h4 class="forms__intro">{{ form.homepage_introduction }}</h4>
+					<h1 class="forms__title">{{ form_page.title }}</h1>
+					<h4 class="forms__intro">{{ form_page.homepage_introduction }}</h4>
 
-					{% if not form.display_form_directly %}
+					{% if not form_page.display_form_directly %}
 					{% trans "Take The Form" as button_text %}
 					<div class="call-to-action call-to-action--forms">
-						<a href="{% pageurl form %}" class="call-to-action__nav-item call-to-action__nav-item--forms">{{ form.homepage_button_text|default:button_text }}</a>
+						<a href="{% pageurl form_page %}" class="call-to-action__nav-item call-to-action__nav-item--forms">{{ form_page.homepage_button_text|default:button_text }}</a>
 					</div>
 
 					{% else %}
-						{% if user.is_authenticated and user.is_active or request.is_preview or form.allow_anonymous_submissions %}
+						{% if user.is_authenticated and user.is_active or request.is_preview or form_page.allow_anonymous_submissions %}
 				    	{% if form %}
-					      <form class="forms__form" action="{% pageurl form %}{% if form.multi_step %}?p={{ fields_step.number|add:"1" }}{% endif %}" method="post">
+					      <form class="forms__form" action="{% pageurl form_page %}{% if form_page.multi_step %}?p={{ fields_step.number|add:"1" }}{% endif %}" method="post">
 					        {% csrf_token %}
 					        {% for field in form %}
 					          <fieldset>

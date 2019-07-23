@@ -1,4 +1,4 @@
-{% load i18n molo_form_tags %}
+{% load i18n molo_forms_tags %}
 <div class="overflow">
 <table class="listing">
     <col />
@@ -23,7 +23,7 @@
                 {% endfor %}
                 <td>
                 <a class="button button-small button-secondary" href="
-                    {% url 'wagtailforms:delete_submission' form_page.id row.model_id %}">
+                    {% url 'wagtailforms:delete_submissions' form_page.id %}">
                     {% trans 'delete' %}</a>
                 </td>
                 <td>
