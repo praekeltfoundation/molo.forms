@@ -345,7 +345,7 @@ class FormResponseRule(AbstractBaseRule):
         ).last()
         if not submission:
             return "No submission"
-        response_date = submission.created_at
+        response_date = submission.submit_time
         if timezone.is_naive(response_date):
             response_date = timezone.make_aware(response_date)
         return response_date.strftime("%Y-%m-%d %H:%M")
@@ -380,13 +380,13 @@ class GroupMembershipRule(AbstractBaseRule):
             return False
 
         # Check whether user is part of a group
-        return user.segment_groups.filter(id=self.group_id).exists()
+        return user.forms_segment_groups.filter(id=self.group_id).exists()
 
     def get_column_header(self):
         return self.group.name
 
     def get_user_info_string(self, user):
-        return str(user.segment_groups.filter(id=self.group_id).exists())
+        return str(user.forms_segment_groups.filter(id=self.group_id).exists())
 
 
 class FormsArticleTagRule(AbstractBaseRule):
