@@ -355,7 +355,7 @@ class GroupMembershipRule(AbstractBaseRule):
     """wagtail-personalisation rule based on user's group membership."""
     static = True
 
-    group = models.ForeignKey('forms.segmentusergroup')
+    group = models.ForeignKey('forms.FormsSegmentUserGroup')
 
     panels = [
         FieldPanel('group')
@@ -389,7 +389,7 @@ class GroupMembershipRule(AbstractBaseRule):
         return str(user.segment_groups.filter(id=self.group_id).exists())
 
 
-class ArticleTagRule(AbstractBaseRule):
+class FormsArticleTagRule(AbstractBaseRule):
     static = True
 
     order = 410
@@ -453,7 +453,7 @@ class ArticleTagRule(AbstractBaseRule):
         verbose_name = _('Article tag rule')
 
     def clean(self):
-        super(ArticleTagRule, self).clean()
+        super(FormsArticleTagRule, self).clean()
         if self.date_from and self.date_to:
             if self.date_from > self.date_to:
                 raise ValidationError(

@@ -25,7 +25,7 @@ from molo.forms.adapters import (
     evaluate,
     PersistentFormsSegmentsAdapter,
 )
-from molo.forms.models import MoloFormPageView, SegmentUserGroup
+from molo.forms.models import MoloFormPageView, FormsSegmentUserGroup
 
 from molo.forms.rules import GroupMembershipRule
 
@@ -41,8 +41,8 @@ class TestAdapterUtils(TestCase, MoloTestCaseMixin):
         self.request.user = get_user_model().objects.create_user(
             username='tester', email='tester@example.com', password='tester')
 
-        self.group_1 = SegmentUserGroup.objects.create(name='Group 1')
-        self.group_2 = SegmentUserGroup.objects.create(name='Group 2')
+        self.group_1 = FormsSegmentUserGroup.objects.create(name='Group 1')
+        self.group_2 = FormsSegmentUserGroup.objects.create(name='Group 2')
 
         self.request.user.segment_groups.add(self.group_1)
 

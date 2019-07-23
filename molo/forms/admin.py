@@ -1,10 +1,10 @@
 from wagtail.contrib.modeladmin.options import ModelAdmin
 
-from .models import SegmentUserGroup
+from .models import FormsSegmentUserGroup
 
 
 class SegmentUserGroupAdmin(ModelAdmin):
-    model = SegmentUserGroup
+    model = FormsSegmentUserGroup
     menu_label = 'User groups for segments'
     menu_icon = 'group'
     menu_order = 1

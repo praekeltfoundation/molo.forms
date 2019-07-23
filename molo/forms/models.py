@@ -51,7 +51,7 @@ from .forms import (  # noqa
     FormsFormBuilder,
 )
 from .rules import (  # noqa
-    ArticleTagRule,
+    FormsArticleTagRule,
     GroupMembershipRule,
     FormSubmissionDataRule,
     FormResponseRule
@@ -65,10 +65,10 @@ SKIP = 'NA (Skipped)'
 
 SectionPage.subpage_types += ['forms.MoloFormPage']
 ArticlePage.subpage_types += ['forms.MoloFormPage']
-FooterPage.parent_page_types += ['forms.TermsAndConditionsIndexPage']
+FooterPage.parent_page_types += ['forms.FormsTermsAndConditionsIndexPage']
 
 
-class TermsAndConditionsIndexPage(TranslatablePageMixinNotRoutable, Page):
+class FormsTermsAndConditionsIndexPage(TranslatablePageMixinNotRoutable, Page):
     parent_page_types = ['forms.FormsIndexPage']
     subpage_types = ['core.Footerpage']
     language = models.ForeignKey('core.SiteLanguage',
@@ -83,7 +83,7 @@ class FormsIndexPage(Page, PreventDeleteMixin):
     parent_page_types = ['core.Main']
     subpage_types = [
         'forms.MoloFormPage', 'forms.PersonalisableForm',
-        'forms.TermsAndConditionsIndexPage']
+        'forms.FormsTermsAndConditionsIndexPage']
 
     def copy(self, *args, **kwargs):
         site = kwargs['to'].get_site()
@@ -766,11 +766,11 @@ class PersonalisableFormField(SkipLogicMixin, AdminLabelMixin,
                         {'default_value': ["Must be a valid date", ]})
 
 
-class SegmentUserGroup(models.Model):
+class FormsSegmentUserGroup(models.Model):
     name = models.CharField(max_length=254)
     users = models.ManyToManyField(
         settings.AUTH_USER_MODEL,
-        related_name='segment_groups',
+        related_name='forms_segment_groups',
     )
 
     def __str__(self):

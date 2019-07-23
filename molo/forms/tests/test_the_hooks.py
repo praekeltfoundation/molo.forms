@@ -7,7 +7,7 @@ from molo.core.models import SiteLanguageRelation, Main, Languages
 from molo.core.tests.base import MoloTestCaseMixin
 from molo.forms.models import (MoloFormPage, MoloFormField,
                                  FormsIndexPage, FormTermsConditions,
-                                 TermsAndConditionsIndexPage)
+                                 FormsTermsAndConditionsIndexPage)
 
 User = get_user_model()
 
@@ -29,7 +29,7 @@ class TestFormViews(TestCase, MoloTestCaseMixin):
             self.main).first()
 
         # create terms and conditions index_page
-        terms_conditions_index = TermsAndConditionsIndexPage(
+        terms_conditions_index = FormsTermsAndConditionsIndexPage(
             title='terms and conditions pages', slug='terms-1')
         self.forms_index.add_child(instance=terms_conditions_index)
         terms_conditions_index.save_revision().publish()

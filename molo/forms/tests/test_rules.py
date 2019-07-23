@@ -19,12 +19,12 @@ from .utils import skip_logic_data
 from ..models import (
     PersonalisableFormField,
     PersonalisableForm,
-    SegmentUserGroup,
+    FormsSegmentUserGroup,
     MoloFormPage,
     MoloFormField,
 )
 from ..rules import (
-    ArticleTagRule,
+    FormsArticleTagRule,
     GroupMembershipRule,
     FormSubmissionDataRule,
     FormResponseRule
@@ -489,7 +489,7 @@ class TestGroupMembershipRuleSegmentation(TestCase, MoloTestCaseMixin):
         self.request.user = get_user_model().objects.create_user(
             username='tester', email='tester@example.com', password='tester')
 
-        self.group = SegmentUserGroup.objects.create(name='Super Test Group!')
+        self.group = FormsSegmentUserGroup.objects.create(name='Super Test Group!')
 
         self.request.user.segment_groups.add(self.group)
 
@@ -503,7 +503,7 @@ class TestGroupMembershipRuleSegmentation(TestCase, MoloTestCaseMixin):
         self.assertTrue(rule.test_user(self.request))
 
     def test_user_membership_rule_when_they_are_not_member(self):
-        group = SegmentUserGroup.objects.create(name='Wagtail-like creatures')
+        group = FormsSegmentUserGroup.objects.create(name='Wagtail-like creatures')
         rule = GroupMembershipRule(group=group)
 
         self.assertFalse(rule.test_user(self.request))
@@ -567,12 +567,12 @@ class TestArticleTagRuleSegmentation(TestCase, MoloTestCaseMixin):
         return new_article
 
     def test_article_tag_rule_is_static(self):
-        rule = ArticleTagRule(tag=self.tag, count=1)
+        rule = FormsArticleTagRule(tag=self.tag, count=1)
         self.assertTrue(rule.static)
 
     def test_user_visits_page_with_tag(self):
-        rule = ArticleTagRule(
-            operator=ArticleTagRule.EQUALS,
+        rule = FormsArticleTagRule(
+            operator=FormsArticleTagRule.EQUALS,
             tag=self.tag,
             count=1,
         )
@@ -582,13 +582,13 @@ class TestArticleTagRuleSegmentation(TestCase, MoloTestCaseMixin):
         self.assertTrue(rule.test_user(self.request))
 
     def test_user_tag_with_no_visits(self):
-        rule = ArticleTagRule(tag=self.tag, count=1)
+        rule = FormsArticleTagRule(tag=self.tag, count=1)
 
         self.assertFalse(rule.test_user(self.request))
 
     def test_user_visits_page_twice_tag_not_duplicated(self):
-        rule = ArticleTagRule(
-            operator=ArticleTagRule.EQUALS,
+        rule = FormsArticleTagRule(
+            operator=FormsArticleTagRule.EQUALS,
             tag=self.tag,
             count=1,
         )
@@ -599,7 +599,7 @@ class TestArticleTagRuleSegmentation(TestCase, MoloTestCaseMixin):
         self.assertTrue(rule.test_user(self.request))
 
     def test_user_visits_page_after_cutoff(self):
-        rule = ArticleTagRule(
+        rule = FormsArticleTagRule(
             tag=self.tag,
             count=1,
             date_to=timezone.make_aware(
@@ -613,8 +613,8 @@ class TestArticleTagRuleSegmentation(TestCase, MoloTestCaseMixin):
         self.assertFalse(rule.test_user(self.request))
 
     def test_user_visits_two_different_pages_same_tag(self):
-        rule = ArticleTagRule(
-            operator=ArticleTagRule.EQUALS,
+        rule = FormsArticleTagRule(
+            operator=FormsArticleTagRule.EQUALS,
             tag=self.tag,
             count=2,
         )
@@ -626,43 +626,43 @@ class TestArticleTagRuleSegmentation(TestCase, MoloTestCaseMixin):
         self.assertTrue(rule.test_user(self.request))
 
     def test_user_passes_less_than(self):
-        rule = ArticleTagRule(
+        rule = FormsArticleTagRule(
             tag=self.tag,
             count=2,
-            operator=ArticleTagRule.LESS_THAN,
+            operator=FormsArticleTagRule.LESS_THAN,
         )
         self.adapter.add_page_visit(self.article)
         self.assertTrue(rule.test_user(self.request))
 
     def test_user_fails_less_than(self):
-        rule = ArticleTagRule(
+        rule = FormsArticleTagRule(
             tag=self.tag,
             count=1,
-            operator=ArticleTagRule.LESS_THAN,
+            operator=FormsArticleTagRule.LESS_THAN,
         )
         self.adapter.add_page_visit(self.article)
         self.assertFalse(rule.test_user(self.request))
 
     def test_user_fails_greater_than(self):
-        rule = ArticleTagRule(
+        rule = FormsArticleTagRule(
             tag=self.tag,
             count=1,
-            operator=ArticleTagRule.GREATER_THAN,
+            operator=FormsArticleTagRule.GREATER_THAN,
         )
         self.adapter.add_page_visit(self.article)
         self.assertFalse(rule.test_user(self.request))
 
     def test_user_passes_greater_than(self):
-        rule = ArticleTagRule(
+        rule = FormsArticleTagRule(
             tag=self.tag,
             count=0,
-            operator=ArticleTagRule.GREATER_THAN,
+            operator=FormsArticleTagRule.GREATER_THAN,
         )
         self.adapter.add_page_visit(self.article)
         self.assertTrue(rule.test_user(self.request))
 
     def test_dates_are_in_order(self):
-        rule = ArticleTagRule(
+        rule = FormsArticleTagRule(
             tag=self.tag,
             count=1,
             date_from=datetime.datetime.now(),
@@ -672,7 +672,7 @@ class TestArticleTagRuleSegmentation(TestCase, MoloTestCaseMixin):
             rule.clean()
 
     def test_count_more_than_article_error(self):
-        rule = ArticleTagRule(
+        rule = FormsArticleTagRule(
             tag=self.tag,
             count=2,
         )
@@ -684,41 +684,41 @@ class TestArticleTagRuleSegmentation(TestCase, MoloTestCaseMixin):
         self.assertFalse(self.request.session['tag_count'])
 
     def test_call_test_user_on_invalid_rule_fails(self):
-        rule = ArticleTagRule()
+        rule = FormsArticleTagRule()
         self.adapter.add_page_visit(self.article)
         self.assertFalse(rule.test_user(None, self.request.user))
 
     def test_call_test_user_without_request(self):
-        rule = ArticleTagRule(
+        rule = FormsArticleTagRule(
             tag=self.tag,
             count=0,
-            operator=ArticleTagRule.GREATER_THAN,
+            operator=FormsArticleTagRule.GREATER_THAN,
         )
         self.adapter.add_page_visit(self.article)
         self.assertTrue(rule.test_user(None, self.request.user))
 
     def test_call_test_user_without_user_or_request(self):
-        rule = ArticleTagRule(
+        rule = FormsArticleTagRule(
             tag=self.tag,
             count=0,
-            operator=ArticleTagRule.GREATER_THAN,
+            operator=FormsArticleTagRule.GREATER_THAN,
         )
         self.adapter.add_page_visit(self.article)
         self.assertFalse(rule.test_user(None))
 
     def test_get_column_header(self):
-        rule = ArticleTagRule(
+        rule = FormsArticleTagRule(
             tag=self.tag,
             count=0,
-            operator=ArticleTagRule.GREATER_THAN,
+            operator=FormsArticleTagRule.GREATER_THAN,
         )
         self.assertEqual(rule.get_column_header(), 'Article Tag = test')
 
     def test_get_user_info_returns_true(self):
-        rule = ArticleTagRule(
+        rule = FormsArticleTagRule(
             tag=self.tag,
             count=0,
-            operator=ArticleTagRule.GREATER_THAN,
+            operator=FormsArticleTagRule.GREATER_THAN,
         )
         self.adapter.add_page_visit(self.article)
         self.assertEqual(rule.get_user_info_string(self.request.user), '1')
