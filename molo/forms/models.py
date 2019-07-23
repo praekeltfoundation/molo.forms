@@ -570,7 +570,7 @@ class SkipLogicMixin(models.Model):
         return super(SkipLogicMixin, self).save(*args, **kwargs)
 
 
-class MoloFormFormField(SkipLogicMixin, AdminLabelMixin,
+class MoloFormField(SkipLogicMixin, AdminLabelMixin,
                           QuestionPaginationMixin, AbstractFormField):
     FORM_FIELD_CHOICES += (
         ('positive_number', _("Positive Number")),)
