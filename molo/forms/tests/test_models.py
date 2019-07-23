@@ -244,9 +244,9 @@ class TestPageBreakWithTwoQuestionsInOneStep(TestCase, MoloTestCaseMixin):
 
         form = MoloFormPage.objects.last()
 
-        self.assertEquals(4, form.form_form_fields.count())
+        self.assertEquals(4, form.form_fields.count())
 
-        field_1 = form.form_form_fields.all()[0]
+        field_1 = form.form_fields.all()[0]
 
         self.assertEquals(
             field_1.skip_logic.stream_data[0]['value']['choice'],
@@ -258,7 +258,7 @@ class TestPageBreakWithTwoQuestionsInOneStep(TestCase, MoloTestCaseMixin):
         )
         self.assertEquals(field_1.sort_order, 0)
 
-        field_2 = form.form_form_fields.all()[1]
+        field_2 = form.form_fields.all()[1]
 
         self.assertEquals(
             field_2.skip_logic.stream_data[0]['value']['choice'],
@@ -270,10 +270,10 @@ class TestPageBreakWithTwoQuestionsInOneStep(TestCase, MoloTestCaseMixin):
         )
         self.assertEquals(field_2.sort_order, 1)
 
-        field_3 = form.form_form_fields.all()[2]
+        field_3 = form.form_fields.all()[2]
         self.assertEquals(field_3.sort_order, 2)
 
-        field_4 = form.form_form_fields.all()[3]
+        field_4 = form.form_fields.all()[3]
 
         self.assertEquals(
             field_4.skip_logic.stream_data[0]['value']['choice'],
@@ -352,9 +352,9 @@ class TestPageBreakWithTwoQuestionsInOneStep(TestCase, MoloTestCaseMixin):
 
         form = MoloFormPage.objects.last()
 
-        self.assertEquals(3, form.form_form_fields.count())
+        self.assertEquals(3, form.form_fields.count())
 
-        field_1 = form.form_form_fields.all()[0]
+        field_1 = form.form_fields.all()[0]
 
         self.assertEquals(
             field_1.skip_logic.stream_data[0]['value']['choice'],
@@ -366,7 +366,7 @@ class TestPageBreakWithTwoQuestionsInOneStep(TestCase, MoloTestCaseMixin):
         )
         self.assertEquals(field_1.sort_order, 0)
 
-        field_2 = form.form_form_fields.all()[1]
+        field_2 = form.form_fields.all()[1]
 
         self.assertEquals(
             field_2.skip_logic.stream_data[0]['value']['choice'],
@@ -378,7 +378,7 @@ class TestPageBreakWithTwoQuestionsInOneStep(TestCase, MoloTestCaseMixin):
         )
         self.assertEquals(field_2.sort_order, 1)
 
-        field_3 = form.form_form_fields.all()[2]
+        field_3 = form.form_fields.all()[2]
         self.assertEquals(field_3.sort_order, 2)
 
         response = self.client.get(form.url)
@@ -411,7 +411,7 @@ class TestFormFieldDefaultDateValidation(TestCase, MoloTestCaseMixin):
         self.mk_main()
         self.login()
 
-    def create_molo_form_form_field(self, field_type):
+    def create_molo_form_field(self, field_type):
         form = MoloFormPage(
             title='Test Form',
             introduction='Introduction to Test Form ...',
@@ -426,7 +426,7 @@ class TestFormFieldDefaultDateValidation(TestCase, MoloTestCaseMixin):
             admin_label="birthday",
         )
 
-    def create_personalisable_form_form_field(self, field_type):
+    def create_personalisable_form_field(self, field_type):
         form = PersonalisableForm(
             title='Test Form',
             introduction='Introduction to Test Form ...',
@@ -443,7 +443,7 @@ class TestFormFieldDefaultDateValidation(TestCase, MoloTestCaseMixin):
         )
 
     def test_date_molo_form_fields_clean_if_blank(self):
-        field = self.create_molo_form_form_field('date')
+        field = self.create_molo_form_field('date')
         field.default_value = ""
         try:
             field.clean()
@@ -451,7 +451,7 @@ class TestFormFieldDefaultDateValidation(TestCase, MoloTestCaseMixin):
             self.fail("clean() raised ValidationError with valid content!")
 
     def test_date_molo_form_fields_clean_with_valid_default(self):
-        field = self.create_molo_form_form_field('date')
+        field = self.create_molo_form_field('date')
         field.default_value = "2008-05-05"
         try:
             field.clean()
@@ -459,7 +459,7 @@ class TestFormFieldDefaultDateValidation(TestCase, MoloTestCaseMixin):
             self.fail("clean() raised ValidationError with valid content!")
 
     def test_date_molo_form_fields_not_clean_with_invalid_default(self):
-        field = self.create_molo_form_form_field('date')
+        field = self.create_molo_form_field('date')
         field.default_value = "something that isn't a date"
         with self.assertRaises(ValidationError) as e:
             field.clean()
@@ -467,7 +467,7 @@ class TestFormFieldDefaultDateValidation(TestCase, MoloTestCaseMixin):
         self.assertEqual(e.exception.messages, ['Must be a valid date'])
 
     def test_datetime_molo_form_fields_clean_if_blank(self):
-        field = self.create_molo_form_form_field('datetime')
+        field = self.create_molo_form_field('datetime')
         field.default_value = ""
         try:
             field.clean()
@@ -475,7 +475,7 @@ class TestFormFieldDefaultDateValidation(TestCase, MoloTestCaseMixin):
             self.fail("clean() raised ValidationError with valid content!")
 
     def test_datetime_molo_form_fields_clean_with_valid_default(self):
-        field = self.create_molo_form_form_field('datetime')
+        field = self.create_molo_form_field('datetime')
         field.default_value = "2008-05-05"
         try:
             field.clean()
@@ -483,7 +483,7 @@ class TestFormFieldDefaultDateValidation(TestCase, MoloTestCaseMixin):
             self.fail("clean() raised ValidationError with valid content!")
 
     def test_datetime_molo_form_fields_not_clean_with_invalid_default(self):
-        field = self.create_molo_form_form_field('datetime')
+        field = self.create_molo_form_field('datetime')
         field.default_value = "something that isn't a date"
         with self.assertRaises(ValidationError) as e:
             field.clean()
@@ -491,7 +491,7 @@ class TestFormFieldDefaultDateValidation(TestCase, MoloTestCaseMixin):
         self.assertEqual(e.exception.messages, ['Must be a valid date'])
 
     def test_date_personalisabe_form_fields_clean_if_blank(self):
-        field = self.create_personalisable_form_form_field('date')
+        field = self.create_personalisable_form_field('date')
         field.default_value = ""
         try:
             field.clean()
@@ -499,7 +499,7 @@ class TestFormFieldDefaultDateValidation(TestCase, MoloTestCaseMixin):
             self.fail("clean() raised ValidationError with valid content!")
 
     def test_date_personalisabe_form_fields_clean_with_valid_default(self):
-        field = self.create_personalisable_form_form_field('date')
+        field = self.create_personalisable_form_field('date')
         field.default_value = "2008-05-05"
         try:
             field.clean()
@@ -507,7 +507,7 @@ class TestFormFieldDefaultDateValidation(TestCase, MoloTestCaseMixin):
             self.fail("clean() raised ValidationError with valid content!")
 
     def test_date_personalisable_fields_not_clean_with_invalid_default(self):
-        field = self.create_personalisable_form_form_field('date')
+        field = self.create_personalisable_form_field('date')
         field.default_value = "something that isn't a date"
         with self.assertRaises(ValidationError) as e:
             field.clean()
@@ -515,7 +515,7 @@ class TestFormFieldDefaultDateValidation(TestCase, MoloTestCaseMixin):
         self.assertEqual(e.exception.messages, ['Must be a valid date'])
 
     def test_datetime_personalisabe_form_fields_clean_if_blank(self):
-        field = self.create_personalisable_form_form_field('datetime')
+        field = self.create_personalisable_form_field('datetime')
         field.default_value = ""
         try:
             field.clean()
@@ -523,7 +523,7 @@ class TestFormFieldDefaultDateValidation(TestCase, MoloTestCaseMixin):
             self.fail("clean() raised ValidationError with valid content!")
 
     def test_datetime_personalisabe_form_fields_clean_with_valid_default(self):
-        field = self.create_personalisable_form_form_field('datetime')
+        field = self.create_personalisable_form_field('datetime')
         field.default_value = "2008-05-05"
         try:
             field.clean()
@@ -532,7 +532,7 @@ class TestFormFieldDefaultDateValidation(TestCase, MoloTestCaseMixin):
 
     def test_datetime_personalisable_fields_not_clean_with_invalid_default(
             self):
-        field = self.create_personalisable_form_form_field('datetime')
+        field = self.create_personalisable_form_field('datetime')
         field.default_value = "something that isn't a date"
         with self.assertRaises(ValidationError) as e:
             field.clean()

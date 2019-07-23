@@ -36,14 +36,14 @@ class TestSites(TestCase, MoloTestCaseMixin):
 
         parent.add_child(instance=molo_form_page)
         molo_form_page.save_revision().publish()
-        molo_form_form_field = MoloFormField.objects.create(
+        molo_form_field = MoloFormField.objects.create(
             page=molo_form_page,
             sort_order=1,
             label='Your favourite animal',
             field_type='singleline',
             required=True
         )
-        return molo_form_page, molo_form_form_field
+        return molo_form_page, molo_form_field
 
     def test_two_sites_point_to_one_root_page(self):
         # assert that there is only one site rooted at main
@@ -65,7 +65,7 @@ class TestSites(TestCase, MoloTestCaseMixin):
         self.assertEquals(self.main.sites_rooted_here.count(), 2)
 
         # create molo form page
-        molo_form_page, molo_form_form_field = \
+        molo_form_page, molo_form_field = \
             self.create_molo_form_page(
                 parent=self.forms_index,
                 homepage_button_text='share your story yo')

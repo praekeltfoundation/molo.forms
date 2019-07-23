@@ -8,7 +8,7 @@ from molo.forms.models import (
 from .utils import skip_logic_data
 
 
-def create_molo_form_form_field(form, sort_order, obj):
+def create_molo_form_field(form, sort_order, obj):
     if obj['type'] == 'radio':
         skip_logic = skip_logic_data(choices=obj['choices'])
     else:
@@ -71,7 +71,7 @@ def create_form(fields={}, **kwargs):
         num_questions = len(fields)
         for index, field in enumerate(reversed(fields)):
             sort_order = num_questions - (index + 1)
-            create_molo_form_form_field(form, sort_order, field)
+            create_molo_form_field(form, sort_order, field)
     return form
 
 

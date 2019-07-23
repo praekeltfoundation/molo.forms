@@ -65,19 +65,19 @@ class TestFormViews(TestCase, MoloTestCaseMixin):
 
         parent.add_child(instance=molo_form_page)
         molo_form_page.save_revision().publish()
-        molo_form_form_field = MoloFormField.objects.create(
+        molo_form_field = MoloFormField.objects.create(
             page=molo_form_page,
             sort_order=1,
             label='Your favourite animal',
             field_type='singleline',
             required=True
         )
-        return molo_form_page, molo_form_form_field
+        return molo_form_page, molo_form_field
 
     def test_copying_main_copies_forms_relations_correctly(self):
         self.user = self.login()
         # create form page
-        molo_form_page, molo_form_form_field = \
+        molo_form_page, molo_form_field = \
             self.create_molo_form_page(
                 parent=self.forms_index,
                 homepage_button_text='share your story yo')

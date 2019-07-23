@@ -491,7 +491,7 @@ class TestGroupMembershipRuleSegmentation(TestCase, MoloTestCaseMixin):
 
         self.group = FormsSegmentUserGroup.objects.create(name='Super Test Group!')
 
-        self.request.user.segment_groups.add(self.group)
+        self.request.user.forms_segment_groups.add(self.group)
 
     def test_group_membership_rule_is_static(self):
         rule = GroupMembershipRule(group=self.group)

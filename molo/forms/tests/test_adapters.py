@@ -44,7 +44,7 @@ class TestAdapterUtils(TestCase, MoloTestCaseMixin):
         self.group_1 = FormsSegmentUserGroup.objects.create(name='Group 1')
         self.group_2 = FormsSegmentUserGroup.objects.create(name='Group 2')
 
-        self.request.user.segment_groups.add(self.group_1)
+        self.request.user.forms_segment_groups.add(self.group_1)
 
         self.group_rule_1 = GroupMembershipRule(group=self.group_1)
         self.group_rule_2 = GroupMembershipRule(group=self.group_2)

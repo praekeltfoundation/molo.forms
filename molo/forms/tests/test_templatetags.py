@@ -6,11 +6,11 @@ from django.contrib.sessions.middleware import SessionMiddleware
 
 from molo.core.models import Main, Languages, SiteLanguageRelation
 from molo.core.tests.base import MoloTestCaseMixin
-from molo.forms.models import (MoloFormPage, MoloFormField,
-                                 FormsIndexPage, PersonalisableForm,
-                                 MoloFormSubmission)
+from molo.forms.models import (
+    MoloFormPage, MoloFormField,
+    FormsIndexPage, PersonalisableForm, MoloFormSubmission)
 
-from molo.forms.templatetags.molo_form_tags import (
+from molo.forms.templatetags.molo_forms_tags import (
     get_form_list, load_user_choice_poll_form)
 from .base import create_form
 
@@ -87,11 +87,12 @@ class LoadUserChoicePollForm(TestCase, MoloTestCaseMixin):
 
 class FormListTest(TestCase, MoloTestCaseMixin):
 
-    def create_molo_form_page(self,
-                                parent,
-                                title="Test Form",
-                                slug="test-form",
-                                **kwargs):
+    def create_molo_form_page(
+            self,
+            parent,
+            title="Test Form",
+            slug="test-form",
+            **kwargs):
         molo_form_page = MoloFormPage(
             title=title,
             slug=slug,
@@ -102,14 +103,14 @@ class FormListTest(TestCase, MoloTestCaseMixin):
 
         parent.add_child(instance=molo_form_page)
         molo_form_page.save_revision().publish()
-        molo_form_form_field = MoloFormField.objects.create(
+        molo_form_field = MoloFormField.objects.create(
             page=molo_form_page,
             sort_order=1,
             label='Your favourite animal',
             field_type='singleline',
             required=True
         )
-        return molo_form_page, molo_form_form_field
+        return molo_form_page, molo_form_field
 
     def create_personalisable_form(
             self,
@@ -127,14 +128,14 @@ class FormListTest(TestCase, MoloTestCaseMixin):
 
         parent.add_child(instance=personalisable_form)
         personalisable_form.save_revision().publish()
-        form_form_field = MoloFormField.objects.create(
+        form_field = MoloFormField.objects.create(
             page=personalisable_form,
             sort_order=1,
             label='Your favourite animal',
             field_type='singleline',
             required=True
         )
-        return personalisable_form, form_form_field
+        return personalisable_form, form_field
 
     def setUp(self):
         self.mk_main()
@@ -164,7 +165,7 @@ class FormListTest(TestCase, MoloTestCaseMixin):
         self.user = self.login()
 
         # create direct questions
-        self.direct_molo_form_page, direct_molo_form_form_field = (
+        self.direct_molo_form_page, direct_molo_form_field = (
             self.create_molo_form_page(
                 parent=self.forms_index,
                 title="direct form title",
@@ -177,14 +178,14 @@ class FormListTest(TestCase, MoloTestCaseMixin):
             slug='french-translation-of-direct-form-title')
         self.translated_direct_form.save_revision().publish()
 
-        self.linked_molo_form_page, linked_molo_form_form_field = (
+        self.linked_molo_form_page, linked_molo_form_field = (
             self.create_molo_form_page(
                 parent=self.forms_index,
                 title="linked form title",
                 slug="linked_form_title",
                 display_form_directly=False,
             ))
-        self.yourwords_molo_form_page, yourwords_molo_form_form_field = (
+        self.yourwords_molo_form_page, yourwords_molo_form_field = (
             self.create_molo_form_page(
                 parent=self.forms_index,
                 title="yourwords form title",
@@ -197,7 +198,7 @@ class FormListTest(TestCase, MoloTestCaseMixin):
             slug='french-translation-of-linked-form-title')
         self.translated_linked_form.save_revision().publish()
 
-        self.personalisable_form, personalisable_form_form_field = (
+        self.personalisable_form, personalisable_form_field = (
             self.create_personalisable_form(
                 parent=self.forms_index,
                 title="personalisable form title",

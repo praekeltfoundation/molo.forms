@@ -64,7 +64,7 @@ class TestFormAdminViews(TestCase, MoloTestCaseMixin):
 
         parent.add_child(instance=molo_form_page)
         molo_form_page.save_revision().publish()
-        molo_form_form_field = MoloFormField.objects.create(
+        molo_form_field = MoloFormField.objects.create(
             page=molo_form_page,
             sort_order=1,
             label='Your favourite animal',
@@ -72,7 +72,7 @@ class TestFormAdminViews(TestCase, MoloTestCaseMixin):
             field_type='singleline',
             required=True
         )
-        return molo_form_page, molo_form_form_field
+        return molo_form_page, molo_form_field
 
     def create_personalisable_molo_form_page(self, parent, **kwargs):
         # create segment for personalisation
@@ -91,14 +91,14 @@ class TestFormAdminViews(TestCase, MoloTestCaseMixin):
         parent.add_child(instance=personalisable_form)
         personalisable_form.save_revision().publish()
 
-        molo_form_form_field = PersonalisableFormField.objects.create(
+        molo_form_field = PersonalisableFormField.objects.create(
             field_type='singleline',
             label='Question 1',
             admin_label='question_1',
             page=personalisable_form,
             segment=test_segment)
 
-        return personalisable_form, molo_form_form_field
+        return personalisable_form, molo_form_field
 
     def test_form_create_invalid_with_duplicate_questions(self):
         self.client.force_login(self.super_user)
@@ -109,48 +109,48 @@ class TestFormAdminViews(TestCase, MoloTestCaseMixin):
         form = response.context['form']
         data = form.initial
         data.update(
-            form.formsets['form_form_fields'].management_form.initial)
+            form.formsets['form_fields'].management_form.initial)
         data.update({u'description-count': 0})
         data.update({
-            'form_form_fields-0-admin_label': 'a',
-            'form_form_fields-0-label': 'question 1',
-            'form_form_fields-0-default_value': 'a',
-            'form_form_fields-0-field_type': 'radio',
-            'form_form_fields-0-help_text': 'b',
-            'form_form_fields-1-admin_label': 'b',
-            'form_form_fields-1-label': 'question 1',
-            'form_form_fields-1-default_value': 'a',
-            'form_form_fields-1-field_type': 'radio',
-            'form_form_fields-1-help_text': 'b',
+            'form_fields-0-admin_label': 'a',
+            'form_fields-0-label': 'question 1',
+            'form_fields-0-default_value': 'a',
+            'form_fields-0-field_type': 'radio',
+            'form_fields-0-help_text': 'b',
+            'form_fields-1-admin_label': 'b',
+            'form_fields-1-label': 'question 1',
+            'form_fields-1-default_value': 'a',
+            'form_fields-1-field_type': 'radio',
+            'form_fields-1-help_text': 'b',
             'go_live_at': '',
             'expire_at': '',
             'image': '',
-            'form_form_fields-0-ORDER': 1,
-            'form_form_fields-0-required': 'on',
-            'form_form_fields-0-skip_logic-0-deleted': '',
-            'form_form_fields-0-skip_logic-0-id': 'None',
-            'form_form_fields-0-skip_logic-0-order': 0,
-            'form_form_fields-0-skip_logic-0-type': 'skip_logic',
-            'form_form_fields-0-skip_logic-0-value-choice': 'a',
-            'form_form_fields-0-skip_logic-0-value-question_0': 'a',
-            'form_form_fields-0-skip_logic-0-value-skip_logic': 'next',
-            'form_form_fields-0-skip_logic-0-value-form': '',
-            'form_form_fields-0-skip_logic-count': 1,
-            'form_form_fields-1-ORDER': 2,
-            'form_form_fields-1-required': 'on',
-            'form_form_fields-1-skip_logic-0-deleted': '',
-            'form_form_fields-1-skip_logic-0-id': 'None',
-            'form_form_fields-1-skip_logic-0-order': 0,
-            'form_form_fields-1-skip_logic-0-type': 'skip_logic',
-            'form_form_fields-1-skip_logic-0-value-choice': 'a',
-            'form_form_fields-1-skip_logic-0-value-question_0': 'a',
-            'form_form_fields-1-skip_logic-0-value-skip_logic': 'next',
-            'form_form_fields-1-skip_logic-0-value-form': '',
-            'form_form_fields-1-skip_logic-count': 1,
-            'form_form_fields-INITIAL_FORMS': 0,
-            'form_form_fields-MAX_NUM_FORMS': 1000,
-            'form_form_fields-MIN_NUM_FORMS': 0,
-            'form_form_fields-TOTAL_FORMS': 2,
+            'form_fields-0-ORDER': 1,
+            'form_fields-0-required': 'on',
+            'form_fields-0-skip_logic-0-deleted': '',
+            'form_fields-0-skip_logic-0-id': 'None',
+            'form_fields-0-skip_logic-0-order': 0,
+            'form_fields-0-skip_logic-0-type': 'skip_logic',
+            'form_fields-0-skip_logic-0-value-choice': 'a',
+            'form_fields-0-skip_logic-0-value-question_0': 'a',
+            'form_fields-0-skip_logic-0-value-skip_logic': 'next',
+            'form_fields-0-skip_logic-0-value-form': '',
+            'form_fields-0-skip_logic-count': 1,
+            'form_fields-1-ORDER': 2,
+            'form_fields-1-required': 'on',
+            'form_fields-1-skip_logic-0-deleted': '',
+            'form_fields-1-skip_logic-0-id': 'None',
+            'form_fields-1-skip_logic-0-order': 0,
+            'form_fields-1-skip_logic-0-type': 'skip_logic',
+            'form_fields-1-skip_logic-0-value-choice': 'a',
+            'form_fields-1-skip_logic-0-value-question_0': 'a',
+            'form_fields-1-skip_logic-0-value-skip_logic': 'next',
+            'form_fields-1-skip_logic-0-value-form': '',
+            'form_fields-1-skip_logic-count': 1,
+            'form_fields-INITIAL_FORMS': 0,
+            'form_fields-MAX_NUM_FORMS': 1000,
+            'form_fields-MIN_NUM_FORMS': 0,
+            'form_fields-TOTAL_FORMS': 2,
             'terms_and_conditions-INITIAL_FORMS': 0,
             'terms_and_conditions-MAX_NUM_FORMS': 1000,
             'terms_and_conditions-MIN_NUM_FORMS': 0,
@@ -160,7 +160,7 @@ class TestFormAdminViews(TestCase, MoloTestCaseMixin):
             '/admin/pages/add/forms/moloformpage/%d/' %
             self.forms_index.pk, data=data)
         self.assertEqual(response.status_code, 200)
-        form = response.context['form'].formsets['form_form_fields']
+        form = response.context['form'].formsets['form_fields']
         err = u'This question appears elsewhere in the form. ' \
               u'Please rephrase one of the questions.'
         self.assertTrue(err in form.errors[1]['label'])
@@ -180,33 +180,33 @@ class TestFormAdminViews(TestCase, MoloTestCaseMixin):
         form = response.context['form']
         data = form.initial
         data.update(
-            form.formsets['form_form_fields'].management_form.initial)
+            form.formsets['form_fields'].management_form.initial)
         data.update({u'description-count': 0})
         data.update({
-            'form_form_fields-0-admin_label': 'a',
-            'form_form_fields-0-label': 'a',
-            'form_form_fields-0-default_value': 'a',
-            'form_form_fields-0-field_type': form_field.field_type,
-            'form_form_fields-0-help_text': 'a',
-            'form_form_fields-0-id': form_field.pk,
+            'form_fields-0-admin_label': 'a',
+            'form_fields-0-label': 'a',
+            'form_fields-0-default_value': 'a',
+            'form_fields-0-field_type': form_field.field_type,
+            'form_fields-0-help_text': 'a',
+            'form_fields-0-id': form_field.pk,
             'go_live_at': '',
             'expire_at': '',
             'image': '',
-            'form_form_fields-0-ORDER': 1,
-            'form_form_fields-0-required': 'on',
-            'form_form_fields-0-skip_logic-0-deleted': '',
-            'form_form_fields-0-skip_logic-0-id': 'None',
-            'form_form_fields-0-skip_logic-0-order': 0,
-            'form_form_fields-0-skip_logic-0-type': 'skip_logic',
-            'form_form_fields-0-skip_logic-0-value-choice': 'a',
-            'form_form_fields-0-skip_logic-0-value-question_0': 'a',
-            'form_form_fields-0-skip_logic-0-value-skip_logic': 'next',
-            'form_form_fields-0-skip_logic-0-value-form': '',
-            'form_form_fields-0-skip_logic-count': 1,
-            'form_form_fields-INITIAL_FORMS': 1,
-            'form_form_fields-MAX_NUM_FORMS': 1000,
-            'form_form_fields-MIN_NUM_FORMS': 0,
-            'form_form_fields-TOTAL_FORMS': 1,
+            'form_fields-0-ORDER': 1,
+            'form_fields-0-required': 'on',
+            'form_fields-0-skip_logic-0-deleted': '',
+            'form_fields-0-skip_logic-0-id': 'None',
+            'form_fields-0-skip_logic-0-order': 0,
+            'form_fields-0-skip_logic-0-type': 'skip_logic',
+            'form_fields-0-skip_logic-0-value-choice': 'a',
+            'form_fields-0-skip_logic-0-value-question_0': 'a',
+            'form_fields-0-skip_logic-0-value-skip_logic': 'next',
+            'form_fields-0-skip_logic-0-value-form': '',
+            'form_fields-0-skip_logic-count': 1,
+            'form_fields-INITIAL_FORMS': 1,
+            'form_fields-MAX_NUM_FORMS': 1000,
+            'form_fields-MIN_NUM_FORMS': 0,
+            'form_fields-TOTAL_FORMS': 1,
             'terms_and_conditions-INITIAL_FORMS': 0,
             'terms_and_conditions-MAX_NUM_FORMS': 1000,
             'terms_and_conditions-MIN_NUM_FORMS': 0,
@@ -219,13 +219,13 @@ class TestFormAdminViews(TestCase, MoloTestCaseMixin):
             u"Page 'Child of FormsIndexPage Form' has been updated."
         )
         data.update({
-            'form_form_fields-0-skip_logic-0-value-choice':
+            'form_fields-0-skip_logic-0-value-choice':
                 'a' + 'a' * CHARACTER_COUNT_CHOICE_LIMIT,
         })
         response = self.client.post(
             '/admin/pages/%d/edit/' % child_of_index_page.pk, data=data)
         self.assertEqual(response.status_code, 200)
-        form = response.context['form'].formsets['form_form_fields']
+        form = response.context['form'].formsets['form_fields']
         err = u'The combined choices\' maximum characters ' \
               u'limit has been exceeded ({max_limit} ' \
               u'character(s)).'
@@ -253,50 +253,50 @@ class TestFormAdminViews(TestCase, MoloTestCaseMixin):
         form = response.context['form']
         data = form.initial
         data.update(
-            form.formsets['form_form_fields'].management_form.initial)
+            form.formsets['form_fields'].management_form.initial)
         data.update({u'description-count': 0})
         data.update({
-            'form_form_fields-0-admin_label': 'a',
-            'form_form_fields-0-label': form_field_1.label,
-            'form_form_fields-0-default_value': 'a',
-            'form_form_fields-0-field_type': form_field_1.field_type,
-            'form_form_fields-0-help_text': 'a',
-            'form_form_fields-0-id': form_field_1.pk,
-            'form_form_fields-1-admin_label': 'a',
-            'form_form_fields-1-label': form_field_1.label,
-            'form_form_fields-1-default_value': 'a',
-            'form_form_fields-1-field_type': form_field_2.field_type,
-            'form_form_fields-1-help_text': 'a',
-            'form_form_fields-1-id': form_field_2.pk,
+            'form_fields-0-admin_label': 'a',
+            'form_fields-0-label': form_field_1.label,
+            'form_fields-0-default_value': 'a',
+            'form_fields-0-field_type': form_field_1.field_type,
+            'form_fields-0-help_text': 'a',
+            'form_fields-0-id': form_field_1.pk,
+            'form_fields-1-admin_label': 'a',
+            'form_fields-1-label': form_field_1.label,
+            'form_fields-1-default_value': 'a',
+            'form_fields-1-field_type': form_field_2.field_type,
+            'form_fields-1-help_text': 'a',
+            'form_fields-1-id': form_field_2.pk,
             'go_live_at': '',
             'expire_at': '',
             'image': '',
-            'form_form_fields-0-ORDER': 1,
-            'form_form_fields-0-required': 'on',
-            'form_form_fields-0-skip_logic-0-deleted': '',
-            'form_form_fields-0-skip_logic-0-id': 'None',
-            'form_form_fields-0-skip_logic-0-order': 0,
-            'form_form_fields-0-skip_logic-0-type': 'skip_logic',
-            'form_form_fields-0-skip_logic-0-value-choice': 'a',
-            'form_form_fields-0-skip_logic-0-value-question_0': 'a',
-            'form_form_fields-0-skip_logic-0-value-skip_logic': 'next',
-            'form_form_fields-0-skip_logic-0-value-form': '',
-            'form_form_fields-0-skip_logic-count': 1,
-            'form_form_fields-1-ORDER': 2,
-            'form_form_fields-1-required': 'on',
-            'form_form_fields-1-skip_logic-0-deleted': '',
-            'form_form_fields-1-skip_logic-0-id': 'None',
-            'form_form_fields-1-skip_logic-0-order': 0,
-            'form_form_fields-1-skip_logic-0-type': 'skip_logic',
-            'form_form_fields-1-skip_logic-0-value-choice': 'a',
-            'form_form_fields-1-skip_logic-0-value-question_0': 'a',
-            'form_form_fields-1-skip_logic-0-value-skip_logic': 'next',
-            'form_form_fields-1-skip_logic-0-value-form': '',
-            'form_form_fields-1-skip_logic-count': 1,
-            'form_form_fields-INITIAL_FORMS': 2,
-            'form_form_fields-MAX_NUM_FORMS': 1000,
-            'form_form_fields-MIN_NUM_FORMS': 0,
-            'form_form_fields-TOTAL_FORMS': 2,
+            'form_fields-0-ORDER': 1,
+            'form_fields-0-required': 'on',
+            'form_fields-0-skip_logic-0-deleted': '',
+            'form_fields-0-skip_logic-0-id': 'None',
+            'form_fields-0-skip_logic-0-order': 0,
+            'form_fields-0-skip_logic-0-type': 'skip_logic',
+            'form_fields-0-skip_logic-0-value-choice': 'a',
+            'form_fields-0-skip_logic-0-value-question_0': 'a',
+            'form_fields-0-skip_logic-0-value-skip_logic': 'next',
+            'form_fields-0-skip_logic-0-value-form': '',
+            'form_fields-0-skip_logic-count': 1,
+            'form_fields-1-ORDER': 2,
+            'form_fields-1-required': 'on',
+            'form_fields-1-skip_logic-0-deleted': '',
+            'form_fields-1-skip_logic-0-id': 'None',
+            'form_fields-1-skip_logic-0-order': 0,
+            'form_fields-1-skip_logic-0-type': 'skip_logic',
+            'form_fields-1-skip_logic-0-value-choice': 'a',
+            'form_fields-1-skip_logic-0-value-question_0': 'a',
+            'form_fields-1-skip_logic-0-value-skip_logic': 'next',
+            'form_fields-1-skip_logic-0-value-form': '',
+            'form_fields-1-skip_logic-count': 1,
+            'form_fields-INITIAL_FORMS': 2,
+            'form_fields-MAX_NUM_FORMS': 1000,
+            'form_fields-MIN_NUM_FORMS': 0,
+            'form_fields-TOTAL_FORMS': 2,
             'terms_and_conditions-INITIAL_FORMS': 0,
             'terms_and_conditions-MAX_NUM_FORMS': 1000,
             'terms_and_conditions-MIN_NUM_FORMS': 0,
@@ -305,22 +305,22 @@ class TestFormAdminViews(TestCase, MoloTestCaseMixin):
         response = self.client.post(
             '/admin/pages/%d/edit/' % child_of_index_page.pk, data=data)
         self.assertEqual(response.status_code, 200)
-        form = response.context['form'].formsets['form_form_fields']
+        form = response.context['form'].formsets['form_fields']
         err = u'This question appears elsewhere in the form. ' \
               u'Please rephrase one of the questions.'
         self.assertTrue(err in form.errors[1]['label'])
 
     def test_convert_to_article(self):
-        molo_form_page, molo_form_form_field = \
+        molo_form_page, molo_form_field = \
             self.create_molo_form_page(parent=self.section_index)
 
         self.client.login(username='tester', password='tester')
         response = self.client.get(molo_form_page.url)
         self.assertContains(response, molo_form_page.title)
         self.assertContains(response, molo_form_page.introduction)
-        self.assertContains(response, molo_form_form_field.label)
+        self.assertContains(response, molo_form_field.label)
         response = self.client.post(molo_form_page.url, {
-            molo_form_form_field.label.lower().replace(' ', '-'): 'python'
+            molo_form_field.label.lower().replace(' ', '-'): 'python'
         }, follow=True)
         self.client.logout()
         self.client.login(
@@ -357,7 +357,7 @@ class TestFormAdminViews(TestCase, MoloTestCaseMixin):
         self.assertEqual(
             sorted([
                 body_elem['value'] for body_elem in article.body.stream_data]),
-            [str(submission.created_at), 'python', 'tester'],
+            [str(submission.submit_time), 'python', 'tester'],
         )
 
         # first time it goes to the move page
@@ -380,13 +380,13 @@ class TestFormAdminViews(TestCase, MoloTestCaseMixin):
         self.assertNotContains(response, 'Convert to Article')
 
     def test_export_submission_standard_form(self):
-        molo_form_page, molo_form_form_field = \
+        molo_form_page, molo_form_field = \
             self.create_molo_form_page(parent=self.section_index)
 
         self.client.force_login(self.user)
         answer = 'PYTHON'
         response = self.client.post(molo_form_page.url, {
-            molo_form_form_field.label.lower().replace(' ', '-'): answer
+            molo_form_field.label.lower().replace(' ', '-'): answer
         })
 
         self.client.force_login(self.super_user)
@@ -397,12 +397,12 @@ class TestFormAdminViews(TestCase, MoloTestCaseMixin):
         self.assertEquals(response.status_code, 200)
         self.assertContains(response, 'Username')
         self.assertContains(response, 'Submission Date')
-        self.assertNotContains(response, molo_form_form_field.label)
-        self.assertContains(response, molo_form_form_field.admin_label)
+        self.assertNotContains(response, molo_form_field.label)
+        self.assertContains(response, molo_form_field.admin_label)
         self.assertContains(response, answer)
 
     def test_export_submission_personalisable_form(self):
-        molo_form_page, molo_form_form_field = (
+        molo_form_page, molo_form_field = (
             self.create_personalisable_molo_form_page(
                 parent=self.section_index))
 
@@ -424,12 +424,12 @@ class TestFormAdminViews(TestCase, MoloTestCaseMixin):
         self.assertEquals(response.status_code, 200)
         self.assertContains(response, 'Username')
         self.assertContains(response, 'Submission Date')
-        self.assertNotContains(response, molo_form_form_field.label)
+        self.assertNotContains(response, molo_form_field.label)
 
         self.assertContains(
             response,
-            '{} ({})'.format(molo_form_form_field.admin_label,
-                             molo_form_form_field.segment.name))
+            '{} ({})'.format(molo_form_field.admin_label,
+                             molo_form_field.segment.name))
 
         self.assertContains(response, self.user.username)
         self.assertContains(response, answer)
@@ -454,7 +454,7 @@ class TestFormAdminViews(TestCase, MoloTestCaseMixin):
 
     def test_segment_submission_rule_edit_shows_field_label(self):
         # create form page
-        molo_form_page, molo_form_form_field = (
+        molo_form_page, molo_form_field = (
             self.create_personalisable_molo_form_page(
                 parent=self.section_index))
         # create segment and rule
@@ -473,4 +473,4 @@ class TestFormAdminViews(TestCase, MoloTestCaseMixin):
             test_segment.pk)
 
         self.assertNotContains(response, rule.field_name)
-        self.assertContains(response, molo_form_form_field.label)
+        self.assertContains(response, molo_form_field.label)
