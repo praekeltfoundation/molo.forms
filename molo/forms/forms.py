@@ -372,7 +372,7 @@ class BaseMoloForm(WagtailAdminPageForm):
 
 
 class MoloForm(BaseMoloForm):
-    form_field_name = 'form_form_fields'
+    form_field_name = 'form_fields'
     form_clean_methods = [
         'check_doesnt_loop_to_self',
         'check_doesnt_link_to_personalised_form',
@@ -390,7 +390,7 @@ class MoloForm(BaseMoloForm):
 
 
 class PersonalisableMoloForm(BaseMoloForm):
-    form_field_name = 'personalisable_form_form_fields'
+    form_field_name = 'personalisable_form_fields'
     form_clean_methods = [
         'check_doesnt_loop_to_self',
         'check_form_link_valid',
