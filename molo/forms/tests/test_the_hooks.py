@@ -6,8 +6,8 @@ from django.test.client import Client
 from molo.core.models import SiteLanguageRelation, Main, Languages
 from molo.core.tests.base import MoloTestCaseMixin
 from molo.forms.models import (MoloFormPage, MoloFormField,
-                                 FormsIndexPage, FormTermsConditions,
-                                 FormsTermsAndConditionsIndexPage)
+                               FormsIndexPage, FormTermsConditions,
+                               FormsTermsAndConditionsIndexPage)
 
 User = get_user_model()
 

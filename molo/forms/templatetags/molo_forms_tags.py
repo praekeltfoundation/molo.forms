@@ -29,30 +29,29 @@ def get_form_list(
     if page:
         forms = []
         if only_linked_forms:
-            forms = (MoloFormPage.objects.child_of(page)
-                       .filter(language__is_main_language=True,
-                               display_form_directly=False,
-                               your_words_competition=False)
-                       .exact_type(MoloFormPage).specific())
+            forms = (MoloFormPage.objects.child_of(page).filter(
+                language__is_main_language=True,
+                display_form_directly=False,
+                your_words_competition=False).exact_type(
+                    MoloFormPage).specific())
         elif only_direct_forms:
-            forms = (MoloFormPage.objects.child_of(page)
-                       .filter(language__is_main_language=True,
-                               display_form_directly=True,
-                               your_words_competition=False)
-                       .exact_type(MoloFormPage).specific())
+            forms = (MoloFormPage.objects.child_of(page).filter(
+                language__is_main_language=True, display_form_directly=True,
+                your_words_competition=False).exact_type(
+                    MoloFormPage).specific())
         elif only_yourwords:
-            forms = (MoloFormPage.objects.child_of(page)
-                       .filter(language__is_main_language=True,
-                               your_words_competition=True)
-                       .exact_type(MoloFormPage).specific())
+            forms = (MoloFormPage.objects.child_of(page).filter(
+                language__is_main_language=True,
+                your_words_competition=True).exact_type(
+                    MoloFormPage).specific())
         elif personalisable_form:
-            forms = (PersonalisableForm.objects.child_of(page)
-                       .filter(language__is_main_language=True)
-                       .exact_type(PersonalisableForm).specific())
+            forms = (PersonalisableForm.objects.child_of(page).filter(
+                language__is_main_language=True).exact_type(
+                    PersonalisableForm).specific())
         else:
-            forms = (MoloFormPage.objects.child_of(page)
-                       .filter(language__is_main_language=True)
-                       .exact_type(MoloFormPage).specific())
+            forms = (MoloFormPage.objects.child_of(page).filter(
+                language__is_main_language=True).exact_type(
+                    MoloFormPage).specific())
     else:
         forms = MoloFormPage.objects.none()
     context.update({

@@ -30,8 +30,7 @@ from .forms import CSVGroupCreationForm
 def index(request):
     form_pages = get_forms_for_user(request.user)
     form_pages = (
-        form_pages.descendant_of(request.site.root_page)
-                    .specific()
+        form_pages.descendant_of(request.site.root_page).specific()
     )
     paginator, form_pages = paginate(request, form_pages)
 
@@ -47,31 +46,31 @@ class SegmentCountForm(SegmentAdminForm):
 
 
 def get_segment_user_count(request):
-        f = SegmentCountForm(request.POST)
-        context = {}
-        if f.is_valid():
-            rules = [
-                form.instance for formset in f.formsets.values()
-                for form in formset
-                if form not in formset.deleted_forms
-            ]
-            count = f.count_matching_users(rules, f.instance.match_any)
-            context = {'segmentusercount': count}
-        else:
-            errors = f.errors
-            # Get the errors for the Rules forms
-            for formset in f.formsets.values():
-                if formset.has_changed():
-                    for form in formset:
-                        if form.errors:
-                            id_prefix = form.prefix
-                            for name, error in form.errors.items():
-                                input_name = id_prefix + "-%s" % name
-                                errors[input_name] = error
+    f = SegmentCountForm(request.POST)
+    context = {}
+    if f.is_valid():
+        rules = [
+            form.instance for formset in f.formsets.values()
+            for form in formset
+            if form not in formset.deleted_forms
+        ]
+        count = f.count_matching_users(rules, f.instance.match_any)
+        context = {'segmentusercount': count}
+    else:
+        errors = f.errors
+        # Get the errors for the Rules forms
+        for formset in f.formsets.values():
+            if formset.has_changed():
+                for form in formset:
+                    if form.errors:
+                        id_prefix = form.prefix
+                        for name, error in form.errors.items():
+                            input_name = id_prefix + "-%s" % name
+                            errors[input_name] = error
 
-            context = {'errors': errors}
+        context = {'errors': errors}
 
-        return JsonResponse(context)
+    return JsonResponse(context)
 
 
 class ResultsPercentagesJson(View):

@@ -284,9 +284,8 @@ class FormListTest(TestCase, MoloTestCaseMixin):
             'request': self.request,
         })
         with self.assertRaises(ValueError):
-            context = get_form_list(context,
-                                      only_linked_forms=True,
-                                      only_direct_forms=True,)
+            context = get_form_list(
+                context, only_linked_forms=True, only_direct_forms=True,)
 
     def test_get_form_list_personalisable_form(self):
         context = Context({

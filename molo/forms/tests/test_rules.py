@@ -489,7 +489,8 @@ class TestGroupMembershipRuleSegmentation(TestCase, MoloTestCaseMixin):
         self.request.user = get_user_model().objects.create_user(
             username='tester', email='tester@example.com', password='tester')
 
-        self.group = FormsSegmentUserGroup.objects.create(name='Super Test Group!')
+        self.group = FormsSegmentUserGroup.objects.create(
+            name='Super Test Group!')
 
         self.request.user.forms_segment_groups.add(self.group)
 
@@ -503,7 +504,8 @@ class TestGroupMembershipRuleSegmentation(TestCase, MoloTestCaseMixin):
         self.assertTrue(rule.test_user(self.request))
 
     def test_user_membership_rule_when_they_are_not_member(self):
-        group = FormsSegmentUserGroup.objects.create(name='Wagtail-like creatures')
+        group = FormsSegmentUserGroup.objects.create(
+            name='Wagtail-like creatures')
         rule = GroupMembershipRule(group=group)
 
         self.assertFalse(rule.test_user(self.request))

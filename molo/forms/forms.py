@@ -1,5 +1,5 @@
 import csv
-from collections import defaultdict, OrderedDict
+from collections import defaultdict
 from unidecode import unidecode
 
 from django import forms
@@ -147,7 +147,8 @@ class FormsFormBuilder(FormBuilder):
     #                              self.formfields[field.field_type].__name__)
     #             formfields[field.clean_name] = method(field, options)
     #         else:
-    #             raise Exception("Unrecognised field type: " + field.field_type)
+    #             raise Exception(
+    #                       "Unrecognised field type: " + field.field_type)
 
     #     return formfields
 

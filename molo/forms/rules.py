@@ -69,9 +69,8 @@ class FormSubmissionDataRule(AbstractBaseRule):
         (CONTAINS, _('contains')),
     )
 
-    form = models.ForeignKey('PersonalisableForm',
-                               verbose_name=_('form'),
-                               on_delete=models.CASCADE)
+    form = models.ForeignKey(
+        'PersonalisableForm', verbose_name=_('form'), on_delete=models.CASCADE)
     field_name = FieldNameField(
         _('field name'), max_length=255,
         help_text=_('Field\'s label. For possible choices '
@@ -296,9 +295,8 @@ class FormSubmissionDataRule(AbstractBaseRule):
 class FormResponseRule(AbstractBaseRule):
     static = True
 
-    form = models.ForeignKey('MoloFormPage',
-                               verbose_name=_('form'),
-                               on_delete=models.CASCADE)
+    form = models.ForeignKey(
+        'MoloFormPage', verbose_name=_('form'), on_delete=models.CASCADE)
 
     panels = [
         PageChooserPanel('form')

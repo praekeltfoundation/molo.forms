@@ -571,7 +571,7 @@ class SkipLogicMixin(models.Model):
 
 
 class MoloFormField(SkipLogicMixin, AdminLabelMixin,
-                          QuestionPaginationMixin, AbstractFormField):
+                    QuestionPaginationMixin, AbstractFormField):
     FORM_FIELD_CHOICES += (
         ('positive_number', _("Positive Number")),)
     choices = models.TextField(
@@ -729,8 +729,7 @@ class PersonalisableForm(MoloFormPage):
 
 
 class PersonalisableFormField(SkipLogicMixin, AdminLabelMixin,
-                                    QuestionPaginationMixin,
-                                    AbstractFormField):
+                              QuestionPaginationMixin, AbstractFormField):
     """
     Form field that has a segment assigned.
     """
