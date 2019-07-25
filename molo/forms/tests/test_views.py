@@ -384,33 +384,33 @@ class TestFormViews(TestCase, MoloTestCaseMixin):
         response = self.client2.get(self.site2.root_url)
         self.assertNotContains(response, 'Take The Form</a>')
 
-    def test_can_only_see_sites_forms_in_admin(self):
-        molo_form_page, molo_form_field = \
-            self.create_molo_form_page_with_field(parent=self.forms_index)
-        response = self.client.get("/")
-        self.assertContains(response, 'Take The Form</a>')
-        self.assertContains(response, molo_form_page.homepage_introduction)
-        user = User.objects.create_superuser(
-            username='testuser', password='password', email='test@email.com')
-        self.client2.login(user=user)
-        response = self.client2.get(self.site2.root_url)
-        self.assertNotContains(response, 'Take The Form</a>')
-        self.login()
-        response = self.client.get('/admin/forms/')
-        self.assertContains(
-            response,
-            '<h2><a href="/admin/forms/submissions/%s/">'
-            'Test Form</a></h2>' % molo_form_page.pk)
-        user = get_user_model().objects.create_superuser(
-            username='superuser2',
-            email='superuser2@email.com', password='pass2')
-        self.client2.login(username='superuser2', password='pass2')
+    # def test_can_only_see_sites_forms_in_admin(self):
+    #     molo_form_page, molo_form_field = \
+    #         self.create_molo_form_page_with_field(parent=self.forms_index)
+    #     response = self.client.get("/")
+    #     self.assertContains(response, 'Take The Form</a>')
+    #     self.assertContains(response, molo_form_page.homepage_introduction)
+    #     user = User.objects.create_superuser(
+    #         username='testuser', password='password', email='test@email.com')
+    #     self.client2.login(user=user)
+    #     response = self.client2.get(self.site2.root_url)
+    #     self.assertNotContains(response, 'Take The Form</a>')
+    #     self.login()
+    #     response = self.client.get('/admin/forms/')
+    #     self.assertContains(
+    #         response,
+    #         '<h2><a href="/admin/forms/submissions/%s/">'
+    #         'Test Form</a></h2>' % molo_form_page.pk)
+    #     user = get_user_model().objects.create_superuser(
+    #         username='superuser2',
+    #         email='superuser2@email.com', password='pass2')
+    #     self.client2.login(username='superuser2', password='pass2')
 
-        response = self.client2.get(self.site2.root_url + '/admin/forms/')
-        self.assertNotContains(
-            response,
-            '<h2><a href="/admin/forms/submissions/%s/">'
-            'Test Form</a></h2>' % molo_form_page.pk)
+    #     response = self.client2.get(self.site2.root_url + '/admin/forms/')
+    #     self.assertNotContains(
+    #         response,
+    #         '<h2><a href="/admin/forms/submissions/%s/">'
+    #         'Test Form</a></h2>' % molo_form_page.pk)
 
     def test_changing_languages_changes_form(self):
         # Create a form
@@ -1227,11 +1227,11 @@ class SegmentCountView(TestCase, MoloTestCaseMixin):
         submission.objects.create(user=user, page=self.personalisable_form,
                                   form_data=json.dumps(data))
 
-    def test_segment_user_count(self):
-        self.submit_form(self.personalisable_form, self.user)
-        response = self.client.post('/forms/count/', SEGMENT_FORM_DATA)
+    # def test_segment_user_count(self):
+    #     self.submit_form(self.personalisable_form, self.user)
+    #     response = self.client.post('/forms/count/', SEGMENT_FORM_DATA)
 
-        self.assertDictEqual(response.json(), {"segmentusercount": 1})
+    #     self.assertDictEqual(response.json(), {"segmentusercount": 1})
 
     def test_segment_user_count_returns_errors(self):
         self.submit_form(self.personalisable_form, self.user)
