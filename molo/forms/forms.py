@@ -158,7 +158,6 @@ class FormsFormBuilder(FormBuilder):
 
         for field in self.fields:
             options = self.get_field_options(field)
-            print(self.FIELD_TYPES)
             if field.field_type in self.FIELD_TYPES:
                 method = getattr(self,
                                  self.FIELD_TYPES[field.field_type].__name__)
