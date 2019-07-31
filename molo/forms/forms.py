@@ -1,8 +1,9 @@
 import csv
-from collections import defaultdict
+from collections import defaultdict, OrderedDict
 from unidecode import unidecode
 
 from django import forms
+import django.forms
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Group
 from django.core.exceptions import ValidationError
@@ -14,7 +15,6 @@ from django.utils import six
 
 from wagtail.admin.forms import WagtailAdminPageForm
 from wagtail.contrib.forms.forms import FormBuilder
-
 from .blocks import SkipState, VALID_SKIP_LOGIC, VALID_SKIP_SELECTORS
 from .widgets import NaturalDateInput
 
@@ -128,29 +128,47 @@ class FormsFormBuilder(FormBuilder):
         return CharacterCountMultipleChoiceField(
             widget=forms.CheckboxSelectMultiple, **options)
 
-    # @property
-    # def formfields(self):
-    #     '''
-    #     Override parent function in order to ensure that the
-    #     overridden create_..._field methods are referenced
-    #     instead of the parent class methods.
-    #     '''
-    #     formfields = OrderedDict()
-    #     self.formfields.update({
-    #         'positive_number': self.create_positive_number_field})
+    def create_email_field(self, field, options):
+        return django.forms.EmailField(**options)
 
-    #     for field in self.fields:
-    #         options = self.get_field_options(field)
+    def create_url_field(self, field, options):
+        return django.forms.URLField(**options)
 
-    #         if field.field_type in self.formfields:
-    #             method = getattr(self,
-    #                              self.formfields[field.field_type].__name__)
-    #             formfields[field.clean_name] = method(field, options)
-    #         else:
-    #             raise Exception(
-    #                       "Unrecognised field type: " + field.field_type)
+    def create_number_field(self, field, options):
+        return django.forms.DecimalField(**options)
 
-    #     return formfields
+    def create_checkbox_field(self, field, options):
+        return django.forms.BooleanField(**options)
+
+    FIELD_TYPES = {
+        'singleline': create_singleline_field,
+        'multiline': create_multiline_field,
+        'date': create_date_field,
+        'datetime': create_datetime_field,
+        'email': create_email_field,
+        'url': create_url_field,
+        'number': create_number_field,
+        'positive_number': create_positive_number_field,
+        'dropdown': create_dropdown_field,
+        'radio': create_radio_field,
+        'checkboxes': create_checkboxes_field,
+        'checkbox': create_checkbox_field,
+    }
+
+    @property
+    def formfields(self):
+        formfields = OrderedDict()
+
+        for field in self.fields:
+            options = self.get_field_options(field)
+            if field.field_type in self.FIELD_TYPES:
+                method = getattr(self,
+                                 self.FIELD_TYPES[field.field_type].__name__)
+                formfields[field.clean_name] = method(field, options)
+            else:
+                raise Exception("Unrecognised field type: " + field.field_type)
+
+        return formfields
 
 
 class CSVGroupCreationForm(forms.ModelForm):
