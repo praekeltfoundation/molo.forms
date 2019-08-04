@@ -114,7 +114,7 @@ def create_form_index_pages(sender, instance, **kwargs):
 
 class MoloFormPage(
         TranslatablePageMixinNotRoutable,
-        forms_models.AbstractForm):
+        forms_models.AbstractEmailForm):
     parent_page_types = [
         'forms.FormsIndexPage', 'core.SectionPage', 'core.ArticlePage']
     subpage_types = []
@@ -209,6 +209,13 @@ class MoloFormPage(
         FieldPanel('submit_text', classname='full'),
         FieldPanel('thank_you_text', classname='full'),
         InlinePanel('terms_and_conditions', label="Terms and Conditions"),
+        MultiFieldPanel([
+            FieldRowPanel([
+                FieldPanel('from_address', classname="col6"),
+                FieldPanel('to_address', classname="col6"),
+            ]),
+            FieldPanel('subject'),
+        ], "Email"),
     ]
 
     settings_panels = forms_models.AbstractForm.settings_panels + [
