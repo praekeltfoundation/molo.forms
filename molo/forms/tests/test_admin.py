@@ -5,6 +5,7 @@ from django.contrib.auth import get_user_model
 from django.test import TestCase
 from django.test.client import Client
 
+# ArticlePage
 from molo.core.models import SiteLanguageRelation, Main, Languages
 from molo.core.tests.base import MoloTestCaseMixin
 from molo.forms.models import (
@@ -331,6 +332,7 @@ class TestFormAdminViews(TestCase, MoloTestCaseMixin):
     #     # test shows convert to article button when no article created yet
     #     response = self.client.get(
     #         '/admin/forms/submissions/%s/' % molo_form_page.id)
+
     #     self.assertContains(response, 'Convert to Article')
 
     #     # convert submission to article
@@ -351,14 +353,14 @@ class TestFormAdminViews(TestCase, MoloTestCaseMixin):
     #     self.assertEqual(
     #         sorted([
     #             body_elem['type'] for body_elem in article.body.stream_data]
-    #          ),
+    #         ),
     #         ['paragraph', 'paragraph', 'paragraph'],
     #     )
 
     #     self.assertEqual(
     #         sorted([
     #             body_elem['value'] for body_elem in article.body.stream_data]
-    #          ),
+    #         ),
     #         [str(submission.submit_time), 'python', 'tester'],
     #     )
 

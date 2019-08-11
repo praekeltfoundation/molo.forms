@@ -71,8 +71,8 @@ class TestSites(TestCase, MoloTestCaseMixin):
                 homepage_button_text='share your story yo')
 
         # assert that both sites render the form
-        response = client_1.get('/forms-main-1/test-form/')
+        response = client_1.get('/molo-forms-main-1/test-form/')
         self.assertEquals(response.status_code, 200)
         response = client_2.get(
-            site_2.root_url + '/forms-main-1/test-form/')
+            site_2.root_url + '/molo-forms-main-1/test-form/')
         self.assertEquals(response.status_code, 200)

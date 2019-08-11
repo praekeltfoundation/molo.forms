@@ -25,7 +25,7 @@ from ..models import (
 )
 from ..rules import (
     FormsArticleTagRule,
-    GroupMembershipRule,
+    FormGroupMembershipRule,
     FormSubmissionDataRule,
     FormResponseRule
 )
@@ -479,7 +479,7 @@ class TestFormResponseRule(TestCase, MoloTestCaseMixin):
         self.assertEqual(rule.get_user_info_string(self.user), "No submission")
 
 
-class TestGroupMembershipRuleSegmentation(TestCase, MoloTestCaseMixin):
+class TestFormGroupMembershipRuleSegmentation(TestCase, MoloTestCaseMixin):
     def setUp(self):
         # Fabricate a request with a logged-in user
         # so we can use it to test the segment rule
@@ -495,41 +495,41 @@ class TestGroupMembershipRuleSegmentation(TestCase, MoloTestCaseMixin):
         self.request.user.forms_segment_groups.add(self.group)
 
     def test_group_membership_rule_is_static(self):
-        rule = GroupMembershipRule(group=self.group)
+        rule = FormGroupMembershipRule(group=self.group)
         self.assertTrue(rule.static)
 
     def test_user_membership_rule_when_they_are_member(self):
-        rule = GroupMembershipRule(group=self.group)
+        rule = FormGroupMembershipRule(group=self.group)
 
         self.assertTrue(rule.test_user(self.request))
 
     def test_user_membership_rule_when_they_are_not_member(self):
         group = FormsSegmentUserGroup.objects.create(
             name='Wagtail-like creatures')
-        rule = GroupMembershipRule(group=group)
+        rule = FormGroupMembershipRule(group=group)
 
         self.assertFalse(rule.test_user(self.request))
 
     def test_user_membership_rule_on_not_logged_in_user(self):
         self.request.user = AnonymousUser()
-        rule = GroupMembershipRule(group=self.group)
+        rule = FormGroupMembershipRule(group=self.group)
 
         self.assertFalse(rule.test_user(self.request))
 
     def test_call_test_user_without_request(self):
-        rule = GroupMembershipRule(group=self.group)
+        rule = FormGroupMembershipRule(group=self.group)
         self.assertTrue(rule.test_user(None, self.request.user))
 
     def test_call_test_user_without_user_or_request(self):
-        rule = GroupMembershipRule(group=self.group)
+        rule = FormGroupMembershipRule(group=self.group)
         self.assertFalse(rule.test_user(None))
 
     def test_get_column_header(self):
-        rule = GroupMembershipRule(group=self.group)
+        rule = FormGroupMembershipRule(group=self.group)
         self.assertEqual(rule.get_column_header(), 'Super Test Group!')
 
     def test_get_user_info_returns_true(self):
-        rule = GroupMembershipRule(group=self.group)
+        rule = FormGroupMembershipRule(group=self.group)
         self.assertEqual(rule.get_user_info_string(self.request.user), 'True')
 
 

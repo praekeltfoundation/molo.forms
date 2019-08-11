@@ -27,7 +27,7 @@ from molo.forms.adapters import (
 )
 from molo.forms.models import MoloFormPageView, FormsSegmentUserGroup
 
-from molo.forms.rules import GroupMembershipRule
+from molo.forms.rules import FormGroupMembershipRule
 
 
 class TestAdapterUtils(TestCase, MoloTestCaseMixin):
@@ -46,8 +46,8 @@ class TestAdapterUtils(TestCase, MoloTestCaseMixin):
 
         self.request.user.forms_segment_groups.add(self.group_1)
 
-        self.group_rule_1 = GroupMembershipRule(group=self.group_1)
-        self.group_rule_2 = GroupMembershipRule(group=self.group_2)
+        self.group_rule_1 = FormGroupMembershipRule(group=self.group_1)
+        self.group_rule_2 = FormGroupMembershipRule(group=self.group_2)
         self.logged_in_rule = UserIsLoggedInRule(is_logged_in=True)
 
     def test_get_rule(self):
@@ -68,7 +68,7 @@ class TestAdapterUtils(TestCase, MoloTestCaseMixin):
                       self.group_rule_1,
                       self.group_rule_2]
         expected_output = {
-            'GroupMembershipRule': [self.group_rule_1, self.group_rule_2],
+            'FormGroupMembershipRule': [self.group_rule_1, self.group_rule_2],
             'UserIsLoggedInRule': [self.logged_in_rule]
         }
 
@@ -84,13 +84,13 @@ class TestAdapterUtils(TestCase, MoloTestCaseMixin):
                 u'type': u'NestedLogic',
                 u'value': {
                     u'operator': u'or',
-                    u'rule_1': u'GroupMembershipRule_0',
-                    u'rule_2': u'GroupMembershipRule_1'}
+                    u'rule_1': u'FormGroupMembershipRule_0',
+                    u'rule_2': u'FormGroupMembershipRule_1'}
             }
         ]
 
         sample_indexed_rules = {
-            'GroupMembershipRule': [self.group_rule_1, self.group_rule_2],
+            'FormGroupMembershipRule': [self.group_rule_1, self.group_rule_2],
             'UserIsLoggedInRule': [self.logged_in_rule]
         }
 
@@ -116,12 +116,12 @@ class TestAdapterUtils(TestCase, MoloTestCaseMixin):
                 u'value': {
                     u'operator': u'or',
                     u'rule_1': u'UserIsLoggedInRule_0',
-                    u'rule_2': u'GroupMembershipRule_0'}
+                    u'rule_2': u'FormGroupMembershipRule_0'}
             }
         ]
 
         sample_indexed_rules = {
-            'GroupMembershipRule': [self.group_rule_1],
+            'FormGroupMembershipRule': [self.group_rule_1],
             'UserIsLoggedInRule': [self.logged_in_rule]
         }
 

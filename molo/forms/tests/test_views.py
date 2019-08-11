@@ -561,7 +561,7 @@ class TestFormViews(TestCase, MoloTestCaseMixin):
         response = self.client.get('/')
         self.assertContains(
             response,
-            '<a href="/forms-main-1/test-form/" class="footer-link"> '
+            '<a href="/molo-forms-main-1/test-form/" class="footer-link"> '
             '<div class="footer-link__thumbnail-icon"> '
             '<img src="/static/img/clipboard.png" '
             'class="menu-list__item--icon" /></div> '
@@ -571,7 +571,7 @@ class TestFormViews(TestCase, MoloTestCaseMixin):
         response = self.client.get('/')
         self.assertContains(
             response,
-            '<a href="/forms-main-1/french-translation-of-test-form/"'
+            '<a href="/molo-forms-main-1/french-translation-of-test-form/"'
             'class="footer-link"> <div class="footer-link__thumbnail-icon"> '
             '<img src="/static/img/clipboard.png" '
             'class="menu-list__item--icon" /></div> '
@@ -1156,8 +1156,8 @@ class TestPositiveNumberView(TestCase, MoloTestCaseMixin):
             is_active=True)
 
         self.forms_index = FormsIndexPage(
-            title='Forms',
-            slug='forms')
+            title='Molo Forms',
+            slug='molo-forms')
         self.main.add_child(instance=self.forms_index)
         self.forms_index.save_revision().publish()
 

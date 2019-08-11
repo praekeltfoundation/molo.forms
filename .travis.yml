@@ -22,6 +22,7 @@ script:
   - cp local_test_settings.py testapp/testapp/settings/local.py
   - mkdir testapp/testapp/templates/
   - mkdir testapp/testapp/templates/core
+  - cp -a molo/forms/templates/ testapp/testapp/templates/
   - cp molo/forms/test_templates/*.html testapp/testapp/templates/core/
   - cp molo/forms/test_templates/base.html testapp/testapp/templates/base.html
   - flake8 testapp
