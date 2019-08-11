@@ -52,7 +52,7 @@ from .forms import (  # noqa
 )
 from .rules import (  # noqa
     FormsArticleTagRule,
-    GroupMembershipRule,
+    FormGroupMembershipRule,
     FormSubmissionDataRule,
     FormResponseRule
 )
@@ -106,7 +106,7 @@ def create_form_index_pages(sender, instance, **kwargs):
     if not instance.get_children().filter(
             title='Forms').exists():
         form_index = FormsIndexPage(
-            title='Forms', slug=('forms-{}'.format(
+            title='Molo Forms', slug=('molo-forms-{}'.format(
                 generate_slug(instance.title), )))
         instance.add_child(instance=form_index)
         form_index.save_revision().publish()

@@ -10,7 +10,7 @@ def create_forms_index(apps, schema_editor):
     main = Main.objects.all().first()
 
     if main:
-        forms_index = FormsIndexPage(title='Forms', slug='forms')
+        forms_index = FormsIndexPage(title='Molo Forms', slug='molo-forms')
         main.add_child(instance=forms_index)
         forms_index.save_revision().publish()
 
