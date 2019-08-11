@@ -37,11 +37,11 @@ VisitCountRule._meta.verbose_name = 'Page Visit Count Rule'
 
 
 # Add ordering to the base class
-AbstractBaseRule.__old_subclasses__ = AbstractBaseRule.__subclasses__
+AbstractBaseRule.__forms_old_subclasses__ = AbstractBaseRule.__subclasses__
 
 
 def __ordered_subclasses__(cls):
-    subclasses = cls.__old_subclasses__()
+    subclasses = cls.__forms_old_subclasses__()
     for i, item in enumerate(subclasses):
         if not hasattr(item, 'order'):
             item.order = (i + 1) * 100
@@ -349,7 +349,7 @@ class FormResponseRule(AbstractBaseRule):
         return response_date.strftime("%Y-%m-%d %H:%M")
 
 
-class GroupMembershipRule(AbstractBaseRule):
+class FormGroupMembershipRule(AbstractBaseRule):
     """wagtail-personalisation rule based on user's group membership."""
     static = True
 
@@ -530,7 +530,7 @@ class FormsArticleTagRule(AbstractBaseRule):
         return str(visit_count)
 
 
-class CombinationRule(AbstractBaseRule):
+class FormCombinationRule(AbstractBaseRule):
     body = blocks.StreamField([
         ('Rule', blocks.RuleSelectBlock()),
         ('Operator', blocks.AndOrBlock()),
@@ -549,7 +549,7 @@ class CombinationRule(AbstractBaseRule):
         }
 
     def clean(self):
-        super(CombinationRule, self).clean()
+        super(FormCombinationRule, self).clean()
         if len(self.body.stream_data) > 0:
             if isinstance(self.body.stream_data[0], dict):
                 newData = [block['type'] for block in self.body.stream_data]

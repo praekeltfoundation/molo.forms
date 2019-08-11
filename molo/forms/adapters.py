@@ -8,7 +8,7 @@ from django.utils.dateparse import parse_datetime
 from django.utils import timezone
 
 from molo.core.models import ArticlePage, ArticlePageTags
-from .rules import CombinationRule
+from .rules import FormCombinationRule
 
 
 def get_rule(rule_hash, data_structure):
@@ -149,7 +149,7 @@ class FormsSegmentsAdapter(SessionSegmentsAdapter):
 
         bool_rules = False
         bool_rules = [rule for rule in rules
-                      if isinstance(rule, CombinationRule)]
+                      if isinstance(rule, FormCombinationRule)]
 
         if not bool_rules:
             if match_any:
@@ -160,7 +160,7 @@ class FormsSegmentsAdapter(SessionSegmentsAdapter):
             rule_combo = bool_rules[0]
 
             simple_rules = [rule for rule in rules
-                            if not isinstance(rule, CombinationRule)]
+                            if not isinstance(rule, FormCombinationRule)]
 
             rules_indexed_by_type_name = index_rules_by_type(simple_rules)
 
