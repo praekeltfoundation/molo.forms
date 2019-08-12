@@ -1,0 +1,54 @@
+{% load wagtailcore_tags i18n forms_personalise_extras %}
+
+{% block content %}
+{% filter_forms_by_segments forms request as filtered_forms %}
+	{% for item in filtered_forms %}
+		{% with form_page=item.molo_form_page form=item.form %}
+			<div class="forms forms{{form.get_effective_extra_style_hints}}">
+				<div class="forms__item">
+					<h1 class="forms__title">{{ form_page.title }}</h1>
+					<h4 class="forms__intro">{{ form_page.homepage_introduction }}</h4>
+
+					{% if not form_page.display_form_directly %}
+					{% trans "Take The Form" as button_text %}
+					<div class="call-to-action call-to-action--forms">
+						<a href="{% pageurl form_page %}" class="call-to-action__nav-item call-to-action__nav-item--forms">{{ form_page.homepage_button_text|default:button_text }}</a>
+					</div>
+
+					{% else %}
+						{% if user.is_authenticated and user.is_active or request.is_preview or form_page.allow_anonymous_submissions %}
+				    	{% if form %}
+					      <form class="forms__form" action="{% pageurl form_page %}{% if form_page.multi_step %}?p={{ fields_step.number|add:"1" }}{% endif %}" method="post">
+					        {% csrf_token %}
+					        {% for field in form %}
+					          <fieldset>
+					            <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+					            <span class="forms__helptext">{{ field.help_text }}</span>
+					            {{ field }}
+					            {% if field.errors %}
+					              <ul class="error error--forms">
+					              {% for error in field.errors %}
+					                <li>{{ error }}</li>
+					              {% endfor %}
+					              </ul>
+					            {% endif %}
+					          </fieldset>
+					        {% endfor %}
+									{% trans "Submit Form" as text %}
+					        <input type="submit" value="{% if is_intermediate_step %}{% trans 'Next Question' %}{% else %}{{ form.submit_text|default:text }}{% endif %}" />
+					      </form>
+					    {% else %}
+					      <p class="error error--forms">{% trans 'You have already completed this form.' %}</p>
+					    {% endif %}
+					  {% else %}
+					    <div class="call-to-action call-to-action--forms">
+					      <a href="{% url 'molo.profiles:auth_login' %}?next={{request.path}}" class="call-to-action__nav-item call-to-action__nav-item--forms">{% trans 'Please log in to take this form' %}</a>
+					    </div>
+					  {% endif %}
+	  			<!-- end of insertion -->
+			    {% endif %}
+				</div>
+			</div>
+		{% endwith %}
+	{% endfor %}
+{% endblock %}

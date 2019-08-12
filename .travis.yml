@@ -1,0 +1,43 @@
+sudo: false
+language: python
+python:
+  - "3.6"
+cache:
+  directories:
+    - $HOME/.pip-cache/
+
+env:
+  - TZ=UTC
+
+install:
+  - pip install twine
+  - pip install --upgrade pip --cache-dir $HOME/.pip-cache/
+  - pip install coveralls coverage --cache-dir $HOME/.pip-cache/
+  - pip install flake8 --cache-dir $HOME/.pip-cache/
+  - pip install -r requirements-dev.txt --cache-dir $HOME/.pip-cache/
+  - pip install -e . --cache-dir $HOME/.pip-cache/
+script:
+  - flake8 molo
+  - molo scaffold testapp --require molo.forms --include molo.forms ^forms/
+  - cp local_test_settings.py testapp/testapp/settings/local.py
+  - mkdir testapp/testapp/templates/
+  - mkdir testapp/testapp/templates/core
+  - cp -a molo/forms/templates/ testapp/testapp/templates/
+  - cp molo/forms/test_templates/*.html testapp/testapp/templates/core/
+  - cp molo/forms/test_templates/base.html testapp/testapp/templates/base.html
+  - flake8 testapp
+  - pip install -e testapp
+  - py.test --cov=molo.forms --cov-report=term
+
+after_success:
+  - coveralls
+
+deploy:
+  provider: pypi
+  distributions: sdist bdist_wheel
+  user: praekelt.org
+  password:
+    secure: "A8XMvXz0oUa4wXIyW+EvWHbWRSzOpFL/UOqvTTzklXjw/0mOkwe9cmD0IHlB15lmPkvvPF8tUp8f05wex+2vEsZ9rIekIJRyMCeQZPuVSiHJ/jGnonS9n95BBWiezhmJnt5np8MU390EbsPDNfQKVzXPsblhticvIuDvzAOJo/jODz083QpLO4THFTnNcBbcYrUX8s6r17DcVC9BdOxIMfth/3lC2b69Jk+Djwwmhc1xjrI9a1q4LDxfe8g88JuWi6F48o1S1YKohoRX4XZggZRGKsy38x+3+AXHiCQFjmplNOyA5QPljTfue4fKo5h3eFqilAXYmwJdSqCu7L2zgG0xItnSOPFmQyy1yiIgbpxqFSUfonVMzTW9ehtDAVhk0mxpTKyI69si1FbswozfBKp8TMryNoaXsr3mqSR9//nOR8ueLokzrlzNtYVtBAd4+H5678kXoFO7NiWu3APGS6uMEvY45N10JxObW81rsTSqME1KiyRY+LmwQ/1psOMqSUzonkVMNeEnDtEA9mNbR2kSDFXgHDp8YS/ONXkxDChGSrh4vHW5e8NeP9FGFLrAoPL4KZAN+fCY4uTIfq5NCOg4CR4fncGLa0Tp1SQ+7VTdi+3PqieZomVRZbXqpMo8mTcyCtHKnwgThYREISWYgoyjyH8opeqE7uD96LTR0TY="
+  on:
+    tags: true
+    python: 3.6
