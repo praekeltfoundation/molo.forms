@@ -44,7 +44,7 @@ SEGMENT_FORM_DATA = {
     'forms_formresponserule_related-INITIAL_FORMS': ['0'],
     'forms_formresponserule_related-MIN_NUM_FORMS': ['0'],
     'forms_formresponserule_related-MAX_NUM_FORMS': ['1000'],
-    'forms_formresponserule_related-0-form': ['11'],
+    'forms_formresponserule_related-0-form': ['10'],
     'forms_formresponserule_related-0-id': [''],
     'forms_formresponserule_related-0-DELETE': [''],
     'forms_formgroupmembershiprule_related-TOTAL_FORMS': ['0'],
