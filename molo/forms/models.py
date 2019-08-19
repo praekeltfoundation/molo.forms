@@ -456,6 +456,14 @@ class MoloFormPage(
 
         return super(MoloFormPage, self).serve(request, *args, **kwargs)
 
+    def clean(self):
+        if all([self.display_form_directly, self.multi_step]):
+            raise ValidationError(
+                _('"{}" and "{}" can not be both selected at the same time'
+                    .format('Display Question Directly', 'Multi-step')
+                  )
+            )
+
 
 class MoloFormPageView(models.Model):
     visited_at = models.DateTimeField(auto_now_add=True)

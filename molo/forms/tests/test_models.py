@@ -37,6 +37,22 @@ class TestFormModels(TestCase, MoloTestCaseMixin):
         self.assertIn('checkbox-question', data)
         self.assertEqual(data['checkbox-question'], u"option 1, option 2")
 
+    def test_model_validation(self):
+        data = {
+            'path': '001',
+            'depth': '1',
+            'title': 'title',
+            'slug': 'title',
+        }
+        with self.assertRaises(ValidationError) as e:
+            expected_error = '"Display Question Directly" and "Multi-step" ' \
+                             'can not be both selected at the same time'
+            MoloFormPage.objects.create(
+                multi_step=True, display_form_directly=True,
+                **data
+            )
+            self.assertEquals(e, expected_error)
+
 
 class TestSkipLogicMixin(TestCase, MoloTestCaseMixin):
     def setUp(self):
