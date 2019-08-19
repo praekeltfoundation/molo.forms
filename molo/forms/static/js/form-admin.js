@@ -2,8 +2,8 @@ $(function(){
   var multi_step_checkbox = $('#id_multi_step');
   var multi_step_label = $('label[for=id_multi_step]');
 
-  var display_direct_checkbox = $('#id_display_survey_directly');
-  var display_direct_label = $('label[for=id_display_survey_directly]');
+  var display_direct_checkbox = $('#id_display_form_directly');
+  var display_direct_label = $('label[for=id_display_form_directly]');
 
   var disableMultiStep = function(){
     multi_step_checkbox.attr("disabled", true);
