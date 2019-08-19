@@ -458,11 +458,12 @@ class MoloFormPage(
 
     def clean(self):
         if all([self.display_form_directly, self.multi_step]):
-            raise ValidationError(
-                _('"{}" and "{}" can not be both selected at the same time'
-                    .format('Display Question Directly', 'Multi-step')
-                  )
-            )
+            error = _(
+                '"{}" and "{}" can not be both selected at the same time'
+                .format('Display Question Directly', 'Multi-step'))
+
+            raise ValidationError({
+                'multi_step': error, 'display_form_directly': error})
 
 
 class MoloFormPageView(models.Model):
