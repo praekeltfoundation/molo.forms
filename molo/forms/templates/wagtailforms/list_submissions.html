@@ -7,7 +7,7 @@
     <thead>
         <tr>
             {% for heading in data_headings %}
-                <th>{{ heading }}</th>
+                <th>{{ heading.name }}</th>
             {% endfor %}
             <th>{% trans "Actions" %}</th>
             <th>{% trans "Article" %}</th>
