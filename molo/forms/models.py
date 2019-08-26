@@ -243,7 +243,7 @@ class MoloFormPage(
     def get_data_fields(self):
         data_fields = [
             ('username', _('Username')),
-            ('created_at', _('Submission Date')),
+            ('submit_time', _('Submission Date')),
         ]
         data_fields += [
             (field.clean_name, field.admin_label)
@@ -713,7 +713,7 @@ class PersonalisableForm(MoloFormPage):
         """
         data_fields = [
             ('username', _('Username')),
-            ('created_at', _('Submission Date')),
+            ('submit_time', _('Submission Date')),
         ]
 
         # Add segment name to a field label if it is segmented.
