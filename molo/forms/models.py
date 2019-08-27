@@ -231,6 +231,7 @@ class MoloFormPage(
             FieldPanel('multi_step'),
             FieldPanel('display_form_directly'),
             FieldPanel('your_words_competition'),
+            FieldPanel('contact_form'),
         ], heading='Form Settings'),
         MultiFieldPanel(
             [FieldRowPanel(
