@@ -95,9 +95,9 @@ class TestFormViews(TestCase, MoloTestCaseMixin):
                 'new_parent_page': self.root.id,
                 'copy_subpages': 'true',
                 'publish_copies': 'true'})
-        self.assertEquals(response.status_code, 302)
+        self.assertEqual(response.status_code, 302)
         main3 = Main.objects.get(slug='blank')
-        self.assertEquals(
+        self.assertEqual(
             main3.get_children().count(), self.main.get_children().count())
 
         # it should replace the terms and conditions page with the new one

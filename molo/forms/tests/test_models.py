@@ -51,7 +51,7 @@ class TestFormModels(TestCase, MoloTestCaseMixin):
                 multi_step=True, display_form_directly=True,
                 **data
             )
-            self.assertEquals(e, expected_error)
+            self.assertEqual(e, expected_error)
 
 
 class TestSkipLogicMixin(TestCase, MoloTestCaseMixin):
@@ -205,11 +205,11 @@ class TestPageBreakWithTwoQuestionsInOneStep(TestCase, MoloTestCaseMixin):
         self.login()
 
     def test_setup(self):
-        self.assertEquals(1, FormsIndexPage.objects.count())
+        self.assertEqual(1, FormsIndexPage.objects.count())
 
         create_form()
 
-        self.assertEquals(1, MoloFormPage.objects.count())
+        self.assertEqual(1, MoloFormPage.objects.count())
 
     def test_setup2(self):
         create_form([{
@@ -220,7 +220,7 @@ class TestPageBreakWithTwoQuestionsInOneStep(TestCase, MoloTestCaseMixin):
             "page_break": True,
         }, ])
 
-        self.assertEquals(1, MoloFormPage.objects.count())
+        self.assertEqual(1, MoloFormPage.objects.count())
 
     def test_two_questions_in_one_step_when_one_required(self):
         create_form([
@@ -256,50 +256,50 @@ class TestPageBreakWithTwoQuestionsInOneStep(TestCase, MoloTestCaseMixin):
         ],
             language=self.english)
 
-        self.assertEquals(1, MoloFormPage.objects.count())
+        self.assertEqual(1, MoloFormPage.objects.count())
 
         form = MoloFormPage.objects.last()
 
-        self.assertEquals(4, form.form_fields.count())
+        self.assertEqual(4, form.form_fields.count())
 
         field_1 = form.form_fields.all()[0]
 
-        self.assertEquals(
+        self.assertEqual(
             field_1.skip_logic.stream_data[0]['value']['choice'],
             "agree"
         )
-        self.assertEquals(
+        self.assertEqual(
             field_1.skip_logic.stream_data[0]['value']['skip_logic'],
             "next"
         )
-        self.assertEquals(field_1.sort_order, 0)
+        self.assertEqual(field_1.sort_order, 0)
 
         field_2 = form.form_fields.all()[1]
 
-        self.assertEquals(
+        self.assertEqual(
             field_2.skip_logic.stream_data[0]['value']['choice'],
             "yes"
         )
-        self.assertEquals(
+        self.assertEqual(
             field_2.skip_logic.stream_data[0]['value']['skip_logic'],
             "next"
         )
-        self.assertEquals(field_2.sort_order, 1)
+        self.assertEqual(field_2.sort_order, 1)
 
         field_3 = form.form_fields.all()[2]
-        self.assertEquals(field_3.sort_order, 2)
+        self.assertEqual(field_3.sort_order, 2)
 
         field_4 = form.form_fields.all()[3]
 
-        self.assertEquals(
+        self.assertEqual(
             field_4.skip_logic.stream_data[0]['value']['choice'],
             "Strongly disagree"
         )
-        self.assertEquals(
+        self.assertEqual(
             field_4.skip_logic.stream_data[0]['value']['skip_logic'],
             "next"
         )
-        self.assertEquals(field_4.sort_order, 3)
+        self.assertEqual(field_4.sort_order, 3)
 
         response = self.client.get(form.url)
 
@@ -364,38 +364,38 @@ class TestPageBreakWithTwoQuestionsInOneStep(TestCase, MoloTestCaseMixin):
             },
         ])
 
-        self.assertEquals(1, MoloFormPage.objects.count())
+        self.assertEqual(1, MoloFormPage.objects.count())
 
         form = MoloFormPage.objects.last()
 
-        self.assertEquals(3, form.form_fields.count())
+        self.assertEqual(3, form.form_fields.count())
 
         field_1 = form.form_fields.all()[0]
 
-        self.assertEquals(
+        self.assertEqual(
             field_1.skip_logic.stream_data[0]['value']['choice'],
             "agree"
         )
-        self.assertEquals(
+        self.assertEqual(
             field_1.skip_logic.stream_data[0]['value']['skip_logic'],
             "next"
         )
-        self.assertEquals(field_1.sort_order, 0)
+        self.assertEqual(field_1.sort_order, 0)
 
         field_2 = form.form_fields.all()[1]
 
-        self.assertEquals(
+        self.assertEqual(
             field_2.skip_logic.stream_data[0]['value']['choice'],
             "yes"
         )
-        self.assertEquals(
+        self.assertEqual(
             field_2.skip_logic.stream_data[0]['value']['skip_logic'],
             "next"
         )
-        self.assertEquals(field_2.sort_order, 1)
+        self.assertEqual(field_2.sort_order, 1)
 
         field_3 = form.form_fields.all()[2]
-        self.assertEquals(field_3.sort_order, 2)
+        self.assertEqual(field_3.sort_order, 2)
 
         response = self.client.get(form.url)
 

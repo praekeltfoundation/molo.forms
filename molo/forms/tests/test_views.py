@@ -434,8 +434,8 @@ class TestFormViews(TestCase, MoloTestCaseMixin):
         request.context = {'page': molo_form_page}
         request.site = self.main.get_site()
         response = molo_form_page.serve_questions(request)
-        self.assertEquals(response.status_code, 302)
-        self.assertEquals(response['location'], translated_form.url)
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response['location'], translated_form.url)
 
     def test_changing_languages_when_no_translation_stays_on_form(self):
         setting = SiteSettings.objects.create(site=self.main.get_site())
@@ -456,7 +456,7 @@ class TestFormViews(TestCase, MoloTestCaseMixin):
         request.session = {}
         request.user = self.user
         response = molo_form_page.serve_questions(request)
-        self.assertEquals(response.status_code, 200)
+        self.assertEqual(response.status_code, 200)
         self.assertContains(response, 'Test Form')
 
     def test_can_see_translated_form_submissions_in_admin(self):
@@ -504,7 +504,7 @@ class TestFormViews(TestCase, MoloTestCaseMixin):
 
     def test_no_duplicate_indexes(self):
         self.assertTrue(FormsIndexPage.objects.child_of(self.main2).exists())
-        self.assertEquals(
+        self.assertEqual(
             FormsIndexPage.objects.child_of(self.main2).count(), 1)
         self.client.post(reverse(
             'wagtailadmin_pages:copy',
@@ -515,7 +515,7 @@ class TestFormViews(TestCase, MoloTestCaseMixin):
                 'new_parent_page': self.main2,
                 'copy_subpages': 'true',
                 'publish_copies': 'true'})
-        self.assertEquals(
+        self.assertEqual(
             FormsIndexPage.objects.child_of(self.main2).count(), 1)
 
     def test_translated_form(self):
@@ -630,7 +630,7 @@ class TestFormViews(TestCase, MoloTestCaseMixin):
                 parent=self.forms_index,
                 display_form_directly=True)
         response = self.client.get('/')
-        self.assertEquals(response.status_code, 200)
+        self.assertEqual(response.status_code, 200)
         self.assertContains(response, 'Please log in to take this form')
         self.assertNotContains(response, molo_form_field.label)
 
@@ -642,7 +642,7 @@ class TestFormViews(TestCase, MoloTestCaseMixin):
 
         self.user = self.login()
         response = self.client.get('/')
-        self.assertEquals(response.status_code, 200)
+        self.assertEqual(response.status_code, 200)
         self.assertNotContains(response, 'Please log in to take this form')
         self.assertContains(response, molo_form_field.label)
 
@@ -723,7 +723,7 @@ class TestDeleteButtonRemoved(TestCase, MoloTestCaseMixin):
         main_page = Main.objects.first()
         response = self.client.get('/admin/pages/{0}/'
                                    .format(str(main_page.pk)))
-        self.assertEquals(response.status_code, 200)
+        self.assertEqual(response.status_code, 200)
 
         forms_index_page_title = (
             FormsIndexPage.objects.first().title)
@@ -741,7 +741,7 @@ class TestDeleteButtonRemoved(TestCase, MoloTestCaseMixin):
 
         response = self.client.get('/admin/pages/{0}/'
                                    .format(str(forms_index_page.pk)))
-        self.assertEquals(response.status_code, 200)
+        self.assertEqual(response.status_code, 200)
 
         delete_link = ('<a href="/admin/pages/{0}/delete/" '
                        'title="Delete this page" class="u-link '
@@ -754,7 +754,7 @@ class TestDeleteButtonRemoved(TestCase, MoloTestCaseMixin):
 
         response = self.client.get('/admin/pages/{0}/edit/'
                                    .format(str(forms_index_page.pk)))
-        self.assertEquals(response.status_code, 200)
+        self.assertEqual(response.status_code, 200)
 
         delete_button = ('<li><a href="/admin/pages/{0}/delete/" '
                          'class="shortcut">Delete</a></li>'

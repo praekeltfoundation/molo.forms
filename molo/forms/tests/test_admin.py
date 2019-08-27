@@ -342,12 +342,12 @@ class TestFormAdminViews(TestCase, MoloTestCaseMixin):
         response = self.client.get(
             '/forms/submissions/%s/article/%s/' % (
                 molo_form_page.id, submission.pk))
-        self.assertEquals(response.status_code, 302)
+        self.assertEqual(response.status_code, 302)
         article = ArticlePage.objects.last()
         submission = SubmissionClass.objects.filter(
             page=molo_form_page).first()
-        self.assertEquals(article.title, article.slug)
-        self.assertEquals(submission.article_page, article)
+        self.assertEqual(article.title, article.slug)
+        self.assertEqual(submission.article_page, article)
 
         self.assertEqual(
             sorted([
@@ -364,7 +364,7 @@ class TestFormAdminViews(TestCase, MoloTestCaseMixin):
         )
 
         # first time it goes to the move page
-        self.assertEquals(
+        self.assertEqual(
             response['Location'],
             '/admin/pages/%d/move/' % article.id)
 
@@ -372,8 +372,8 @@ class TestFormAdminViews(TestCase, MoloTestCaseMixin):
         response = self.client.get(
             '/forms/submissions/%s/article/%s/' % (
                 molo_form_page.id, submission.pk))
-        self.assertEquals(response.status_code, 302)
-        self.assertEquals(
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(
             response['Location'],
             '/admin/pages/%d/edit/' % article.id)
         response = self.client.get(
@@ -397,7 +397,7 @@ class TestFormAdminViews(TestCase, MoloTestCaseMixin):
             '/admin/forms/submissions/%s/' % (molo_form_page.id),
             {'action': 'CSV'},
         )
-        self.assertEquals(response.status_code, 200)
+        self.assertEqual(response.status_code, 200)
         self.assertContains(response, 'Username')
         self.assertContains(response, 'Submission Date')
         self.assertNotContains(response, molo_form_field.label)
@@ -424,7 +424,7 @@ class TestFormAdminViews(TestCase, MoloTestCaseMixin):
             {'action': 'CSV'},
         )
 
-        self.assertEquals(response.status_code, 200)
+        self.assertEqual(response.status_code, 200)
         self.assertContains(response, 'Username')
         self.assertContains(response, 'Submission Date')
         self.assertNotContains(response, molo_form_field.label)
@@ -477,3 +477,57 @@ class TestFormAdminViews(TestCase, MoloTestCaseMixin):
 
         self.assertNotContains(response, rule.field_name)
         self.assertContains(response, molo_form_field.label)
+
+    def test_form_edit_view_invalid_formfields(self):
+        self.client.force_login(self.super_user)
+        child_of_index_page = create_molo_form_page(
+            self.forms_index,
+            title="Child of FormsIndexPage Form",
+            slug="child-of-formsindexpage-form"
+        )
+        form_field = MoloFormField.objects.create(
+            page=child_of_index_page, field_type='radio', choices='a,b,c')
+        response = self.client.get(
+            '/admin/pages/%d/edit/' % child_of_index_page.pk)
+        self.assertEqual(response.status_code, 200)
+        form = response.context['form']
+        data = form.initial
+        data.update(
+            form.formsets['form_fields'].management_form.initial)
+        data.update({u'description-count': 0})
+        data.update({
+            'form_fields-0-admin_label': '',
+            'form_fields-0-label': '',
+            'form_fields-0-default_value': '',
+            'form_fields-0-field_type': form_field.field_type,
+            'form_fields-0-help_text': '',
+            'form_fields-0-id': form_field.pk,
+            'go_live_at': '',
+            'expire_at': '',
+            'image': '',
+            'form_fields-0-ORDER': 1,
+            'form_fields-0-required': 'on',
+            'form_fields-0-skip_logic-0-deleted': '',
+            'form_fields-0-skip_logic-0-id': 'None',
+            'form_fields-0-skip_logic-0-order': 0,
+            'form_fields-0-skip_logic-0-type': 'skip_logic',
+            'form_fields-0-skip_logic-0-value-choice': 'a',
+            'form_fields-0-skip_logic-0-value-question_0': 'a',
+            'form_fields-0-skip_logic-0-value-skip_logic': 'next',
+            'form_fields-0-skip_logic-0-value-form': '',
+            'form_fields-0-skip_logic-count': 1,
+            'form_fields-INITIAL_FORMS': 1,
+            'form_fields-MAX_NUM_FORMS': 1000,
+            'form_fields-MIN_NUM_FORMS': 0,
+            'form_fields-TOTAL_FORMS': 1,
+            'terms_and_conditions-INITIAL_FORMS': 0,
+            'terms_and_conditions-MAX_NUM_FORMS': 1000,
+            'terms_and_conditions-MIN_NUM_FORMS': 0,
+            'terms_and_conditions-TOTAL_FORMS': 0,
+        })
+        response = self.client.post(
+            '/admin/pages/%d/edit/' % child_of_index_page.pk, data=data)
+        self.assertEqual(
+            response.context['message'],
+            u"The page could not be saved due to validation errors"
+        )

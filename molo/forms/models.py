@@ -132,7 +132,6 @@ class MoloFormPage(
     introduction = TextField(blank=True)
     homepage_introduction = TextField(blank=True)
     image = models.ForeignKey(
-
         'wagtailimages.Image',
         null=True,
         blank=True,
@@ -192,6 +191,11 @@ class MoloFormPage(
         default=False,
         verbose_name='Is YourWords Competition',
         help_text='This will display the correct template for yourwords'
+    )
+    contact_form = BooleanField(
+        default=False,
+        verbose_name='Is Contact Form',
+        help_text='This will display the correct template for contact forms'
     )
     extra_style_hints = models.TextField(
         default='',
@@ -464,6 +468,14 @@ class MoloFormPage(
 
             raise ValidationError({
                 'multi_step': error, 'display_form_directly': error})
+
+        if all([self.your_words_competition, self.contact_form]):
+            error = _(
+                '"{}" and "{}" can not be both selected at the same time'
+                .format('Is YourWords Competition', 'Is contact form'))
+
+            raise ValidationError({
+                'your_words_competition': error, 'contact_form': error})
 
 
 class MoloFormPageView(models.Model):
