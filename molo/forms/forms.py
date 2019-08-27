@@ -251,21 +251,22 @@ class BaseMoloForm(WagtailAdminPageForm):
         cleaned_data = super(BaseMoloForm, self).clean()
 
         question_data = {}
-        for form in self.formsets[self.form_field_name]:
+        for form in self.formsets.get(self.form_field_name):
             form.is_valid()
-            question_data[form.cleaned_data['ORDER']] = form
+            question_data[form.cleaned_data.get('ORDER')] = form
 
         field_names = []
         for form in question_data.values():
             data = form.cleaned_data
-            field_name = str(slugify(six.text_type(unidecode(data['label']))))
-            if field_name in field_names:
-                if 'label' not in form._errors:
-                    form._errors['label'] = []
-                form._errors['label'].append(_(
-                    "This question appears elsewhere in the form. Please "
-                    "rephrase one of the questions."))
-            field_names.append(field_name)
+            if data and data.get('label'):
+                field_name = str(slugify(six.text_type(unidecode(data.get('label')))))
+                if field_name in field_names:
+                    if 'label' not in form._errors:
+                        form._errors['label'] = []
+                    form._errors['label'].append(_(
+                        "This question appears elsewhere in the form. Please "
+                        "rephrase one of the questions."))
+                field_names.append(field_name)
 
         for form in question_data.values():
             self._clean_errors = {}
@@ -280,7 +281,7 @@ class BaseMoloForm(WagtailAdminPageForm):
                         )
                 elif data['field_type'] in VALID_SKIP_LOGIC:
                     choices_length = 0
-                    for i, logic in enumerate(data['skip_logic']):
+                    for i, logic in enumerate(data.get('skip_logic')):
                         if not logic.value['choice']:
                             self.add_stream_field_error(
                                 i,
@@ -300,12 +301,12 @@ class BaseMoloForm(WagtailAdminPageForm):
                                 max_limit=CHARACTER_COUNT_CHOICE_LIMIT),
                         )
 
-                for i, logic in enumerate(data['skip_logic']):
+                for i, logic in enumerate(data.get('skip_logic')):
                     if logic.value['skip_logic'] == SkipState.FORM:
-                        form = logic.value['form']
+                        form = logic.value.get('form')
                         self.clean_form(i, form)
                     if logic.value['skip_logic'] == SkipState.QUESTION:
-                        target = question_data.get(logic.value['question'])
+                        target = question_data.get(logic.value.get('question'))
                         target_data = target.cleaned_data
                         self.clean_question(i, data, target_data)
                 if self.clean_errors:
@@ -349,7 +350,7 @@ class BaseMoloForm(WagtailAdminPageForm):
     def form_cant_have_skip_errors(self, form):
         return (
             form.has_error('skip_logic') and
-            form.cleaned_data['field_type'] not in VALID_SKIP_LOGIC
+            form.cleaned_data.get('field_type') not in VALID_SKIP_LOGIC
         )
 
     def check_doesnt_loop_to_self(self, form):
