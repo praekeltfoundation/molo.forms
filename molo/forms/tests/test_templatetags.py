@@ -60,7 +60,7 @@ class LoadUserChoicePollForm(TestCase, MoloTestCaseMixin):
                 'agree',
             'ajax': 'True'
         })
-        self.assertEquals(MoloFormSubmission.objects.count(), 1)
+        self.assertEqual(MoloFormSubmission.objects.count(), 1)
         self.assertTrue(load_user_choice_poll_form(
             {'request': self.request},
             form, 'i-feel-i-can-be-myself-around-other-people',
@@ -74,7 +74,7 @@ class LoadUserChoicePollForm(TestCase, MoloTestCaseMixin):
                 'disagree',
             'ajax': 'True'
         })
-        self.assertEquals(MoloFormSubmission.objects.count(), 1)
+        self.assertEqual(MoloFormSubmission.objects.count(), 1)
         self.assertFalse(load_user_choice_poll_form(
             {'request': self.request},
             form, 'i-feel-i-can-be-myself-around-other-people',

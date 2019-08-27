@@ -47,7 +47,7 @@ class TestSites(TestCase, MoloTestCaseMixin):
 
     def test_two_sites_point_to_one_root_page(self):
         # assert that there is only one site rooted at main
-        self.assertEquals(self.main.sites_rooted_here.count(), 1)
+        self.assertEqual(self.main.sites_rooted_here.count(), 1)
         client_1 = Client()
         # add a site that points to the same root page
         site_2 = Site.objects.create(
@@ -62,7 +62,7 @@ class TestSites(TestCase, MoloTestCaseMixin):
         client_2 = Client(HTTP_HOST=site_2.hostname)
 
         # assert that there are now two sites rooted at main
-        self.assertEquals(self.main.sites_rooted_here.count(), 2)
+        self.assertEqual(self.main.sites_rooted_here.count(), 2)
 
         # create molo form page
         molo_form_page, molo_form_field = \
@@ -72,7 +72,7 @@ class TestSites(TestCase, MoloTestCaseMixin):
 
         # assert that both sites render the form
         response = client_1.get('/molo-forms-main-1/test-form/')
-        self.assertEquals(response.status_code, 200)
+        self.assertEqual(response.status_code, 200)
         response = client_2.get(
             site_2.root_url + '/molo-forms-main-1/test-form/')
-        self.assertEquals(response.status_code, 200)
+        self.assertEqual(response.status_code, 200)
