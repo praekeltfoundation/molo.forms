@@ -259,7 +259,9 @@ class BaseMoloForm(WagtailAdminPageForm):
         for form in question_data.values():
             data = form.cleaned_data
             if data and data.get('label'):
-                field_name = str(slugify(six.text_type(unidecode(data.get('label')))))
+                field_name = str(
+                    slugify(six.text_type(unidecode(data.get('label'))))
+                )
                 if field_name in field_names:
                     if 'label' not in form._errors:
                         form._errors['label'] = []
