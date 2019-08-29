@@ -191,7 +191,7 @@ class FormListTest(TestCase, MoloTestCaseMixin):
                 title="test title",
                 slug="test_tittle",
                 contact_form=True,
-        ))
+            ))
         self.yourwords_molo_form_page, yourwords_molo_form_field = (
             self.create_molo_form_page(
                 parent=self.forms_index,
