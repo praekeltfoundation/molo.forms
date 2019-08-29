@@ -17,7 +17,9 @@ def get_form_list(
         only_linked_forms=False,
         only_direct_forms=False,
         only_yourwords=False,
-        personalisable_form=False):
+        personalisable_form=False,
+        contact_form=False,
+):
     if only_linked_forms and only_direct_forms:
         raise ValueError('arguments "only_linked_forms" and '
                          '"only_direct_forms" cannot both be True')
@@ -48,6 +50,11 @@ def get_form_list(
             forms = (PersonalisableForm.objects.child_of(page).filter(
                 language__is_main_language=True).exact_type(
                     PersonalisableForm).specific())
+        elif contact_form:
+            forms = (MoloFormPage.objects.child_of(page).filter(
+                language__is_main_language=True,
+                contact_form=True).exact_type(
+                MoloFormPage).specific())
         else:
             forms = (MoloFormPage.objects.child_of(page).filter(
                 language__is_main_language=True).exact_type(
@@ -90,13 +97,16 @@ def forms_list_headline(context):
 def forms_list(
         context, pk=None, only_linked_forms=False,
         only_direct_forms=False, only_yourwords=False,
-        personalisable_form=False):
+        personalisable_form=False, contact_form=False):
+
     context = get_form_list(
         context,
         only_linked_forms=only_linked_forms,
         only_direct_forms=only_direct_forms,
         only_yourwords=only_yourwords,
-        personalisable_form=personalisable_form)
+        personalisable_form=personalisable_form,
+        contact_form=contact_form,
+    )
     return add_form_objects_to_forms(context)
 
 
