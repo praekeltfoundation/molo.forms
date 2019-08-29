@@ -34,6 +34,7 @@ def get_form_list(
             forms = (MoloFormPage.objects.child_of(page).filter(
                 language__is_main_language=True,
                 display_form_directly=False,
+                contact_form=False,
                 your_words_competition=False).exact_type(
                     MoloFormPage).specific())
         elif only_direct_forms:
