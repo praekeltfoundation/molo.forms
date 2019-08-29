@@ -7,9 +7,9 @@ from django.db import migrations
 def create_forms_index(apps, schema_editor):
     from molo.core.models import Main
     from molo.forms.models import FormsIndexPage
-    main = Main.objects.all().first()
+    mains = Main.objects.all()
 
-    if main:
+    for main in mains:
         forms_index = FormsIndexPage(title='Molo Forms', slug='molo-forms')
         main.add_child(instance=forms_index)
         forms_index.save_revision().publish()
