@@ -185,6 +185,13 @@ class FormListTest(TestCase, MoloTestCaseMixin):
                 slug="linked_form_title",
                 display_form_directly=False,
             ))
+        self.contact_form_page, linked_molo_form_field = (
+            self.create_molo_form_page(
+                parent=self.forms_index,
+                title="test title",
+                slug="test_tittle",
+                contact_form=True,
+            ))
         self.yourwords_molo_form_page, yourwords_molo_form_field = (
             self.create_molo_form_page(
                 parent=self.forms_index,
@@ -216,7 +223,7 @@ class FormListTest(TestCase, MoloTestCaseMixin):
             'request': self.request,
         })
         context = get_form_list(context)
-        self.assertEqual(len(context['forms']), 3)
+        self.assertEqual(len(context['forms']), 4)
         self.assertTrue(self.direct_molo_form_page in context['forms'])
         self.assertTrue(self.linked_molo_form_page in context['forms'])
 
@@ -225,7 +232,7 @@ class FormListTest(TestCase, MoloTestCaseMixin):
             'request': self.request,
         })
         context = get_form_list(context)
-        self.assertEqual(len(context['forms']), 3)
+        self.assertEqual(len(context['forms']), 4)
         self.assertTrue(self.translated_direct_form in context['forms'])
         self.assertTrue(self.translated_linked_form in context['forms'])
         self.assertTrue(self.yourwords_molo_form_page in context['forms'])
@@ -258,6 +265,17 @@ class FormListTest(TestCase, MoloTestCaseMixin):
         self.assertEqual(len(context['forms']), 1)
         self.assertTrue(self.yourwords_molo_form_page in context['forms'])
         self.assertTrue(self.linked_molo_form_page not in context['forms'])
+
+    def test_get_form_list_only_contact_forms(self):
+        context = Context({
+            'locale_code': 'en',
+            'request': self.request,
+        })
+        context = get_form_list(context, contact_form=True)
+        self.assertEqual(len(context['forms']), 1)
+        self.assertTrue(self.contact_form_page in context['forms'])
+        self.assertTrue(self.linked_molo_form_page not in context['forms'])
+        self.assertTrue(self.yourwords_molo_form_page not in context['forms'])
 
     def test_get_form_list_only_linked(self):
         context = Context({
