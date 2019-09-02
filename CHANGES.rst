@@ -1,5 +1,6 @@
 CHANGE LOG
 ==========
 
-8.0.0
+9.0.0
 -----
+Initial release
