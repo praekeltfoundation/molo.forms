@@ -27,6 +27,7 @@ script:
   - cp molo/forms/test_templates/base.html testapp/testapp/templates/base.html
   - flake8 testapp
   - pip install -e testapp
+  - ./testapp/manage.py collectstatic
   - py.test --cov=molo.forms --cov-report=term
 
 after_success:

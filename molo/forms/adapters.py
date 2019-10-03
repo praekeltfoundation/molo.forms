@@ -200,7 +200,7 @@ class PersistentFormsSegmentsAdapter(FormsSegmentsAdapter):
             MoloFormPageView = apps.get_model('forms.MoloFormPageView')
             user = self.request.user
 
-            if user.is_authenticated():
+            if user.is_authenticated:
                 pageview = MoloFormPageView.objects.create(
                     user=user,
                     page=page.specific,
@@ -217,7 +217,7 @@ class PersistentFormsSegmentsAdapter(FormsSegmentsAdapter):
 
         user = self.request.user
 
-        if user.is_anonymous():
+        if user.is_anonymous:
             return 0
 
         MoloFormPageView = apps.get_model('forms.MoloFormPageView')
@@ -246,7 +246,7 @@ class PersistentFormsSegmentsAdapter(FormsSegmentsAdapter):
 
         user = self.request.user
 
-        if user.is_anonymous():
+        if user.is_anonymous:
             return 0
 
         if page is None:

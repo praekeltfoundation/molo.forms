@@ -1,7 +1,7 @@
 import json
 from bs4 import BeautifulSoup
 from django.contrib.auth import get_user_model
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.test import TestCase, RequestFactory
 from django.test.client import Client
 from django.utils.text import slugify
