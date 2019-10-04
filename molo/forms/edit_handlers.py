@@ -5,8 +5,8 @@ from molo.core.models import ArticlePageTags
 
 
 class TagPanel(FieldPanel):
-    def on_instance_bound(self):
-        super().on_instance_bound()
+    def on_form_bound(self):
+        super().on_form_bound()
         target_model = self.bound_field.field.queryset.model
 
         data = ArticlePageTags.objects.values('tag').annotate(
