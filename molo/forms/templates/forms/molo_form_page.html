@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+
+{% load i18n %}
+{% load wagtailcore_tags %}
+
+{% block content %}
+<div class="forms forms{{page.get_parent_section.get_effective_extra_style_hints}}">
+  <h1 class="forms__title">{{ page.title }}</h1>
+  <h4 class="forms__intro">{{ page.introduction }}</h4>
+  {% if page.terms_and_conditions.exists and page.terms_and_conditions.first.terms_and_conditions.live %}
+    <a href="{% pageurl page.terms_and_conditions.first.terms_and_conditions %}">{{page.terms_and_conditions.first.terms_and_conditions.title}}</a>
+  {% endif %}
+  {% if user.is_authenticated and user.is_active or request.is_preview or self.allow_anonymous_submissions %}
+    {% if form %}
+      <form class="forms__form" action="{% pageurl self %}{% if self.multi_step or self.has_page_breaks %}?p={{ fields_step.number|add:"1" }}{% endif %}" method="post">
+        {% csrf_token %}
+        {{ form.media }}
+        {% for field in form %}
+          {% if fields_step %}
+            <h4 class="forms__question-title">
+              Question {{ fields_step.paginator.answered|length|add:forloop.counter }}
+            </h4>
+          {% else %}
+            <h4 class="forms__question-title">
+              Question {{ forloop.counter }}
+            </h4>
+          {% endif %}
+          <fieldset>
+              <div class="input-group">
+                <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                <span class="forms__helptext">{{ field.help_text }}</span>
+                {{ field }}
+                {% if field.errors %}
+                  <ul class="error error--forms">
+                  {% for error in field.errors %}
+                    <li>{{ error }}</li>
+                  {% endfor %}
+                  </ul>
+                {% endif %}
+              </div>
+          </fieldset>
+        {% endfor %}
+        {% trans "Submit Form" as text %}
+        <input type="submit" value="{% if is_intermediate_step %}{% trans 'Next Question' %}{% else %}{{self.submit_text|default:text }}{% endif %}" />
+
+      </form>
+    {% else %}
+      <p class="error error--forms">{% trans 'You have already completed this form.' %}</p>
+      <div class="call-to-action call-to-action--forms">
+        <a href="{{request.site.root_page.url}}" class="call-to-action__nav-item call-to-action__nav-item--back-home">
+        {% trans "Back to Home page" %}</a>
+      </div>
+    {% endif %}
+  {% else %}
+    <div class="call-to-action call-to-action--forms">
+      <a href="{% url 'molo.profiles:auth_login' %}?next={{request.path}}" class="call-to-action__nav-item call-to-action__nav-item--forms">{% trans 'Please log in to take this form' %}</a>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

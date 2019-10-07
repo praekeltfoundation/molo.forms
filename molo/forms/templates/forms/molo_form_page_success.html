@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block content %}
+<div class="forms">
+	<h4 class="forms__thank-you">{{ self.thank_you_text }}</h4>
+	<div class="call-to-action call-to-action--forms">
+		<a href="{{request.site.root_page.url}}" class="call-to-action__nav-item call-to-action__nav-item--back-home">
+		{% trans "Back to Home page" %}</a>
+	</div>
+	{% if self.show_results and results %}
+	<h1 class="forms__title">{% trans "Form Results" %}</h1>
+	<h4 class="forms__intro">
+		{% trans "Your form has been completed successfully. Please see your submission results below." %}
+	</h4>
+	<div class="forms__results">
+	{% for question, answers in results.items %}
+		<h3 class="forms__question">{{ question }}</h3>
+		{% for answer, count in answers.items %}
+		  <div class="forms__answer">
+			<span>{{ answer }}</span> {{ count }}{% if self.show_results_as_percentage %}%{% endif %}
+		  </div>
+		{% endfor %}
+	{% endfor %}
+	</div>
+	{% endif %}
+</div>
+{% endblock %}
