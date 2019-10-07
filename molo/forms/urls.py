@@ -1,5 +1,5 @@
 
-from django.conf.urls import url
+from django.urls import re_path
 from molo.forms.views import (
     FormSuccess, ResultsPercentagesJson, submission_article,
     get_segment_user_count
@@ -7,21 +7,21 @@ from molo.forms.views import (
 
 
 urlpatterns = [
-    url(
+    re_path(
         r"^(?P<slug>[\w-]+)/success/$",
         FormSuccess.as_view(),
         name="success"
     ),
-    url(
+    re_path(
         r"^(?P<slug>[\w-]+)/results_json/$",
         ResultsPercentagesJson.as_view(),
         name="results_json"
     ),
-    url(
+    re_path(
         r'^submissions/(\d+)/article/(\d+)/$',
         submission_article, name='article'
     ),
-    url(
+    re_path(
         r"^count/$",
         get_segment_user_count,
         name="segmentusercount"

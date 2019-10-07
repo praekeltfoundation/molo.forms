@@ -188,7 +188,7 @@ class FormSubmissionDataRule(AbstractBaseRule):
     def test_user(self, request, user=None):
         if request:
             # When testing a request they must be logged-in to use this rule
-            if not request.user.is_authenticated():
+            if not request.user.is_authenticated:
                 return False
             user = request.user
 
@@ -307,7 +307,7 @@ class FormResponseRule(AbstractBaseRule):
 
     def test_user(self, request, user=None):
         if request:
-            if not request.user.is_authenticated():
+            if not request.user.is_authenticated:
                 return False
             user = request.user
         if not user:
@@ -353,7 +353,8 @@ class FormGroupMembershipRule(AbstractBaseRule):
     """wagtail-personalisation rule based on user's group membership."""
     static = True
 
-    group = models.ForeignKey('forms.FormsSegmentUserGroup')
+    group = models.ForeignKey(
+        'forms.FormsSegmentUserGroup', on_delete=models.CASCADE)
 
     panels = [
         FieldPanel('group')
@@ -371,7 +372,7 @@ class FormGroupMembershipRule(AbstractBaseRule):
     def test_user(self, request, user=None):
         if request:
             # Ignore not-logged in users when testing requests
-            if not request.user.is_authenticated():
+            if not request.user.is_authenticated:
                 return False
             user = request.user
         if not user:

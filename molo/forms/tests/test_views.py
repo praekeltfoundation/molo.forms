@@ -1,7 +1,7 @@
 import json
 from bs4 import BeautifulSoup
 from django.contrib.auth import get_user_model
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.test import TestCase, RequestFactory
 from django.test.client import Client
 from django.utils.text import slugify
@@ -399,9 +399,9 @@ class TestFormViews(TestCase, MoloTestCaseMixin):
         response = self.client.get('/admin/forms/')
         self.assertContains(
             response,
-            '<h2><a href="/admin/forms/submissions/%s/">'
-            'Test Form</a></h2>' % molo_form_page.pk)
-        user = get_user_model().objects.create_superuser(
+            '<a href="/admin/forms/submissions/%s/">'
+            'Test Form</a>' % molo_form_page.pk)
+        get_user_model().objects.create_superuser(
             username='superuser2',
             email='superuser2@email.com', password='pass2')
         self.client2.login(username='superuser2', password='pass2')
