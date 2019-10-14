@@ -69,12 +69,10 @@ class SkipLogicStreamBlock(blocks.StreamBlock):
     @property
     def media(self):
         media = super(SkipLogicStreamBlock, self).media
-        media.add_js(
-            [static('js/blocks/skiplogic_stream.js')]
-        )
-        media.add_css(
-            {'all': [static('css/blocks/skiplogic.css')]}
-        )
+        css = media._css
+        css.update({'all': [static('css/blocks/skiplogic.css')]})
+        js = media._js + [static('js/blocks/skiplogic_stream.js')]
+        media = forms.Media(css=css, js=js)
         return media
 
     def js_initializer(self):
