@@ -17,29 +17,31 @@ def create_forms_index(apps, schema_editor):
         forms_index.save_revision().publish()
 
         terms_index = FormsTermsAndConditionsIndexPage(
-            title='Terms and Conditions', slug='terms-conditions')
+            title='Terms and Conditions', slug='terms-conditions-indexpage')
         forms_index.add_child(instance=terms_index)
         terms_index.save_revision().publish()
 
         reactionquestion_index = FormsIndexPage(
-            title='Reaction Questions', slug='reaction-questions')
+            title='Reaction Questions', slug='reaction-questions-indexpage')
         forms_index.add_child(instance=reactionquestion_index)
         reactionquestion_index.save_revision().publish()
 
         contactforms_index = FormsIndexPage(
-            title='Contact Forms', slug='contact-forms')
+            title='Contact Forms', slug='contact-forms-indexpage')
         forms_index.add_child(instance=contactforms_index)
         contactforms_index.save_revision().publish()
 
-        yourwords_index = FormsIndexPage(title='Your Words', slug='yourwords')
+        yourwords_index = FormsIndexPage(
+            title='Your Words', slug='yourwords-indexpage')
         forms_index.add_child(instance=yourwords_index)
         yourwords_index.save_revision().publish()
 
-        polls_index = FormsIndexPage(title='Polls', slug='polls')
+        polls_index = FormsIndexPage(title='Polls', slug='polls-indexpage')
         forms_index.add_child(instance=polls_index)
         polls_index.save_revision().publish()
 
-        surveys_index = FormsIndexPage(title='Surveys', slug='surveys')
+        surveys_index = FormsIndexPage(
+            title='Surveys', slug='surveys-indexpage')
         forms_index.add_child(instance=surveys_index)
         surveys_index.save_revision().publish()
 

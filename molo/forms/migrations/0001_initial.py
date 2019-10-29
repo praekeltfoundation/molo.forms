@@ -85,8 +85,6 @@ class Migration(migrations.Migration):
             name='FormsTermsAndConditionsIndexPage',
             fields=[
                 ('page_ptr', models.OneToOneField(auto_created=True, on_delete=django.db.models.deletion.CASCADE, parent_link=True, primary_key=True, serialize=False, to='wagtailcore.Page')),
-                ('language', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to='core.SiteLanguage')),
-                ('translated_pages', models.ManyToManyField(blank=True, related_name='_formstermsandconditionsindexpage_translated_pages_+', to='forms.FormsTermsAndConditionsIndexPage')),
             ],
             options={
                 'abstract': False,
@@ -278,15 +276,5 @@ class Migration(migrations.Migration):
             model_name='formsubmissiondatarule',
             name='form',
             field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='forms.PersonalisableForm', verbose_name='form'),
-        ),
-        migrations.AddField(
-            model_name='formsindexpage',
-            name='language',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to='core.SiteLanguage'),
-        ),
-        migrations.AddField(
-            model_name='formsindexpage',
-            name='translated_pages',
-            field=models.ManyToManyField(blank=True, related_name='_formsindexpage_translated_pages_+', to='forms.FormsIndexPage'),
         ),
     ]

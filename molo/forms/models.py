@@ -68,26 +68,15 @@ ArticlePage.subpage_types += ['forms.MoloFormPage']
 FooterPage.parent_page_types += ['forms.FormsTermsAndConditionsIndexPage']
 
 
-class FormsTermsAndConditionsIndexPage(TranslatablePageMixinNotRoutable, Page):
+class FormsTermsAndConditionsIndexPage(Page):
     parent_page_types = ['forms.FormsIndexPage']
     subpage_types = ['core.Footerpage']
-    language = models.ForeignKey('core.SiteLanguage',
-                                 blank=True,
-                                 null=True,
-                                 on_delete=models.SET_NULL,
-                                 )
-    translated_pages = models.ManyToManyField("self", blank=True)
 
 
-class FormsIndexPage(TranslatablePageMixinNotRoutable,
-                     Page, PreventDeleteMixin):
+class FormsIndexPage(Page, PreventDeleteMixin):
     parent_page_types = ['core.Main']
     subpage_types = [
         'forms.MoloFormPage', 'forms.PersonalisableForm']
-    language = models.ForeignKey(
-        'core.SiteLanguage', blank=True, null=True,
-        on_delete=models.SET_NULL, )
-    translated_pages = models.ManyToManyField("self", blank=True)
 
     def copy(self, *args, **kwargs):
         site = kwargs['to'].get_site()
