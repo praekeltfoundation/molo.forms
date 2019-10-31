@@ -31,33 +31,33 @@ def get_form_list(
     if page:
         forms = []
         if only_linked_forms:
-            forms = (MoloFormPage.objects.child_of(page).filter(
+            forms = (MoloFormPage.objects.descendant_of(page).filter(
                 language__is_main_language=True,
                 display_form_directly=False,
                 contact_form=False,
                 your_words_competition=False).exact_type(
                     MoloFormPage).specific())
         elif only_direct_forms:
-            forms = (MoloFormPage.objects.child_of(page).filter(
+            forms = (MoloFormPage.objects.descendant_of(page).filter(
                 language__is_main_language=True, display_form_directly=True,
                 your_words_competition=False).exact_type(
                     MoloFormPage).specific())
         elif only_yourwords:
-            forms = (MoloFormPage.objects.child_of(page).filter(
+            forms = (MoloFormPage.objects.descendant_of(page).filter(
                 language__is_main_language=True,
                 your_words_competition=True).exact_type(
                     MoloFormPage).specific())
         elif personalisable_form:
-            forms = (PersonalisableForm.objects.child_of(page).filter(
+            forms = (PersonalisableForm.objects.descendant_of(page).filter(
                 language__is_main_language=True).exact_type(
                     PersonalisableForm).specific())
         elif contact_form:
-            forms = (MoloFormPage.objects.child_of(page).filter(
+            forms = (MoloFormPage.objects.descendant_of(page).filter(
                 language__is_main_language=True,
                 contact_form=True).exact_type(
                 MoloFormPage).specific())
         else:
-            forms = (MoloFormPage.objects.child_of(page).filter(
+            forms = (MoloFormPage.objects.descendant_of(page).filter(
                 language__is_main_language=True).exact_type(
                     MoloFormPage).specific())
     else:
@@ -146,7 +146,7 @@ def forms_list_for_pages(context, pk=None, page=None):
     locale_code = context.get('locale_code')
     if page:
         forms = (
-            MoloFormPage.objects.child_of(page).filter(
+            MoloFormPage.objects.descendant_of(page).filter(
                 language__is_main_language=True).specific())
     else:
         forms = MoloFormPage.objects.none()
