@@ -1,5 +1,16 @@
 CHANGE LOG
 ==========
+10.1.0
+------
+Oficial release for Django 2.2.5+ support
+
+10.0.1
+------
+Fix SkipLogicStreamBlock's media block
+
+10.0.0
+------
+Molo Version 10 support
 
 9.1.0
 -----

@@ -25,7 +25,7 @@ class CharacterCountWidget(forms.TextInput):
     class Media:
         js = ('js/widgets/character_count.js',)
 
-    def render(self, name, value, attrs=None):
+    def render(self, name, value, attrs=None, renderer=None):
         max_length = self.attrs['maxlength']
         maximum_text = _('Maximum: {max_length}').format(max_length=max_length)
         return format_html(
@@ -36,7 +36,7 @@ class CharacterCountWidget(forms.TextInput):
 
 
 class MultiLineWidget(forms.Textarea):
-    def render(self, name, value, attrs=None):
+    def render(self, name, value, attrs=None, renderer=None):
         return format_html(
             u'{}<span>{}</span>',
             super(MultiLineWidget, self).render(name, value, attrs),

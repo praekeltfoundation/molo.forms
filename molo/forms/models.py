@@ -5,7 +5,7 @@ from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.core.paginator import EmptyPage, PageNotAnInteger
 from django.core.serializers.json import DjangoJSONEncoder
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.db import models
 from django.db.models import Q
 from django.db.models.fields import BooleanField, TextField
@@ -256,7 +256,7 @@ class MoloFormPage(
         return SectionPage.objects.all().ancestor_of(self).last()
 
     def process_form_submission(self, form):
-        user = form.user if not form.user.is_anonymous() else None
+        user = form.user if not form.user.is_anonymous else None
 
         self.get_submission_class().objects.create(
             form_data=json.dumps(form.cleaned_data, cls=DjangoJSONEncoder),
