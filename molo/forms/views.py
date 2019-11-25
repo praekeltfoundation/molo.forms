@@ -36,6 +36,7 @@ def index(request):
 
     return render(request, 'wagtailforms/index.html', {
         'form_pages': form_pages,
+        'page_obj': form_pages,
     })
 
 
