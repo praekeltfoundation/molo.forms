@@ -1,5 +1,9 @@
 CHANGE LOG
 ==========
+10.1.1
+------
+Fix pagination on forms submission
+
 10.1.0
 ------
 Oficial release for Django 2.2.5+ support
