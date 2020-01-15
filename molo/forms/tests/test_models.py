@@ -55,7 +55,7 @@ class TestFormModels(TestCase, MoloTestCaseMixin):
 
     def test_your_words_competition_flag(self):
         with self.assertRaises(ValidationError) as e:
-            expected_error = '"{}" and "{}" can not be both selected at the same time'\
+            error = '"{}" and "{}" can not be both selected at the same time'\
                 .format('Is YourWords Competition', 'Is contact form')
 
             MoloFormPage.objects.create(
@@ -65,7 +65,7 @@ class TestFormModels(TestCase, MoloTestCaseMixin):
                 contact_form=True,
                 your_words_competition=True,
             )
-            self.assertEqual(e, expected_error)
+            self.assertEqual(e, error)
 
 
 class TestSkipLogicMixin(TestCase, MoloTestCaseMixin):
