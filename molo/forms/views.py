@@ -25,6 +25,8 @@ from wagtail_personalisation.models import Segment
 from wagtail.contrib.forms.utils import get_forms_for_user
 
 from .forms import CSVGroupCreationForm
+from wagtail.api.v2.endpoints import PagesAPIEndpoint
+from .serializers import MoloFormSerializer
 
 
 def index(request):
@@ -231,3 +233,23 @@ def create(request):
     return render(request, 'csv_group_creation/create.html', {
         'form': form
     })
+
+
+class MoloFormsEndpoint(PagesAPIEndpoint):
+    base_serializer_class = MoloFormSerializer
+
+    listing_default_fields = \
+        PagesAPIEndpoint.listing_default_fields + ['homepage_introduction']
+
+    def get_queryset(self):
+        '''
+        This is overwritten in order to only show Forms
+        '''
+        queryset = MoloFormPage.objects.public()
+        request = self.request
+
+        # Filter by site
+        queryset = queryset.descendant_of(
+            request.site.root_page, inclusive=True)
+
+        return queryset
