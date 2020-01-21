@@ -274,8 +274,8 @@ class BaseMoloForm(WagtailAdminPageForm):
             self._clean_errors = {}
             if form.is_valid():
                 data = form.cleaned_data
-                if data['field_type'] in VALID_SKIP_LOGIC \
-                        and not data['field_type'] == 'checkbox':
+                is_checkbox = data['field_type'] == 'checkbox'
+                if data['field_type'] in VALID_SKIP_LOGIC and not is_checkbox:
                     choices_length = 0
                     for i, logic in enumerate(data.get('skip_logic')):
                         if not logic.value['choice']:
@@ -296,6 +296,15 @@ class BaseMoloForm(WagtailAdminPageForm):
                             _(err).format(
                                 max_limit=CHARACTER_COUNT_CHOICE_LIMIT),
                         )
+
+                if is_checkbox and not len(data.get('skip_logic')) == 2:
+                    err = _(
+                        'Checkbox must include only 2 Answer Options.'
+                        ' True and False in that order')
+
+                    form._errors['field_type'] = [err] if not \
+                        form._errors.get('field_type') \
+                        else form._errors['field_type'].append(err)
 
                 for i, logic in enumerate(data.get('skip_logic')):
                     if logic.value['skip_logic'] == SkipState.FORM:
