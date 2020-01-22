@@ -1,5 +1,5 @@
 from django.conf import settings
-from django.conf.urls import include, url
+from django.urls import re_path, include
 from django.utils.html import format_html_join
 
 from wagtail.contrib.modeladmin.options import modeladmin_register
@@ -52,5 +52,5 @@ def create_new_page_relations(request, page, new_page):
 @hooks.register('register_admin_urls')
 def register_admin_urls():
     return [
-        url(r'^forms/', include(admin_urls)),
+        re_path(r'^forms/', include(admin_urls)),
     ]

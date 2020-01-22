@@ -11,7 +11,7 @@ from django.shortcuts import get_object_or_404, redirect
 from wagtail.core.utils import cautious_slugify
 
 from django.contrib.auth.models import Group
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.shortcuts import render
 from django.http import JsonResponse
 from django.utils.translation import ugettext as _
@@ -36,6 +36,7 @@ def index(request):
 
     return render(request, 'wagtailforms/index.html', {
         'form_pages': form_pages,
+        'page_obj': form_pages,
     })
 
 
