@@ -1,5 +1,9 @@
 CHANGE LOG
 ==========
+10.1.2
+------
+Fix skip logic's checkbox issue
+
 10.1.1
 ------
 Fix pagination on forms submission
