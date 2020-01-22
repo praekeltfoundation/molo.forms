@@ -2,9 +2,12 @@
 from django.urls import re_path
 from molo.forms.views import (
     FormSuccess, ResultsPercentagesJson, submission_article,
-    get_segment_user_count
+    get_segment_user_count, MoloFormsEndpoint
 )
+from molo.core.api.urls import api_router
 
+
+api_router.register_endpoint("forms", MoloFormsEndpoint)
 
 urlpatterns = [
     re_path(
