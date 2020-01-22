@@ -198,7 +198,6 @@ class MoloFormPage(
             "and all its descendants"))
     content_panels = forms_models.AbstractForm.content_panels + [
         ImageChooserPanel('image'),
-        FieldPanel('introduction', classname='full'),
         FieldPanel('homepage_introduction', classname='full'),
         FieldPanel('homepage_button_text', classname='full'),
         StreamFieldPanel('description'),
@@ -232,7 +231,7 @@ class MoloFormPage(
             "Meta")
     ]
 
-    api_fields = ["live", "form_fields", "introduction"]
+    api_fields = ["live", "form_fields", "introduction", "image", "thank_you_text"]
 
     def get_effective_extra_style_hints(self):
         return self.extra_style_hints
