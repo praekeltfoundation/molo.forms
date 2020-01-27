@@ -8,7 +8,7 @@ from wagtail.core.models import Page
 
 from django.conf.urls import url
 from django.views.generic import TemplateView, View
-from molo.forms.models import MoloFormPage, FormsIndexPage
+from molo.forms.models import MoloFormPage, FormsIndexPage, PersonalisableForm
 from molo.core.models import ArticlePage
 from django.shortcuts import get_object_or_404, redirect
 
@@ -251,6 +251,9 @@ class MoloFormsEndpoint(PagesAPIEndpoint):
         This is overwritten in order to only show Forms
         '''
         queryset = MoloFormPage.objects.public()
+        # exclude PersonalisableForms and ones that require login
+        queryset = queryset.exclude(
+            id__in=PersonalisableForm.objects.public())
         request = self.request
 
         # Filter by site

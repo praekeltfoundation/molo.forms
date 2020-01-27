@@ -1395,6 +1395,23 @@ class TestAPIEndpointsView(TestCase, MoloTestCaseMixin):
         self.assertEqual(obj["items"][0]["id"], self.molo_form_page.id)
         self.assertEqual(obj["items"][0]["title"], self.molo_form_page.title)
 
+    def test_api_list_endpoint_excludes_personalisable_forms(self):
+        personalisable_form = PersonalisableForm(title='Test Form')
+        FormsIndexPage.objects.first().add_child(
+            instance=personalisable_form
+        )
+        personalisable_form.save_revision()
+        response = self.client.get('/api/v2/forms/')
+
+        obj = response.json()
+        self.assertIn("meta", obj)
+        self.assertEqual(obj["meta"]["total_count"], 2)
+        self.assertEqual(obj["items"][0]["id"], self.molo_form_page.id)
+        self.assertEqual(obj["items"][0]["title"], self.molo_form_page.title)
+        self.assertEqual(obj["items"][1]["id"], self.another_molo_form_page.id)
+        self.assertEqual(obj["items"][1]["title"],
+                         self.another_molo_form_page.title)
+
     def test_api_detail_endpoint(self):
         response = self.client.get(
             '/api/v2/forms/%s/' % self.molo_form_page.id)
