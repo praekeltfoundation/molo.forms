@@ -1,8 +1,12 @@
 from __future__ import unicode_literals
 
 import json
+from rest_framework import status
+from rest_framework.exceptions import ValidationError
+from rest_framework.response import Response
 from wagtail.core.models import Page
 
+from django.conf.urls import url
 from django.views.generic import TemplateView, View
 from molo.forms.models import MoloFormPage, FormsIndexPage
 from molo.core.models import ArticlePage
@@ -22,6 +26,7 @@ from wagtail.admin.utils import permission_required
 from wagtail_personalisation.forms import SegmentAdminForm
 from wagtail_personalisation.models import Segment
 
+from wagtail.contrib.forms.forms import FormBuilder
 from wagtail.contrib.forms.utils import get_forms_for_user
 
 from .forms import CSVGroupCreationForm
@@ -253,3 +258,33 @@ class MoloFormsEndpoint(PagesAPIEndpoint):
             request.site.root_page, inclusive=True)
 
         return queryset
+
+    def submit_form(self, request, pk):
+        # Get the form
+        instance = self.get_object()
+        builder = FormBuilder(instance.form_fields.all())
+
+        # Populate the form with the submitted data
+        form_class = builder.get_form_class()
+        form = form_class(request.data)
+        form.user = request.user
+
+        # Validate and create the submission
+        if form.is_valid():
+            instance.process_form_submission(form)
+            return Response(form.cleaned_data, status=status.HTTP_201_CREATED)
+        else:
+            raise ValidationError(detail=form.errors)
+
+    @classmethod
+    def get_urlpatterns(cls):
+        # Overwritten to also return the submit_form url
+        patterns = super(MoloFormsEndpoint, cls).get_urlpatterns()
+        patterns = patterns + [
+            url(
+                r'^(?P<pk>\d+)/submit_form/$',
+                cls.as_view({'post': 'submit_form'}),
+                name='submit'
+            ),
+        ]
+        return patterns
