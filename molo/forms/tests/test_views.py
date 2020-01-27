@@ -1332,6 +1332,9 @@ class TestAPIEndpointsView(TestCase, MoloTestCaseMixin):
             sort_order=1,
             label='Your favourite actor',
             field_type='dropdown',
+            skip_logic=skip_logic_data(
+                self.choices,
+            ),
             required=True
         )
 
@@ -1430,3 +1433,39 @@ class TestAPIEndpointsView(TestCase, MoloTestCaseMixin):
         self.assertEqual(form_fields[2]["choices"], self.form_field_3.choices)
         self.assertEqual(form_fields[2]["field_type"],
                          self.form_field_3.field_type)
+
+    def test_submit_form_endpoint_creates_a_submission(self):
+        field_1_label = self.form_field_1.label.lower().replace(' ', '-')
+        field_2_label = self.form_field_2.label.lower().replace(' ', '-')
+        field_3_label = self.form_field_3.label.lower().replace(' ', '-')
+
+        data = {field_1_label: "Tom", field_2_label: "cat",
+                field_3_label: "Yellow"}
+        response = self.client.post(
+            '/api/v2/forms/%s/submit_form/' % self.molo_form_page.id,
+            data,
+            format="json",
+            content_type="application/json")
+
+        self.assertEqual(response.status_code, 201)
+        submissions = self.molo_form_page.get_submission_class().objects.all()
+        self.assertEqual(len(submissions), 1)
+        form_data = json.loads(submissions[0].form_data)
+        self.assertEqual(form_data, data)
+
+    def test_submit_form_endpoint_returns_400_for_invalid_data(self):
+        field_1_label = self.form_field_1.label.lower().replace(' ', '-')
+        field_2_label = self.form_field_2.label.lower().replace(' ', '-')
+        field_3_label = self.form_field_3.label.lower().replace(' ', '-')
+
+        data = {field_1_label: "Tom", field_2_label: "cat",
+                field_3_label: "Copper"}
+        response = self.client.post(
+            '/api/v2/forms/%s/submit_form/' % self.molo_form_page.id,
+            data,
+            format="json",
+            content_type="application/json")
+
+        self.assertEqual(response.status_code, 400)
+        submissions = self.molo_form_page.get_submission_class().objects.all()
+        self.assertEqual(len(submissions), 0)
