@@ -1395,6 +1395,18 @@ class TestAPIEndpointsView(TestCase, MoloTestCaseMixin):
         self.assertEqual(obj["items"][0]["id"], self.molo_form_page.id)
         self.assertEqual(obj["items"][0]["title"], self.molo_form_page.title)
 
+    def test_list_endpoint_can_filter_by_allowing_anonymous_submissions(self):
+        self.another_molo_form_page.allow_anonymous_submissions = False
+        self.another_molo_form_page.save()
+        response = self.client.get(
+            '/api/v2/forms/?allow_anonymous_submissions=true')
+
+        obj = response.json()
+        self.assertIn("meta", obj)
+        self.assertEqual(obj["meta"]["total_count"], 1)
+        self.assertEqual(obj["items"][0]["id"], self.molo_form_page.id)
+        self.assertEqual(obj["items"][0]["title"], self.molo_form_page.title)
+
     def test_api_list_endpoint_excludes_personalisable_forms(self):
         personalisable_form = PersonalisableForm(title='Test Form')
         FormsIndexPage.objects.first().add_child(
