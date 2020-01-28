@@ -1499,3 +1499,20 @@ class TestAPIEndpointsView(TestCase, MoloTestCaseMixin):
         self.assertEqual(response.status_code, 400)
         submissions = self.molo_form_page.get_submission_class().objects.all()
         self.assertEqual(len(submissions), 0)
+
+    def test_submit_form_endpoint_returns_400_for_unpublished_form(self):
+        self.molo_form_page.live = False
+        self.molo_form_page.save()
+        data = {self.form_field_1.clean_name: "Tom",
+                self.form_field_2.clean_name: "cat",
+                self.form_field_3.clean_name: "Yellow"}
+
+        response = self.client.post(
+            '/api/v2/forms/%s/submit_form/' % self.molo_form_page.id,
+            data,
+            format="json",
+            content_type="application/json")
+
+        self.assertEqual(response.status_code, 400)
+        submissions = self.molo_form_page.get_submission_class().objects.all()
+        self.assertEqual(len(submissions), 0)
