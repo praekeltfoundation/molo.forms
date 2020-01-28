@@ -30,7 +30,8 @@ class FormFieldSerializer(serializers.Field):
                     "default_value": item.default_value,
                     "help_text": item.help_text, "page_break": item.page_break,
                     "admin_label": item.admin_label, "choices": item.choices,
-                    "field_type": item.field_type})
+                    "field_type": item.field_type,
+                    "input_name": item.clean_name})
             return OrderedDict([
                 ("items", items),
             ])

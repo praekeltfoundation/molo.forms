@@ -8,7 +8,7 @@ from wagtail.core.models import Page
 
 from django.conf.urls import url
 from django.views.generic import TemplateView, View
-from molo.forms.models import MoloFormPage, FormsIndexPage
+from molo.forms.models import MoloFormPage, FormsIndexPage, PersonalisableForm
 from molo.core.models import ArticlePage
 from django.shortcuts import get_object_or_404, redirect
 
@@ -251,6 +251,9 @@ class MoloFormsEndpoint(PagesAPIEndpoint):
         This is overwritten in order to only show Forms
         '''
         queryset = MoloFormPage.objects.public()
+        # exclude PersonalisableForms and ones that require login
+        queryset = queryset.exclude(
+            id__in=PersonalisableForm.objects.public())
         request = self.request
 
         # Filter by site
@@ -262,6 +265,9 @@ class MoloFormsEndpoint(PagesAPIEndpoint):
     def submit_form(self, request, pk):
         # Get the form
         instance = self.get_object()
+        if not instance.live:
+            raise ValidationError(
+                detail=_("Submissions to unpublished forms are not allowed."))
         builder = FormBuilder(instance.form_fields.all())
 
         # Populate the form with the submitted data
