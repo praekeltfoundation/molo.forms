@@ -1442,6 +1442,8 @@ class TestAPIEndpointsView(TestCase, MoloTestCaseMixin):
         self.assertEqual(form_fields[0]["choices"], self.form_field_1.choices)
         self.assertEqual(form_fields[0]["field_type"],
                          self.form_field_1.field_type)
+        self.assertEqual(form_fields[0]["input_name"],
+                         self.form_field_1.clean_name)
 
         self.assertEqual(form_fields[1]["sort_order"],
                          self.form_field_2.sort_order)
@@ -1452,6 +1454,8 @@ class TestAPIEndpointsView(TestCase, MoloTestCaseMixin):
         self.assertEqual(form_fields[1]["choices"], self.form_field_2.choices)
         self.assertEqual(form_fields[1]["field_type"],
                          self.form_field_2.field_type)
+        self.assertEqual(form_fields[1]["input_name"],
+                         self.form_field_2.clean_name)
 
         self.assertEqual(form_fields[2]["sort_order"],
                          self.form_field_3.sort_order)
@@ -1462,14 +1466,13 @@ class TestAPIEndpointsView(TestCase, MoloTestCaseMixin):
         self.assertEqual(form_fields[2]["choices"], self.form_field_3.choices)
         self.assertEqual(form_fields[2]["field_type"],
                          self.form_field_3.field_type)
+        self.assertEqual(form_fields[2]["input_name"],
+                         self.form_field_3.clean_name)
 
     def test_submit_form_endpoint_creates_a_submission(self):
-        field_1_label = self.form_field_1.label.lower().replace(' ', '-')
-        field_2_label = self.form_field_2.label.lower().replace(' ', '-')
-        field_3_label = self.form_field_3.label.lower().replace(' ', '-')
-
-        data = {field_1_label: "Tom", field_2_label: "cat",
-                field_3_label: "Yellow"}
+        data = {self.form_field_1.clean_name: "Tom",
+                self.form_field_2.clean_name: "cat",
+                self.form_field_3.clean_name: "Yellow"}
         response = self.client.post(
             '/api/v2/forms/%s/submit_form/' % self.molo_form_page.id,
             data,
@@ -1483,12 +1486,10 @@ class TestAPIEndpointsView(TestCase, MoloTestCaseMixin):
         self.assertEqual(form_data, data)
 
     def test_submit_form_endpoint_returns_400_for_invalid_data(self):
-        field_1_label = self.form_field_1.label.lower().replace(' ', '-')
-        field_2_label = self.form_field_2.label.lower().replace(' ', '-')
-        field_3_label = self.form_field_3.label.lower().replace(' ', '-')
+        data = {self.form_field_1.clean_name: "Tom",
+                self.form_field_2.clean_name: "cat",
+                self.form_field_3.clean_name: "Copper"}
 
-        data = {field_1_label: "Tom", field_2_label: "cat",
-                field_3_label: "Copper"}
         response = self.client.post(
             '/api/v2/forms/%s/submit_form/' % self.molo_form_page.id,
             data,
