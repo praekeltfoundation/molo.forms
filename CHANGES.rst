@@ -1,5 +1,14 @@
 CHANGE LOG
 ==========
+10.1.5
+------
+Updated the README
+Small changes to API endpoints
+- Remove Personalisable forms from list view
+- Prevent submissions to unpublished forms
+- Enable filtering by allow_anonymous_submission
+- Show input_name attr on form fields in the detail view
+
 10.1.4
 ------
 Add API endpoint that accepts form submissions
