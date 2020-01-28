@@ -267,7 +267,7 @@ class MoloFormsEndpoint(PagesAPIEndpoint):
         instance = self.get_object()
         if not instance.live:
             raise ValidationError(
-                detail="Submissions to unpublished forms are not allowed.")
+                detail=_("Submissions to unpublished forms are not allowed."))
         builder = FormBuilder(instance.form_fields.all())
 
         # Populate the form with the submitted data
