@@ -23,38 +23,37 @@ Testing:
    follow the instructions under the scripts heading
 
 Django setup::
-```
+
    INSTALLED_APPS = (
-      ...
+      # ...
       'molo.forms',
-      ...
+      # ...
 
    )
-```
 
 
 In your urls.py::
-```
-from molo.forms import urls
- ...   
- url(r"^forms/$", include(urls)),
- ...
-```
+
+    from molo.forms import urls
+     ...
+     url(r"^forms/$", include(urls)),
+     ...
+
 
 In your main.html::
-```
+
    {% load molo_forms_tags %}
 
    {% block content %}
       {% forms_list %}
    {% endblock %}
-```
+
 
 In your section page or article page::
-```
+
    {% load molo_forms_tags %}
 
    {% block content %}
     {{% forms_list_for_pages page=self %}
    {% endblock %}
-```
+
