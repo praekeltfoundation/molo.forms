@@ -164,10 +164,13 @@ def forms_list_linked_to_pages(context, article):
     queryset = article.forms.all()\
         .values_list('form', flat=True)
 
-    articles = MoloFormPage.objects\
+    forms = MoloFormPage.objects\
         .filter(pk__in=queryset)
 
-    return get_pages(context, articles, locale_code)
+    context.update({
+        'forms': get_pages(context, forms, locale_code)
+    })
+    return add_form_objects_to_forms(context)
 
 
 @register.filter(name='is_multiple_choice_field')
