@@ -1310,3 +1310,209 @@ class TestPollsViaFormsView(TestCase, MoloTestCaseMixin):
         )
         self.assertContains(response, form.thank_you_text)
         self.assertNotContains(response, 'That page number is less than 1')
+
+
+class TestAPIEndpointsView(TestCase, MoloTestCaseMixin):
+    def setUp(self):
+        self.mk_main()
+        self.main = Main.objects.all().first()
+        self.language_setting = Languages.objects.create(
+            site_id=self.main.get_site().pk)
+        self.english = SiteLanguageRelation.objects.create(
+            language_setting=self.language_setting,
+            locale='en',
+            is_active=True)
+
+        self.molo_form_page = self.new_form('Test Form')
+        self.another_molo_form_page = self.new_form('Another Test Form')
+
+        self.choices = ['Haley', 'Brad', 'Tom', 'Idris']
+        self.form_field_1 = MoloFormField.objects.create(
+            page=self.molo_form_page,
+            sort_order=1,
+            label='Your favourite actor',
+            field_type='dropdown',
+            skip_logic=skip_logic_data(
+                self.choices,
+            ),
+            required=True
+        )
+
+        self.form_field_2 = MoloFormField.objects.create(
+            page=self.molo_form_page,
+            sort_order=2,
+            label='Your favourite animal',
+            field_type='singleline',
+            required=False
+        )
+
+        self.choices = ['Red', 'Blue', 'Green', 'Yellow']
+        self.form_field_3 = (
+            MoloFormField.objects.create(
+                page=self.molo_form_page,
+                sort_order=3,
+                label='Your favourite colour',
+                field_type='radio',
+                skip_logic=skip_logic_data(
+                    self.choices,
+                ),
+                required=True
+            )
+        )
+
+    def new_form(self, name):
+        form = MoloFormPage(
+            title=name, slug=slugify(name),
+            introduction='Introduction to {}...'.format(name),
+            thank_you_text='Thank you for taking the {}'.format(name),
+            submit_text='form submission text for {}'.format(name),
+            allow_anonymous_submissions=True,
+        )
+        self.section_index.add_child(instance=form)
+        form.save_revision().publish()
+        return form
+
+    def test_api_list_endpoint_shows_forms(self):
+        response = self.client.get('/api/v2/forms/')
+
+        obj = response.json()
+        self.assertIn("meta", obj)
+        self.assertEqual(obj["meta"]["total_count"], 2)
+        self.assertEqual(obj["items"][0]["id"], self.molo_form_page.id)
+        self.assertEqual(obj["items"][0]["title"], self.molo_form_page.title)
+        self.assertEqual(obj["items"][1]["id"], self.another_molo_form_page.id)
+        self.assertEqual(obj["items"][1]["title"],
+                         self.another_molo_form_page.title)
+
+    def test_api_list_endpoint_can_filter_by_live(self):
+        self.another_molo_form_page.live = False
+        self.another_molo_form_page.save()
+        response = self.client.get('/api/v2/forms/?live=true')
+
+        obj = response.json()
+        self.assertIn("meta", obj)
+        self.assertEqual(obj["meta"]["total_count"], 1)
+        self.assertEqual(obj["items"][0]["id"], self.molo_form_page.id)
+        self.assertEqual(obj["items"][0]["title"], self.molo_form_page.title)
+
+    def test_list_endpoint_can_filter_by_allowing_anonymous_submissions(self):
+        self.another_molo_form_page.allow_anonymous_submissions = False
+        self.another_molo_form_page.save()
+        response = self.client.get(
+            '/api/v2/forms/?allow_anonymous_submissions=true')
+
+        obj = response.json()
+        self.assertIn("meta", obj)
+        self.assertEqual(obj["meta"]["total_count"], 1)
+        self.assertEqual(obj["items"][0]["id"], self.molo_form_page.id)
+        self.assertEqual(obj["items"][0]["title"], self.molo_form_page.title)
+
+    def test_api_list_endpoint_excludes_personalisable_forms(self):
+        personalisable_form = PersonalisableForm(title='Test Form')
+        FormsIndexPage.objects.first().add_child(
+            instance=personalisable_form
+        )
+        personalisable_form.save_revision()
+        response = self.client.get('/api/v2/forms/')
+
+        obj = response.json()
+        self.assertIn("meta", obj)
+        self.assertEqual(obj["meta"]["total_count"], 2)
+        self.assertEqual(obj["items"][0]["id"], self.molo_form_page.id)
+        self.assertEqual(obj["items"][0]["title"], self.molo_form_page.title)
+        self.assertEqual(obj["items"][1]["id"], self.another_molo_form_page.id)
+        self.assertEqual(obj["items"][1]["title"],
+                         self.another_molo_form_page.title)
+
+    def test_api_detail_endpoint(self):
+        response = self.client.get(
+            '/api/v2/forms/%s/' % self.molo_form_page.id)
+
+        obj = response.json()
+        self.assertEqual(obj["title"], self.molo_form_page.title)
+        self.assertEqual(len(obj["form_fields"]["items"]), 3)
+        form_fields = obj["form_fields"]["items"]
+        # Check fields
+        self.assertEqual(form_fields[0]["sort_order"],
+                         self.form_field_1.sort_order)
+        self.assertEqual(form_fields[0]["label"], self.form_field_1.label)
+        self.assertEqual(form_fields[0]["required"], True)
+        self.assertEqual(form_fields[0]["admin_label"],
+                         self.form_field_1.admin_label)
+        self.assertEqual(form_fields[0]["choices"], self.form_field_1.choices)
+        self.assertEqual(form_fields[0]["field_type"],
+                         self.form_field_1.field_type)
+        self.assertEqual(form_fields[0]["input_name"],
+                         self.form_field_1.clean_name)
+
+        self.assertEqual(form_fields[1]["sort_order"],
+                         self.form_field_2.sort_order)
+        self.assertEqual(form_fields[1]["label"], self.form_field_2.label)
+        self.assertEqual(form_fields[1]["required"], False)
+        self.assertEqual(form_fields[1]["admin_label"],
+                         self.form_field_2.admin_label)
+        self.assertEqual(form_fields[1]["choices"], self.form_field_2.choices)
+        self.assertEqual(form_fields[1]["field_type"],
+                         self.form_field_2.field_type)
+        self.assertEqual(form_fields[1]["input_name"],
+                         self.form_field_2.clean_name)
+
+        self.assertEqual(form_fields[2]["sort_order"],
+                         self.form_field_3.sort_order)
+        self.assertEqual(form_fields[2]["label"], self.form_field_3.label)
+        self.assertEqual(form_fields[2]["required"], True)
+        self.assertEqual(form_fields[2]["admin_label"],
+                         self.form_field_3.admin_label)
+        self.assertEqual(form_fields[2]["choices"], self.form_field_3.choices)
+        self.assertEqual(form_fields[2]["field_type"],
+                         self.form_field_3.field_type)
+        self.assertEqual(form_fields[2]["input_name"],
+                         self.form_field_3.clean_name)
+
+    def test_submit_form_endpoint_creates_a_submission(self):
+        data = {self.form_field_1.clean_name: "Tom",
+                self.form_field_2.clean_name: "cat",
+                self.form_field_3.clean_name: "Yellow"}
+        response = self.client.post(
+            '/api/v2/forms/%s/submit_form/' % self.molo_form_page.id,
+            data,
+            format="json",
+            content_type="application/json")
+
+        self.assertEqual(response.status_code, 201)
+        submissions = self.molo_form_page.get_submission_class().objects.all()
+        self.assertEqual(len(submissions), 1)
+        form_data = json.loads(submissions[0].form_data)
+        self.assertEqual(form_data, data)
+
+    def test_submit_form_endpoint_returns_400_for_invalid_data(self):
+        data = {self.form_field_1.clean_name: "Tom",
+                self.form_field_2.clean_name: "cat",
+                self.form_field_3.clean_name: "Copper"}
+
+        response = self.client.post(
+            '/api/v2/forms/%s/submit_form/' % self.molo_form_page.id,
+            data,
+            format="json",
+            content_type="application/json")
+
+        self.assertEqual(response.status_code, 400)
+        submissions = self.molo_form_page.get_submission_class().objects.all()
+        self.assertEqual(len(submissions), 0)
+
+    def test_submit_form_endpoint_returns_400_for_unpublished_form(self):
+        self.molo_form_page.live = False
+        self.molo_form_page.save()
+        data = {self.form_field_1.clean_name: "Tom",
+                self.form_field_2.clean_name: "cat",
+                self.form_field_3.clean_name: "Yellow"}
+
+        response = self.client.post(
+            '/api/v2/forms/%s/submit_form/' % self.molo_form_page.id,
+            data,
+            format="json",
+            content_type="application/json")
+
+        self.assertEqual(response.status_code, 400)
+        submissions = self.molo_form_page.get_submission_class().objects.all()
+        self.assertEqual(len(submissions), 0)

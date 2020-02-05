@@ -234,6 +234,18 @@ class TestFormAdminViews(TestCase, MoloTestCaseMixin):
             form.errors[0]['field_type'].error_list[0]
         )
 
+        data.update({
+            'form_fields-0-field_type': 'checkbox',
+        })
+        response = self.client.post(
+            '/admin/pages/%d/edit/' % child_of_index_page.pk, data=data)
+        self.assertEqual(response.status_code, 200)
+        form = response.context['form'].formsets['form_fields']
+        self.assertTrue(
+            'Checkbox must include only 2 Answer Options.' in
+            form.errors[0]['field_type'][0]
+        )
+
     def test_form_edit_invalid_with_duplicate_questions(self):
         self.client.force_login(self.super_user)
         child_of_index_page = create_molo_form_page(

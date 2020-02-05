@@ -235,6 +235,9 @@ class MoloFormPage(
             "Meta")
     ]
 
+    api_fields = ["live", "form_fields", "introduction", "image",
+                  "thank_you_text", "allow_anonymous_submissions"]
+
     def get_effective_extra_style_hints(self):
         return self.extra_style_hints
 
