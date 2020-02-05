@@ -7,11 +7,11 @@ from django.contrib.sessions.middleware import SessionMiddleware
 from molo.core.models import Main, Languages, SiteLanguageRelation
 from molo.core.tests.base import MoloTestCaseMixin
 from molo.forms.models import (
-    MoloFormPage, MoloFormField,
+    MoloFormPage, MoloFormField, ArticlePageForms,
     FormsIndexPage, PersonalisableForm, MoloFormSubmission)
 
 from molo.forms.templatetags.molo_forms_tags import (
-    get_form_list, load_user_choice_poll_form)
+    get_form_list, load_user_choice_poll_form, forms_list_linked_to_pages)
 from .base import create_form
 
 
@@ -295,6 +295,18 @@ class FormListTest(TestCase, MoloTestCaseMixin):
         self.assertTrue(
             self.translated_direct_form not in context['forms'])
         self.assertTrue(self.translated_linked_form in context['forms'])
+
+    def test_forms_list_linked_to_pages(self):
+        context = Context({
+            'locale_code': 'en',
+            'request': self.request,
+        })
+        survey = self.direct_molo_form_page
+        article = self.mk_article(self.main)
+        article_page_form = ArticlePageForms(form=survey, page=article)
+        article.forms.add(article_page_form)
+        res = forms_list_linked_to_pages(context, article)
+        self.assertEqual(res['forms'][0]['molo_form_page'], survey)
 
     def test_get_form_list_arg_error(self):
         context = Context({

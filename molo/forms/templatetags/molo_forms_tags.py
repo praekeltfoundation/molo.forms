@@ -167,9 +167,13 @@ def forms_list_linked_to_pages(context, article):
     forms = MoloFormPage.objects\
         .filter(pk__in=queryset)
 
-    context.update({
-        'forms': get_pages(context, forms, locale_code)
-    })
+    if context.get('forms'):
+        forms = context['forms'] \
+                + get_pages(context, forms, locale_code)
+    else:
+        forms = get_pages(context, forms, locale_code)
+
+    context.update({'forms': forms})
     return add_form_objects_to_forms(context)
 
 
