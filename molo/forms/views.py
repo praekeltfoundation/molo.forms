@@ -1,10 +1,14 @@
 from __future__ import unicode_literals
 
 import json
+from rest_framework import status
+from rest_framework.exceptions import ValidationError
+from rest_framework.response import Response
 from wagtail.core.models import Page
 
+from django.conf.urls import url
 from django.views.generic import TemplateView, View
-from molo.forms.models import MoloFormPage, FormsIndexPage
+from molo.forms.models import MoloFormPage, FormsIndexPage, PersonalisableForm
 from molo.core.models import ArticlePage
 from django.shortcuts import get_object_or_404, redirect
 
@@ -22,9 +26,12 @@ from wagtail.admin.utils import permission_required
 from wagtail_personalisation.forms import SegmentAdminForm
 from wagtail_personalisation.models import Segment
 
+from wagtail.contrib.forms.forms import FormBuilder
 from wagtail.contrib.forms.utils import get_forms_for_user
 
 from .forms import CSVGroupCreationForm
+from wagtail.api.v2.endpoints import PagesAPIEndpoint
+from .serializers import MoloFormSerializer
 
 
 def index(request):
@@ -231,3 +238,59 @@ def create(request):
     return render(request, 'csv_group_creation/create.html', {
         'form': form
     })
+
+
+class MoloFormsEndpoint(PagesAPIEndpoint):
+    base_serializer_class = MoloFormSerializer
+
+    listing_default_fields = \
+        PagesAPIEndpoint.listing_default_fields + ['homepage_introduction']
+
+    def get_queryset(self):
+        '''
+        This is overwritten in order to only show Forms
+        '''
+        queryset = MoloFormPage.objects.public()
+        # exclude PersonalisableForms and ones that require login
+        queryset = queryset.exclude(
+            id__in=PersonalisableForm.objects.public())
+        request = self.request
+
+        # Filter by site
+        queryset = queryset.descendant_of(
+            request.site.root_page, inclusive=True)
+
+        return queryset
+
+    def submit_form(self, request, pk):
+        # Get the form
+        instance = self.get_object()
+        if not instance.live:
+            raise ValidationError(
+                detail=_("Submissions to unpublished forms are not allowed."))
+        builder = FormBuilder(instance.form_fields.all())
+
+        # Populate the form with the submitted data
+        form_class = builder.get_form_class()
+        form = form_class(request.data)
+        form.user = request.user
+
+        # Validate and create the submission
+        if form.is_valid():
+            instance.process_form_submission(form)
+            return Response(form.cleaned_data, status=status.HTTP_201_CREATED)
+        else:
+            raise ValidationError(detail=form.errors)
+
+    @classmethod
+    def get_urlpatterns(cls):
+        # Overwritten to also return the submit_form url
+        patterns = super(MoloFormsEndpoint, cls).get_urlpatterns()
+        patterns = patterns + [
+            url(
+                r'^(?P<pk>\d+)/submit_form/$',
+                cls.as_view({'post': 'submit_form'}),
+                name='submit'
+            ),
+        ]
+        return patterns

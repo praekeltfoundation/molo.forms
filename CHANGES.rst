@@ -1,5 +1,26 @@
 CHANGE LOG
 ==========
+10.1.6
+------
+- Add ArticlePageForms model and forms_list_linked_to_pages template tag to link surveys to articles
+
+10.1.5
+------
+Updated the README
+Small changes to API endpoints
+- Remove Personalisable forms from list view
+- Prevent submissions to unpublished forms
+- Enable filtering by allow_anonymous_submission
+- Show input_name attr on form fields in the detail view
+
+10.1.4
+------
+Add API endpoint that accepts form submissions
+
+10.1.3
+------
+Add API endpoint to display forms
+
 10.1.2
 ------
 Fix skip logic's checkbox issue
