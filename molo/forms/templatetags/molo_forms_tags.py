@@ -157,6 +157,19 @@ def forms_list_for_pages(context, pk=None, page=None):
     return add_form_objects_to_forms(context)
 
 
+@register.inclusion_tag('forms/forms_list.html', takes_context=True)
+def forms_list_linked_to_pages(context, article):
+    locale_code = context.get('locale_code')
+
+    queryset = article.forms.all()\
+        .values_list('form', flat=True)
+
+    articles = MoloFormPage.objects\
+        .filter(pk__in=queryset)
+
+    return get_pages(context, articles, locale_code)
+
+
 @register.filter(name='is_multiple_choice_field')
 def is_multiple_choice_field(value):
     return isinstance(value.field, MultipleChoiceField)

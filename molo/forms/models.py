@@ -36,6 +36,7 @@ from wagtail.admin.edit_handlers import (
     StreamFieldPanel,
 )
 from wagtail.core import blocks
+from wagtail.core.query import PageQuerySet
 from wagtail.core.fields import StreamField
 from wagtail.core.models import Orderable, Page
 from wagtail.images.blocks import ImageChooserBlock
