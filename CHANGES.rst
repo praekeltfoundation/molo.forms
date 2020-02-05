@@ -2,6 +2,10 @@ CHANGE LOG
 ==========
 10.1.5
 ------
+- Add ArticlePageForms model and forms_list_linked_to_pages template tag to link surveys to articles
+
+10.1.5
+------
 Updated the README
 Small changes to API endpoints
 - Remove Personalisable forms from list view
