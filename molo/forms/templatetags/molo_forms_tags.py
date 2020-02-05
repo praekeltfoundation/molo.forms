@@ -169,7 +169,7 @@ def forms_list_linked_to_pages(context, article):
 
     if context.get('forms'):
         forms = context['forms'] \
-                + get_pages(context, forms, locale_code)
+            + get_pages(context, forms, locale_code)
     else:
         forms = get_pages(context, forms, locale_code)
 
