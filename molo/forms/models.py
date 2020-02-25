@@ -614,7 +614,7 @@ class MoloFormField(SkipLogicMixin, AdminLabelMixin,
         max_length=16,
         choices=[
             x for x in FORM_FIELD_CHOICES
-            if x[0] not in ['multiselect', 'hidden']
+            if x[0] != 'multiselect'
         ]
     )
     page = ParentalKey(MoloFormPage, related_name='form_fields')
@@ -770,7 +770,7 @@ class PersonalisableFormField(SkipLogicMixin, AdminLabelMixin,
         max_length=16,
         choices=[
             x for x in FORM_FIELD_CHOICES
-            if x[0] not in ['multiselect', 'hidden']
+            if x[0] != 'multiselect'
         ]
     )
     page = ParentalKey(PersonalisableForm, on_delete=models.CASCADE,
