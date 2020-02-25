@@ -612,7 +612,10 @@ class MoloFormField(SkipLogicMixin, AdminLabelMixin,
     field_type = models.CharField(
         verbose_name=_('field type'),
         max_length=16,
-        choices=[x for x in FORM_FIELD_CHOICES if x[0] != 'multiselect']
+        choices=[
+            x for x in FORM_FIELD_CHOICES
+            if x[0] != 'multiselect'
+        ]
     )
     page = ParentalKey(MoloFormPage, related_name='form_fields')
 
@@ -764,7 +767,12 @@ class PersonalisableFormField(SkipLogicMixin, AdminLabelMixin,
     """
     field_type = models.CharField(
         verbose_name=_('field type'),
-        max_length=16, choices=FORM_FIELD_CHOICES)
+        max_length=16,
+        choices=[
+            x for x in FORM_FIELD_CHOICES
+            if x[0] != 'multiselect'
+        ]
+    )
     page = ParentalKey(PersonalisableForm, on_delete=models.CASCADE,
                        related_name='personalisable_form_fields')
     segment = models.ForeignKey(
