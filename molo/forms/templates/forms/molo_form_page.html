@@ -16,29 +16,33 @@
         {% csrf_token %}
         {{ form.media }}
         {% for field in form %}
-          {% if fields_step %}
-            <h4 class="forms__question-title">
-              Question {{ fields_step.paginator.answered|length|add:forloop.counter }}
-            </h4>
+          {% if field.is_hidden %}
+            {{ field.as_hidden }}
           {% else %}
-            <h4 class="forms__question-title">
-              Question {{ forloop.counter }}
-            </h4>
-          {% endif %}
-          <fieldset>
-              <div class="input-group">
-                <label for="{{ field.id_for_label }}">{{ field.label }}</label>
-                <span class="forms__helptext">{{ field.help_text }}</span>
-                {{ field }}
-                {% if field.errors %}
-                  <ul class="error error--forms">
-                  {% for error in field.errors %}
-                    <li>{{ error }}</li>
-                  {% endfor %}
-                  </ul>
-                {% endif %}
-              </div>
-          </fieldset>
+            {% if fields_step %}
+              <h4 class="forms__question-title">
+                Question {{ fields_step.paginator.answered|length|add:forloop.counter }}
+              </h4>
+            {% else %}
+              <h4 class="forms__question-title">
+                Question {{ forloop.counter }}
+              </h4>
+            {% endif %}
+            <fieldset>
+                <div class="input-group">
+                  <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                  <span class="forms__helptext">{{ field.help_text }}</span>
+                  {{ field }}
+                  {% if field.errors %}
+                    <ul class="error error--forms">
+                    {% for error in field.errors %}
+                      <li>{{ error }}</li>
+                    {% endfor %}
+                    </ul>
+                  {% endif %}
+                </div>
+            </fieldset>
+        {% endif %}
         {% endfor %}
         {% trans "Submit Form" as text %}
         <input type="submit" value="{% if is_intermediate_step %}{% trans 'Next Question' %}{% else %}{{self.submit_text|default:text }}{% endif %}" />

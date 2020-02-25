@@ -697,6 +697,23 @@ class TestFormViews(TestCase, MoloTestCaseMixin):
         self.assertNotContains(response,
                                'You have already completed this form.')
 
+    def test_hidden_form_field(self):
+        self.client.force_login(self.user)
+        form = create_molo_form_page(
+            self.forms_index, display_form_directly=True)
+        hidden_field = create_molo_form_formfield(
+            form, 'hidden', 'some hidden field')
+        req = RequestFactory()
+        req.user = self.user
+        req.site = self.site
+        response = self.client.get(form.url, request=req)
+        self.assertNotContains(response, hidden_field.label)
+        self.assertContains(
+            response,
+            '<input type="hidden" name="some-hidden-field" '
+            'id="id_some-hidden-field">'
+        )
+
 
 class TestDeleteButtonRemoved(TestCase, MoloTestCaseMixin):
 
