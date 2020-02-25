@@ -1,5 +1,9 @@
 CHANGE LOG
 ==========
+10.1.7
+------
+- Add support for hidden form fields
+
 10.1.6
 ------
 - Add ArticlePageForms model and forms_list_linked_to_pages template tag to link surveys to articles
