@@ -1,13 +1,20 @@
+from copy import copy
+
 from django import template
+from django.shortcuts import get_object_or_404
 from django.forms.fields import MultipleChoiceField
 
-from copy import copy
 from wagtail.core.models import Page
-from molo.forms.models import (
-    MoloFormPage, FormsIndexPage, PersonalisableForm)
 
+from molo.core.models import ArticlePage
 from molo.core.templatetags.core_tags import get_pages
-from django.shortcuts import get_object_or_404
+
+from molo.forms.models import (
+    MoloFormPage, FormsIndexPage, PersonalisableForm,
+    ReactionQuestion, ReactionQuestionResponse,
+    ReactionQuestionChoice,
+)
+
 
 register = template.Library()
 
@@ -180,3 +187,148 @@ def forms_list_linked_to_pages(context, article):
 @register.filter(name='is_multiple_choice_field')
 def is_multiple_choice_field(value):
     return isinstance(value.field, MultipleChoiceField)
+
+
+@register.simple_tag(takes_context=True)
+def load_choices_for_reaction_question(context, question):
+    if question:
+        question = question.specific.get_main_language_page().specific
+        if question.get_children():
+            choices = ReactionQuestionChoice.objects.child_of(
+                question).filter(language__is_main_language=True)
+            return get_pages(context, choices, context.get('locale_code'))
+    return []
+
+
+@register.simple_tag()
+def load_reaction_choice_submission_count(choice, article, question):
+    if choice and article:
+        choice = choice.specific.get_main_language_page().specific
+        return ReactionQuestionResponse.objects.filter(
+            article=article, choice=choice, question=question).count()
+
+
+# @prometheus_query_count
+@register.simple_tag(takes_context=True)
+def load_user_can_vote_on_reaction_question(context, question, article_pk):
+    if question:
+        question = question.specific.get_main_language_page()
+        article = ArticlePage.objects.get(pk=article_pk)
+
+        if hasattr(article, 'get_main_language_page'):
+            article = article.get_main_language_page()
+
+        return not question.has_user_submitted_reaction_response(
+            context['request'], question.pk, article.pk)
+
+
+# @prometheus_query_count
+@register.simple_tag(takes_context=True)
+def load_user_choice_reaction_question(context, question, article, choice):
+    if question and context['request'].user.is_authenticated:
+        question = question.specific.get_main_language_page()
+        article = ArticlePage.objects.get(pk=article)
+
+        if hasattr(article, 'get_main_language_page'):
+            article = article.get_main_language_page()
+
+        return ReactionQuestionResponse.objects.filter(
+            article=article, choice=choice,
+            question=question, user=context['request'].user
+        ).exists()
+
+
+# @prometheus_query_count
+@register.simple_tag(takes_context=True)
+def load_reaction_question(context, article):
+    question = None
+
+    if article:
+        article_question = article.get_main_language_page() \
+            .reaction_questions.all().first()
+        if hasattr(article_question, 'reaction_question'):
+            question = article_question.reaction_question
+
+        if question and context['request'].site:
+            qs = ReactionQuestion.objects.descendant_of(
+                context['request'].site.root_page).live().filter(
+                    pk=question.pk, language__is_main_language=True)
+        else:
+            return []
+
+        translated_question = get_pages(
+            context, qs, context.get('locale_code'))
+        if translated_question:
+            return get_pages(context, qs, context.get('locale_code'))[0]
+        return question
+
+
+@register.simple_tag(takes_context=True)
+def load_choices_for_reaction_question(context, question):
+    if question:
+        question = question.specific.get_main_language_page().specific
+        if question.get_children():
+            choices = ReactionQuestionChoice.objects.child_of(
+                question).filter(language__is_main_language=True)
+            return get_pages(context, choices, context.get('locale_code'))
+    return []
+
+
+@register.simple_tag()
+def load_reaction_choice_submission_count(choice, article, question):
+    if choice and article:
+        choice = choice.specific.get_main_language_page().specific
+        return ReactionQuestionResponse.objects.filter(
+            article=article, choice=choice, question=question).count()
+
+
+@register.simple_tag(takes_context=True)
+def load_user_can_vote_on_reaction_question(context, question, article_pk):
+    if question:
+        question = question.specific.get_main_language_page()
+        article = ArticlePage.objects.get(pk=article_pk)
+
+        if hasattr(article, 'get_main_language_page'):
+            article = article.get_main_language_page()
+
+        return not question.has_user_submitted_reaction_response(
+            context['request'], question.pk, article.pk)
+
+
+@register.simple_tag(takes_context=True)
+def load_user_choice_reaction_question(context, question, article, choice):
+    if question and context['request'].user.is_authenticated:
+        question = question.specific.get_main_language_page()
+        article = ArticlePage.objects.get(pk=article)
+
+        if hasattr(article, 'get_main_language_page'):
+            article = article.get_main_language_page()
+
+        return ReactionQuestionResponse.objects.filter(
+            article=article, choice=choice,
+            question=question, user=context['request'].user
+        ).exists()
+
+
+@register.simple_tag(takes_context=True)
+def load_reaction_question(context, article):
+    question = None
+
+    if article:
+        article_question = article.get_main_language_page() \
+            .reaction_questions.all().first()
+        if hasattr(article_question, 'reaction_question'):
+            question = article_question.reaction_question
+
+        if question and context['request'].site:
+            qs = ReactionQuestion.objects.descendant_of(
+                context['request'].site.root_page).live().filter(
+                    pk=question.pk, language__is_main_language=True)
+        else:
+            return []
+
+        translated_question = get_pages(
+            context, qs, context.get('locale_code'))
+        if translated_question:
+            return get_pages(context, qs, context.get('locale_code'))[0]
+        return question

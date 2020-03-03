@@ -2,7 +2,8 @@
 from django.urls import re_path
 from molo.forms.views import (
     FormSuccess, ResultsPercentagesJson, submission_article,
-    get_segment_user_count, MoloFormsEndpoint
+    get_segment_user_count, MoloFormsEndpoint,
+    ReactionQuestionChoiceFeedbackView, ReactionQuestionChoiceView
 )
 from molo.core.api.urls import api_router
 
@@ -29,4 +30,17 @@ urlpatterns = [
         get_segment_user_count,
         name="segmentusercount"
     ),
+
+    re_path(
+        r'^reaction/(?P<article_slug>[0-9A-Za-z_\-]+)/'
+        r'(?P<question_id>\d+)/vote/$',
+        ReactionQuestionChoiceView.as_view(),
+        name='reaction-vote'),
+
+    re_path(
+        r'^reaction/(?P<article_slug>[0-9A-Za-z_\-]+)/'
+        r'(?P<question_id>\d+)/(?P<choice_slug>[0-9A-Za-z_\-]+)/feedback/$',
+        ReactionQuestionChoiceFeedbackView.as_view(),
+        name='reaction-feedback'),
+
 ]

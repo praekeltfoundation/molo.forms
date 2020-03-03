@@ -1,37 +1,44 @@
 from __future__ import unicode_literals
 
 import json
-from rest_framework import status
-from rest_framework.exceptions import ValidationError
-from rest_framework.response import Response
-from wagtail.core.models import Page
 
-from django.conf.urls import url
-from django.views.generic import TemplateView, View
-from molo.forms.models import MoloFormPage, FormsIndexPage, PersonalisableForm
-from molo.core.models import ArticlePage
-from django.shortcuts import get_object_or_404, redirect
-
-from wagtail.core.utils import cautious_slugify
-
-from django.contrib.auth.models import Group
+from django.http import Http404
 from django.urls import reverse
+from django.conf.urls import url
 from django.shortcuts import render
 from django.http import JsonResponse
+from django.contrib.auth.models import Group
 from django.utils.translation import ugettext as _
-from wagtail.utils.pagination import paginate
+from django.shortcuts import get_object_or_404, redirect
+from django.views.generic import TemplateView, View, FormView
+
+from rest_framework import status
+from rest_framework.response import Response
+from rest_framework.exceptions import ValidationError
 
 from wagtail.admin import messages
+from wagtail.core.models import Page
+from wagtail.utils.pagination import paginate
+from wagtail.core.utils import cautious_slugify
 from wagtail.admin.utils import permission_required
+
+from wagtail.contrib.forms.forms import FormBuilder
+from wagtail.api.v2.endpoints import PagesAPIEndpoint
+from wagtail.contrib.forms.utils import get_forms_for_user
+
 from wagtail_personalisation.forms import SegmentAdminForm
 from wagtail_personalisation.models import Segment
 
-from wagtail.contrib.forms.forms import FormBuilder
-from wagtail.contrib.forms.utils import get_forms_for_user
+from molo.core.models import ArticlePage
+from molo.core.templatetags.core_tags import get_pages
 
-from .forms import CSVGroupCreationForm
-from wagtail.api.v2.endpoints import PagesAPIEndpoint
 from .serializers import MoloFormSerializer
+from .forms import CSVGroupCreationForm, ReactionQuestionChoiceForm
+from .models import (
+    MoloFormPage, FormsIndexPage, PersonalisableForm,
+    ReactionQuestionResponse, ReactionQuestionChoice,
+    ReactionQuestion,
+)
 
 
 def index(request):
@@ -294,3 +301,97 @@ class MoloFormsEndpoint(PagesAPIEndpoint):
             ),
         ]
         return patterns
+
+
+class ReactionQuestionChoiceFeedbackView(TemplateView):
+    template_name = 'patterns/basics/articles/reaction_question_feedback.html'
+
+    def get_context_data(self, **kwargs):
+        context = super(ReactionQuestionChoiceFeedbackView,
+                        self).get_context_data(**kwargs)
+        locale = self.request.LANGUAGE_CODE
+        choice_slug = self.kwargs.get('choice_slug')
+        context['request'] = self.request
+        main_lang_choice = ReactionQuestionChoice.objects.descendant_of(
+            self.request.site.root_page).filter(
+            slug=choice_slug)
+        choice = get_pages(context, main_lang_choice, locale)
+        if choice:
+            choice = choice[0]
+        else:
+            choice = main_lang_choice
+        context.update({'choice': choice})
+        article_slug = self.kwargs.get('article_slug')
+        article = ArticlePage.objects.descendant_of(
+            self.request.site.root_page).filter(slug=article_slug).first()
+        context.update({'article': article})
+        return context
+
+
+class ReactionQuestionChoiceView(FormView):
+    form_class = ReactionQuestionChoiceForm
+    template_name = 'patterns/basics/articles/reaction_question.html'
+
+    def get_success_url(self, *args, **kwargs):
+        article_slug = self.kwargs.get('article_slug')
+        article = ArticlePage.objects.descendant_of(
+            self.request.site.root_page).filter(slug=article_slug).first()
+        if not article:
+            raise Http404
+        choice_id = self.get_context_data()['form'].data.get('choice')
+        choice = get_object_or_404(ReactionQuestionChoice, pk=choice_id)
+        question_id = self.kwargs.get('question_id')
+        return reverse('molo.forms:reaction-feedback', kwargs={
+            'question_id': question_id, 'article_slug': article.slug,
+            'choice_slug': choice.slug})
+
+    def get_context_data(self, *args, **kwargs):
+        context = super(
+            ReactionQuestionChoiceView, self).get_context_data(*args, **kwargs)
+        question_id = self.kwargs.get('question_id')
+        question = get_object_or_404(ReactionQuestion, pk=question_id)
+        context.update({'question': question})
+        return context
+
+    def form_valid(self, form, *args, **kwargs):
+        question_id = self.kwargs.get('question_id')
+        question = get_object_or_404(ReactionQuestion, pk=question_id)
+        question = question.get_main_language_page().specific
+        choice_pk = form.cleaned_data['choice']
+        choice = get_object_or_404(ReactionQuestionChoice, pk=choice_pk)
+        article_slug = self.kwargs.get('article_slug')
+        # get main language article and store the vote there
+        article = ArticlePage.objects.descendant_of(
+            self.request.site.root_page).filter(slug=article_slug).first()
+        if hasattr(article, 'get_main_language_page'):
+            article = article.get_main_language_page()
+        if not article:
+            raise Http404
+        if not question.has_user_submitted_reaction_response(
+                self.request, question_id, article.pk):
+            created = ReactionQuestionResponse.objects.create(
+                question=question,
+                article=article)
+            if created:
+                created.choice = choice
+                created.save()
+                created.set_response_as_submitted_for_session(
+                    self.request, article)
+            if self.request.user.is_authenticated:
+                created.user = self.request.user
+                created.save()
+
+        else:
+            if 'ajax' in self.request.POST and \
+                    self.request.POST['ajax'] == 'True':
+                response = ReactionQuestionResponse.objects.filter(
+                    article=article.pk, question=question_id,
+                    user=self.request.user).last()
+                response.choice = choice
+                response.save()
+            else:
+                messages.error(
+                    self.request,
+                    "You have already given feedback on this article.")
+        return super(ReactionQuestionChoiceView, self).form_valid(
+            form, *args, **kwargs)

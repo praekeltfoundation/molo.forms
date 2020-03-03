@@ -1,32 +1,23 @@
 import json
 import datetime
 
-from django.conf import settings
-from django.core.exceptions import ValidationError
-from django.core.paginator import EmptyPage, PageNotAnInteger
-from django.core.serializers.json import DjangoJSONEncoder
-from django.urls import reverse
 from django.db import models
 from django.db.models import Q
-from django.db.models.fields import BooleanField, TextField
-from django.dispatch import receiver
 from django.http import Http404
+from django.urls import reverse
+from django.conf import settings
+from django.dispatch import receiver
 from django.shortcuts import redirect, render
+from django.db.models.signals import post_save
+from django.core.exceptions import ValidationError
 from django.utils.functional import cached_property
 from django.utils.translation import ugettext_lazy as _
+from django.core.serializers.json import DjangoJSONEncoder
+from django.db.models.fields import BooleanField, TextField
+from django.core.paginator import EmptyPage, PageNotAnInteger
+
 from modelcluster.fields import ParentalKey
-from molo.core.blocks import MarkDownBlock
-from molo.core.models import (
-    ArticlePage,
-    FooterPage,
-    Main,
-    PreventDeleteMixin,
-    SectionPage,
-    TranslatablePageMixinNotRoutable,
-    index_pages_after_copy,
-    get_translation_for
-)
-from molo.core.utils import generate_slug
+
 from wagtail.admin.edit_handlers import (
     FieldPanel,
     FieldRowPanel,
@@ -43,6 +34,22 @@ from wagtail.images.edit_handlers import ImageChooserPanel
 from wagtail_personalisation.adapters import get_segment_adapter
 from wagtail.contrib.forms import models as forms_models
 from wagtail.contrib.forms.models import AbstractFormField, FORM_FIELD_CHOICES
+
+from molo.core.blocks import MarkDownBlock
+from molo.core.models import (
+    Main,
+    MoloPage,
+    FooterPage,
+    ArticlePage,
+    SectionPage,
+    PreventDeleteMixin,
+    get_translation_for,
+    TranslatablePageMixin,
+    index_pages_after_copy,
+    PageEffectiveImageMixin,
+    TranslatablePageMixinNotRoutable,
+)
+from molo.core.utils import generate_slug
 
 from .blocks import SkipLogicField, SkipState, SkipLogicStreamPanel
 from .forms import (  # noqa
@@ -63,10 +70,13 @@ from .widgets import NaturalDateInput
 SKIP = 'NA (Skipped)'
 
 
-ArticlePage.api_fields += ['forms']
+ArticlePage.api_fields += ['forms', 'reaction_questions']
 SectionPage.subpage_types += ['forms.MoloFormPage']
 ArticlePage.subpage_types += ['forms.MoloFormPage']
-ArticlePage.content_panels += [InlinePanel('forms', label="Surveys")]
+ArticlePage.content_panels += [
+    InlinePanel('forms', label="Surveys"),
+    InlinePanel('reaction_questions', label="Reaction Questions")
+]
 FooterPage.parent_page_types += ['forms.FormsTermsAndConditionsIndexPage']
 
 
@@ -825,3 +835,130 @@ class ArticlePageForms(Orderable):
     )
     panels = [PageChooserPanel('form', 'forms.MoloFormPage')]
     api_fields = ['forms']
+
+
+class ArticlePageReactionQuestions(Orderable):
+    page = ParentalKey(ArticlePage, related_name='reaction_questions')
+    reaction_question = models.ForeignKey(
+        'wagtailcore.Page',
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name='+',
+        help_text=_('Reaction Questions')
+    )
+    panels = [PageChooserPanel('reaction_question', 'forms.ReactionQuestion')]
+    api_fields = ['reaction_question']
+
+
+class ReactionQuestionIndexPage(MoloPage, PreventDeleteMixin):
+    parent_page_types = []
+    subpage_types = ['ReactionQuestion']
+
+    def copy(self, *args, **kwargs):
+        site = kwargs['to'].specific.get_site()
+        main = site.root_page
+        ReactionQuestionIndexPage.objects.child_of(main).delete()
+        super(ReactionQuestionIndexPage, self).copy(*args, **kwargs)
+
+    def get_site(self):
+        try:
+            return self.get_ancestors().filter(
+                depth=2).first().sites_rooted_here.get(
+                    site_name__icontains='main')
+        except Exception:
+            return self.get_ancestors().filter(
+                depth=2).first().sites_rooted_here.all().first() or None
+
+
+class ReactionQuestion(TranslatablePageMixin, MoloPage):
+    parent_page_types = ['forms.ReactionQuestionIndexPage']
+    subpage_types = ['ReactionQuestionChoice']
+    language = models.ForeignKey('core.SiteLanguage',
+                                 blank=True,
+                                 null=True,
+                                 on_delete=models.SET_NULL,
+                                 )
+    translated_pages = models.ManyToManyField("self", blank=True)
+
+    def has_user_submitted_reaction_response(
+            self, request, reaction_id, article_id):
+        if 'reaction_response_submissions' not in request.session:
+            request.session['reaction_response_submissions'] = []
+        if article_id in request.session['reaction_response_submissions']:
+            return True
+        return False
+
+
+class ReactionQuestionChoice(TranslatablePageMixinNotRoutable,
+                             PageEffectiveImageMixin, MoloPage):
+    parent_page_types = ['forms.ReactionQuestion']
+    subpage_types = []
+    language = models.ForeignKey('core.SiteLanguage',
+                                 blank=True,
+                                 null=True,
+                                 on_delete=models.SET_NULL,
+                                 )
+    translated_pages = models.ManyToManyField("self", blank=True)
+
+    image = models.ForeignKey(
+        'wagtailimages.Image',
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name='+'
+    )
+
+    success_message = models.CharField(blank=True, null=True, max_length=1000)
+    success_image = models.ForeignKey(
+        'wagtailimages.Image',
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name='+'
+    )
+
+
+ReactionQuestionChoice.content_panels = [
+    FieldPanel('title', classname='full title'),
+    ImageChooserPanel('image'),
+    FieldPanel('success_message', classname='full title'),
+    ImageChooserPanel('success_image'),
+]
+
+
+class ReactionQuestionResponse(models.Model):
+    user = models.ForeignKey(
+        'auth.User', blank=True, null=True, on_delete=models.CASCADE
+    )
+    article = models.ForeignKey(
+        'core.ArticlePage', on_delete=models.CASCADE)
+    choice = models.ForeignKey(
+        'forms.ReactionQuestionChoice',
+        blank=True, null=True, on_delete=models.SET_NULL)
+    question = models.ForeignKey(
+        'forms.ReactionQuestion', on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def set_response_as_submitted_for_session(self, request, article):
+        if 'reaction_response_submissions' not in request.session:
+            request.session['reaction_response_submissions'] = []
+        request.session['reaction_response_submissions'].append(article.id)
+        request.session.modified = True
+
+    class Meta:
+        permissions = (
+            ("can_view_response", "Can view Response"),
+        )
+
+
+@receiver(post_save, sender=Main)
+def create_reaction_question_index(sender, **kwargs):
+    instance = kwargs.get('instance')
+    slug = 'reaction-questions-%s' % (generate_slug(instance.title))
+    if not ReactionQuestionIndexPage.objects.filter(slug=slug).exists():
+        reaction_question_index = ReactionQuestionIndexPage(
+            title='Reaction Questions', slug=slug
+        )
+        instance.add_child(instance=reaction_question_index)
+        reaction_question_index.save_revision().publish()

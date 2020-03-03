@@ -446,3 +446,15 @@ class PersonalisableMoloForm(BaseMoloForm):
             # Can only link a form without segments or the same segment
             if segment and segment != self.instance.segment:
                 return _('Cannot select a form with a different segment.')
+
+
+class ReactionQuestionChoiceForm(forms.Form):
+    choice = forms.ChoiceField(
+        required=True,
+        error_messages={'required': _("You didn't select a choice")})
+
+    def __init__(self, *args, **kwargs):
+        from molo.forms.models import ReactionQuestionChoice
+        super(ReactionQuestionChoiceForm, self).__init__(*args, **kwargs)
+        self.fields['choice'].choices = [(
+            c.pk, c.title) for c in ReactionQuestionChoice.objects.all()]

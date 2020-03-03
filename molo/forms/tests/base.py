@@ -1,11 +1,55 @@
+from molo.core.utils import generate_slug
+from molo.core.tests.base import MoloTestCaseMixin
+
 from molo.forms.models import (
-    MoloFormField,
     MoloFormPage,
-    PersonalisableForm,
+    MoloFormField,
     FormsIndexPage,
-    PersonalisableFormField
+    ReactionQuestion,
+    PersonalisableForm,
+    ReactionQuestionChoice,
+    PersonalisableFormField,
+    ReactionQuestionIndexPage,
+    ArticlePageReactionQuestions
 )
 from .utils import skip_logic_data
+
+
+class FormsTestCase(MoloTestCaseMixin):
+    def get_reaction_index(self, parent):
+        index_page = ReactionQuestionIndexPage.objects.child_of(parent)
+        return index_page.first()
+
+    def mk_reaction_question(self, parent, article, **kwargs):
+        data = {}
+        data.update({
+            'title': 'Test Question',
+        })
+        data.update(kwargs)
+        data.update({
+            'slug': generate_slug(data['title'])
+        })
+        question = ReactionQuestion(**data)
+        parent.add_child(instance=question)
+        question.save_revision().publish()
+        choice1 = ReactionQuestionChoice(
+            title='yes', success_message='well done')
+        question.add_child(instance=choice1)
+        choice1.save_revision().publish()
+        choice2 = ReactionQuestionChoice(title='maybe')
+        question.add_child(instance=choice2)
+        choice2.save_revision().publish()
+        choice3 = ReactionQuestionChoice(title='no')
+        question.add_child(instance=choice3)
+        choice3.save_revision().publish()
+        ArticlePageReactionQuestions.objects.create(
+            reaction_question=question, page=article)
+        return question
+
+    def mk_reaction_translation(self, source, article, language, **kwargs):
+        instance = self.mk_reaction_question(
+            source.get_parent(), article, **kwargs)
+        return self.mk_translation(source, language, instance)
 
 
 def create_molo_form_field(form, sort_order, obj):
@@ -115,3 +159,10 @@ def create_molo_form_formfield(
         field_type=field_type,
         required=required
     )
+
+
+# reaction_question_index = ReactionQuestionIndexPage(
+            #     title='Reaction Questions', slug=('reaction-questions-%s' % (
+            #         generate_slug(self.title), )))
+            # self.add_child(instance=reaction_question_index)
+            # reaction_question_index.save_revision().publish()
