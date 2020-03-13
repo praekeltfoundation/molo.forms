@@ -238,31 +238,6 @@ def load_user_choice_reaction_question(context, question, article, choice):
         ).exists()
 
 
-# @prometheus_query_count
-@register.simple_tag(takes_context=True)
-def load_reaction_question(context, article):
-    question = None
-
-    if article:
-        article_question = article.get_main_language_page() \
-            .reaction_questions.all().first()
-        if hasattr(article_question, 'reaction_question'):
-            question = article_question.reaction_question
-
-        if question and context['request'].site:
-            qs = ReactionQuestion.objects.descendant_of(
-                context['request'].site.root_page).live().filter(
-                    pk=question.pk, language__is_main_language=True)
-        else:
-            return []
-
-        translated_question = get_pages(
-            context, qs, context.get('locale_code'))
-        if translated_question:
-            return get_pages(context, qs, context.get('locale_code'))[0]
-        return question
-
-
 @register.simple_tag(takes_context=True)
 def load_choices_for_reaction_question(context, question):
     if question:

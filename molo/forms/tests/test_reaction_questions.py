@@ -81,11 +81,11 @@ class TestReactionQuestionResultsAdminView(FormsTestCase, TestCase):
 
         self.assertContains(
             response,
-            '<a href="/admin/reactionquestion/%s/results/">'
+            '<a href="/admin/forms/reactionquestion/%s/results/">'
             'Test Question</a>' % question.pk)
         self.assertNotContains(
             response,
-            '<a href="/admin/reactionquestion/%s/results/">'
+            '<a href="/admin/forms/reactionquestion/%s/results/">'
             'Test Question</a>' % question2.pk)
 
     def test_article_appears_in_wagtail_admin_summary(self):
@@ -97,17 +97,16 @@ class TestReactionQuestionResultsAdminView(FormsTestCase, TestCase):
         self.mk_reaction_question(self.reaction_index, article)
         self.mk_reaction_question(
             self.reaction_index2, article_site_2)
-        response = self.client.get(
-            '/admin/core/articlepage/'
-        )
+
+        response = self.client.get('/admin/forms/articlepageproxy/')
 
         self.assertContains(
             response,
-            '<a href="/admin/reactionquestion/%s/results/summary/">'
+            '<a href="/admin/forms/reactionquestion/%s/results/summary/">'
             'Test page 0</a>' % article.pk)
         self.assertNotContains(
             response,
-            '<a href="/admin/reactionquestion/%s/results/summary/">'
+            '<a href="/admin/forms/reactionquestion/%s/results/summary/">'
             'Test page 0</a>' % article_site_2.pk)
 
     def test_reaction_question_results_view(self):
@@ -124,7 +123,7 @@ class TestReactionQuestionResultsAdminView(FormsTestCase, TestCase):
             {'choice': choice1.id})
 
         response = self.client.get(
-            '/admin/reactionquestion/{0}/results/'.format(question.id)
+            '/admin/forms/reactionquestion/{0}/results/'.format(question.id)
         )
 
         expected_headings_html = '<tr><th>Submission Date</th><th>Answer</th>'\
@@ -137,7 +136,7 @@ class TestReactionQuestionResultsAdminView(FormsTestCase, TestCase):
 
         # test CSV download
         response = self.client.get(
-            '/admin/reactionquestion/{0}/results/?action=download'.format(
+            '/admin/forms/reactionquestion/{0}/results/?action=download'.format(
                 question.id)
         )
         created_date = ReactionQuestionResponse.objects.first().created_at
@@ -165,9 +164,10 @@ class TestReactionQuestionResultsAdminView(FormsTestCase, TestCase):
             {'choice': choice1.id})
 
         response = self.client.get(
-            '/admin/reactionquestion/{0}/results/summary/'.format(article.id)
+            '/admin/forms/reactionquestion/{0}/results/summary/'
+            .format(article.id)
         )
-
+        self.assertEqual(response.status_code, 200)
         expected_headings_html = '<tr><th>Article</th><th>yes</th>'\
                                  '<th>maybe</th><th>no</th></tr>'
         self.assertContains(response, expected_headings_html, html=True)
@@ -175,7 +175,7 @@ class TestReactionQuestionResultsAdminView(FormsTestCase, TestCase):
 
         # test CSV download
         response = self.client.get(
-            '/admin/reactionquestion/{0}/'
+            '/admin/forms/reactionquestion/{0}/'
             'results/summary/?action=download'.format(article.id)
         )
 
@@ -227,14 +227,13 @@ class TestReactionQuestions(FormsTestCase, TestCase):
         self.reaction_index = self.get_reaction_index(self.main)
         self.reaction_index2 = self.get_reaction_index(self.main2)
 
-    def test_can_react_on_article_with_and_without_ajax_call(self):
+    def test_can_react_on_article(self):
         article = self.mk_article(self.yourmind)
         article.save_revision().publish()
         question = self.mk_reaction_question(self.reaction_index, article)
         self.user = self.login()
 
-        site = 'http://{}:{}'.format(self.site.hostname, self.site.port)
-        response = self.client.get(article.url.replace(site, ''))
+        response = self.client.get(article.url)
 
         self.assertContains(response, question.title)
 
@@ -254,9 +253,13 @@ class TestReactionQuestions(FormsTestCase, TestCase):
 
         self.assertEqual(response.status_code, 302)
         self.assertEqual(
-            response['Location'], '/reaction/test-page-0/20/yes/feedback/')
+            response['Location'],
+            '/forms/reaction/test-page-0/{}/yes/feedback/'.format(question.pk)
+        )
 
-        response = self.client.get('/reaction/test-page-0/20/yes/feedback/')
+        response = self.client.get(
+            '/forms/reaction/test-page-0/{}/yes/feedback/'.format(question.pk)
+        )
 
         self.assertContains(
             response, '<a href="/sections-main-1/your-mind/test-page-0/">')
@@ -274,10 +277,25 @@ class TestReactionQuestions(FormsTestCase, TestCase):
         messages = list(get_messages(response.wsgi_request))
         self.assertEqual(len(messages), 1)
         # this should show if the submit is not done via ajax
-        self.assertEqual(
-            str(messages[0]),
-            'You have already given feedback on this article.')
+        self.assertIn(
+            'You have already given feedback on this article.',
+            str(messages[0])
+        )
 
+    def test_can_react_on_article_ajax_call(self):
+        article = self.mk_article(self.yourmind)
+        article.save_revision().publish()
+        question = self.mk_reaction_question(self.reaction_index, article)
+        self.user = self.login()
+
+        kw = {'question_id': question.id, 'article_slug': article.slug}
+        response = self.client.get(article.url)
+
+        self.assertContains(response, question.title)
+        for choice in question.get_children():
+            self.assertContains(response, choice.title)
+
+        choice2 = question.get_children().last()
         # submit with ajax in post data
         response = self.client.post(
             reverse('molo.forms:reaction-vote', kwargs=kw),
@@ -325,7 +343,9 @@ class TestReactionQuestions(FormsTestCase, TestCase):
             {'choice': translated_choice.id})
         self.assertEqual(ReactionQuestionResponse.objects.all().count(), 1)
 
-        response = self.client.get('/reaction/test-page-0/20/yes/feedback/')
+        response = self.client.get(
+            '/forms/reaction/test-page-0/{}/yes/feedback/'.format(question.pk)
+        )
         self.assertContains(
             response, '<a href="/sections-main-1/your-mind/test-page-0/">')
         self.assertContains(response, 'mooi gedoen')
@@ -444,7 +464,7 @@ class TestReactionQuestionChoiceFeedbackView(FormsTestCase, TestCase):
         self.assertTrue(res.status_code, 200)
         self.assertEqual(
             res.template_name,
-            ['patterns/basics/articles/reaction_question_feedback.html'])
+            ['forms/reaction_question_feedback.html'])
         self.assertContains(res, article.title)
         self.assertContains(res, choice.success_message)
 

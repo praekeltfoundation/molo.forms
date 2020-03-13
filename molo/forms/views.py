@@ -304,7 +304,7 @@ class MoloFormsEndpoint(PagesAPIEndpoint):
 
 
 class ReactionQuestionChoiceFeedbackView(TemplateView):
-    template_name = 'patterns/basics/articles/reaction_question_feedback.html'
+    template_name = 'forms/reaction_question_feedback.html'
 
     def get_context_data(self, **kwargs):
         context = super(ReactionQuestionChoiceFeedbackView,
@@ -330,7 +330,7 @@ class ReactionQuestionChoiceFeedbackView(TemplateView):
 
 class ReactionQuestionChoiceView(FormView):
     form_class = ReactionQuestionChoiceForm
-    template_name = 'patterns/basics/articles/reaction_question.html'
+    template_name = 'forms/reaction_question.html'
 
     def get_success_url(self, *args, **kwargs):
         article_slug = self.kwargs.get('article_slug')

@@ -1,7 +1,8 @@
 from django.urls import reverse
 from django.contrib import admin
 from wagtail.contrib.modeladmin.options import (
-    ModelAdmin as WagtailModelAdmin, modeladmin_register
+    ModelAdmin as WagtailModelAdmin,
+    modeladmin_register, ModelAdminGroup,
 )
 
 from molo.core.models import ArticlePage
@@ -65,9 +66,15 @@ class ReactionQuestionsModelAdmin(WagtailModelAdmin, ReactionQuestionAdmin):
     responses.short_description = 'Title'
 
 
+class ArticlePageProxy(ArticlePage):
+    class Meta:
+        proxy = True
+        verbose_name = 'Article Page'
+
+
 class ReactionQuestionsSummaryModelAdmin(
         WagtailModelAdmin, ReactionQuestionAdmin):
-    model = ArticlePage
+    model = ArticlePageProxy
     menu_label = 'Reaction Question Summary'
     menu_icon = 'doc-full'
     add_to_settings_menu = False
@@ -89,7 +96,14 @@ class ReactionQuestionsSummaryModelAdmin(
     articles.short_description = 'Title'
 
 
+class ReactionQuestionsGroup(ModelAdminGroup):
+    menu_label = 'ReactionQuestions'
+    menu_icon = 'folder-open-inverse'
+    menu_order = 500
+    items = (ReactionQuestionsSummaryModelAdmin, ReactionQuestionsModelAdmin)
 
+
+modeladmin_register(SegmentUserGroupAdmin)
+modeladmin_register(ReactionQuestionsGroup)
 modeladmin_register(ReactionQuestionsModelAdmin)
-modeladmin_register(ReactionQuestionResponseAdmin)
 modeladmin_register(ReactionQuestionsSummaryModelAdmin)
