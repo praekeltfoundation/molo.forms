@@ -1,11 +1,11 @@
 {% load wagtailcore_tags wagtailimages_tags core_tags molo_forms_tags i18n %}
-{% load_reaction_question article as question %}
+{% load_reaction_question self as question %}
 {% if question %}
 {{question.title}}
 {{ form.errors }}
-{% load_user_can_vote_on_reaction_question question article.pk as user_can_vote%}
+{% load_user_can_vote_on_reaction_question question self.pk as user_can_vote%}
   {% if user_can_vote %}
-    <form class="reaction__form" action="{% url 'molo.forms:reaction-vote' article.slug question.id %}" method="post">
+    <form class="reaction__form" action="{% url 'molo.forms:reaction-vote' article_slug=self.slug question_id=question.id %}" method="post">
       {% csrf_token %}
       <div class="poll-choices">
         {% load_choices_for_reaction_question question as choices %}
