@@ -109,4 +109,3 @@ class ReactionQuestionSummaryAdminView(FormView):
             writer.writerow(item.values())
 
         return response
-

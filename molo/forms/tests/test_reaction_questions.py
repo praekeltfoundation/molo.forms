@@ -9,8 +9,6 @@ from django.contrib.contenttypes.models import ContentType
 from molo.core.models import (
     Main,
     Languages,
-    SiteSettings,
-    ArticleOrderingChoices,
     SiteLanguageRelation,)
 
 
@@ -136,8 +134,8 @@ class TestReactionQuestionResultsAdminView(FormsTestCase, TestCase):
 
         # test CSV download
         response = self.client.get(
-            '/admin/forms/reactionquestion/{0}/results/?action=download'.format(
-                question.id)
+            '/admin/forms/reactionquestion/{0}/results/?action=download'
+            .format(question.id)
         )
         created_date = ReactionQuestionResponse.objects.first().created_at
 
@@ -241,7 +239,6 @@ class TestReactionQuestions(FormsTestCase, TestCase):
             self.assertContains(response, choice.title)
 
         choice1 = question.get_children().first()
-        choice2 = question.get_children().last()
         self.assertEqual(ReactionQuestionResponse.objects.all().count(), 0)
 
         kw = {'question_id': question.id, 'article_slug': article.slug}
@@ -529,4 +526,3 @@ class TestReactionQuestionChoiceFeedbackView(FormsTestCase, TestCase):
         count = load_reaction_choice_submission_count(
             choice=choice2, article=article, question=question)
         self.assertEqual(count, 0)
-

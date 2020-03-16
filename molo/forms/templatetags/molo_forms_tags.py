@@ -189,17 +189,6 @@ def is_multiple_choice_field(value):
     return isinstance(value.field, MultipleChoiceField)
 
 
-@register.simple_tag(takes_context=True)
-def load_choices_for_reaction_question(context, question):
-    if question:
-        question = question.specific.get_main_language_page().specific
-        if question.get_children():
-            choices = ReactionQuestionChoice.objects.child_of(
-                question).filter(language__is_main_language=True)
-            return get_pages(context, choices, context.get('locale_code'))
-    return []
-
-
 @register.simple_tag()
 def load_reaction_choice_submission_count(choice, article, question):
     if choice and article:
@@ -247,42 +236,6 @@ def load_choices_for_reaction_question(context, question):
                 question).filter(language__is_main_language=True)
             return get_pages(context, choices, context.get('locale_code'))
     return []
-
-
-@register.simple_tag()
-def load_reaction_choice_submission_count(choice, article, question):
-    if choice and article:
-        choice = choice.specific.get_main_language_page().specific
-        return ReactionQuestionResponse.objects.filter(
-            article=article, choice=choice, question=question).count()
-
-
-@register.simple_tag(takes_context=True)
-def load_user_can_vote_on_reaction_question(context, question, article_pk):
-    if question:
-        question = question.specific.get_main_language_page()
-        article = ArticlePage.objects.get(pk=article_pk)
-
-        if hasattr(article, 'get_main_language_page'):
-            article = article.get_main_language_page()
-
-        return not question.has_user_submitted_reaction_response(
-            context['request'], question.pk, article.pk)
-
-
-@register.simple_tag(takes_context=True)
-def load_user_choice_reaction_question(context, question, article, choice):
-    if question and context['request'].user.is_authenticated:
-        question = question.specific.get_main_language_page()
-        article = ArticlePage.objects.get(pk=article)
-
-        if hasattr(article, 'get_main_language_page'):
-            article = article.get_main_language_page()
-
-        return ReactionQuestionResponse.objects.filter(
-            article=article, choice=choice,
-            question=question, user=context['request'].user
-        ).exists()
 
 
 @register.simple_tag(takes_context=True)

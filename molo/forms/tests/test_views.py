@@ -619,7 +619,8 @@ class TestFormViews(TestCase, MoloTestCaseMixin):
         molo_form_page, molo_form_field = \
             self.create_molo_form_page_with_field(parent=self.article)
         response = self.client.get(self.article.url)
-        self.assertTemplateUsed(response, template_name='core/article_page.html')
+        self.assertTemplateUsed(
+            response, template_name='core/article_page.html')
 
         self.assertContains(response, 'Take The Form</a>')
         self.assertContains(response, molo_form_page.homepage_introduction)

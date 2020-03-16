@@ -159,10 +159,3 @@ def create_molo_form_formfield(
         field_type=field_type,
         required=required
     )
-
-
-# reaction_question_index = ReactionQuestionIndexPage(
-            #     title='Reaction Questions', slug=('reaction-questions-%s' % (
-            #         generate_slug(self.title), )))
-            # self.add_child(instance=reaction_question_index)
-            # reaction_question_index.save_revision().publish()

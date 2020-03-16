@@ -59,6 +59,7 @@ def show_reactionquestions_response_for_users_have_access(request, menu_items):
         menu_items[:] = [
             item for item in menu_items if item.name != 'reactionquestions']
 
+
 # This overwrites the wagtail surveys admin urls in order to use custom
 # form index view
 @hooks.register('register_admin_urls')
@@ -66,4 +67,3 @@ def register_admin_urls():
     return [
         re_path(r'^forms/', include(admin_urls)),
     ]
-
