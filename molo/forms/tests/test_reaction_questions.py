@@ -307,6 +307,16 @@ class TestReactionQuestions(FormsTestCase, TestCase):
         # no error message if the submit is done via ajax
         self.assertEqual(len(messages), 0)
 
+        response = self.client.post(
+            reverse('molo.forms:reaction-vote', kwargs=kw),
+            {'choice': choice2.id, 'ajax': 'True'})
+        self.assertEqual(ReactionQuestionResponse.objects.all().count(), 1)
+        self.assertEqual(
+            ReactionQuestionResponse.objects.last().choice.pk, choice2.pk)
+        messages = list(get_messages(response.wsgi_request))
+        # no error message if the submit is done via ajax
+        self.assertEqual(len(messages), 0)
+
     def test_correct_reaction_shown_for_locale(self):
         article = self.mk_article(self.yourmind)
         question = self.mk_reaction_question(self.reaction_index, article)
@@ -439,7 +449,7 @@ class TestReactionQuestionChoiceFeedbackView(FormsTestCase, TestCase):
             self.section_index, title='Your mind')
         self.reaction_index = self.get_reaction_index(self.main)
 
-    def test_view(self):
+    def test_reaction_question_choice_feedback_view(self):
         article = self.mk_article(self.yourmind)
         question = self.mk_reaction_question(self.reaction_index, article)
         choice = ReactionQuestionChoice(title='yes', success_message='Yes!!!')
@@ -464,6 +474,22 @@ class TestReactionQuestionChoiceFeedbackView(FormsTestCase, TestCase):
             ['forms/reaction_question_feedback.html'])
         self.assertContains(res, article.title)
         self.assertContains(res, choice.success_message)
+
+
+class TestTemplateTags(FormsTestCase, TestCase):
+    """Test response reaction """
+
+    def setUp(self):
+        self.mk_main()
+        self.english = SiteLanguageRelation.objects.create(
+            language_setting=Languages.for_site(self.main.get_site()),
+            locale='en',
+            is_active=True)
+
+        self.assertTrue(self.section_index)
+        self.yourmind = self.mk_section(
+            self.section_index, title='Your mind')
+        self.reaction_index = self.get_reaction_index(self.main)
 
     def test_load_user_choice_reaction_question(self):
         article = self.mk_articles(self.yourmind, 1)[0]
