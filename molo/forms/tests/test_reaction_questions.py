@@ -292,21 +292,22 @@ class TestReactionQuestions(FormsTestCase, TestCase):
         for choice in question.get_children():
             self.assertContains(response, choice.title)
 
+        choice1 = question.get_children().first()
         choice2 = question.get_children().last()
         # submit with ajax in post data
         response = self.client.post(
             reverse('molo.forms:reaction-vote', kwargs=kw),
-            {'choice': choice2.id, 'ajax': 'True'})
+            {'choice': choice1.id, 'ajax': 'True'})
 
-        # there should still only be one response object from user
-        # but the vote should change from choice 1 to choice 2
         self.assertEqual(ReactionQuestionResponse.objects.all().count(), 1)
         self.assertEqual(
-            ReactionQuestionResponse.objects.last().choice.pk, choice2.pk)
+            ReactionQuestionResponse.objects.last().choice.pk, choice1.pk)
         messages = list(get_messages(response.wsgi_request))
         # no error message if the submit is done via ajax
         self.assertEqual(len(messages), 0)
 
+        # there should still only be one response object from user
+        # but the vote should change from choice 1 to choice 2
         response = self.client.post(
             reverse('molo.forms:reaction-vote', kwargs=kw),
             {'choice': choice2.id, 'ajax': 'True'})
