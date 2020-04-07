@@ -122,7 +122,8 @@ class TestFormViews(TestCase, MoloTestCaseMixin):
     def test_submit_form_as_logged_in_user(self):
         molo_form_page, molo_form_field = \
             self.create_molo_form_page_with_field(
-                parent=self.section_index, thank_you_text='https://abc.com/123?')
+                parent=self.section_index,
+                thank_you_text='https://abc.com/123?')
 
         self.client.login(username='tester', password='tester')
 
@@ -135,7 +136,8 @@ class TestFormViews(TestCase, MoloTestCaseMixin):
         response = self.client.post(molo_form_page.url, {
             molo_form_field.label.lower().replace(' ', '-'): 'python'
         }, follow=True)
-        self.assertContains(response, url_to_anchor(molo_form_page.thank_you_text))
+        self.assertContains(
+            response, url_to_anchor(molo_form_page.thank_you_text))
 
         # for test_multiple_submissions_not_allowed_by_default
         return molo_form_page.url
