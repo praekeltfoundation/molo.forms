@@ -1514,6 +1514,7 @@ class TestAPIEndpointsView(TestCase, MoloTestCaseMixin):
             content_type="application/json")
 
         self.assertEqual(response.status_code, 400)
+        self.assertIn('your-favourite-colour',response.json())
         submissions = self.molo_form_page.get_submission_class().objects.all()
         self.assertEqual(len(submissions), 0)
 
@@ -1531,5 +1532,9 @@ class TestAPIEndpointsView(TestCase, MoloTestCaseMixin):
             content_type="application/json")
 
         self.assertEqual(response.status_code, 400)
+        self.assertIn(
+            "Submissions to unpublished forms are not allowed.",
+            response.json()
+        )
         submissions = self.molo_form_page.get_submission_class().objects.all()
         self.assertEqual(len(submissions), 0)
