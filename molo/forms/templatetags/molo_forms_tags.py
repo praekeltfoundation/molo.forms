@@ -188,7 +188,7 @@ def is_multiple_choice_field(value):
 def url_to_anchor(value):
     def find_links(text):
         url_pattern = 'http[s]?://' \
-                      '(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]' \
+                      '(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*(),]' \
                       '|(?:%[0-9a-fA-F][0-9a-fA-F]))+'
         url = re.findall(url_pattern, text)
         return url
