@@ -63,8 +63,10 @@ from .widgets import NaturalDateInput
 SKIP = 'NA (Skipped)'
 
 
+ArticlePage.api_fields += ['forms']
 SectionPage.subpage_types += ['forms.MoloFormPage']
 ArticlePage.subpage_types += ['forms.MoloFormPage']
+ArticlePage.content_panels += [InlinePanel('forms', label="Surveys")]
 FooterPage.parent_page_types += ['forms.FormsTermsAndConditionsIndexPage']
 
 
@@ -610,7 +612,10 @@ class MoloFormField(SkipLogicMixin, AdminLabelMixin,
     field_type = models.CharField(
         verbose_name=_('field type'),
         max_length=16,
-        choices=[x for x in FORM_FIELD_CHOICES if x[0] != 'multiselect']
+        choices=[
+            x for x in FORM_FIELD_CHOICES
+            if x[0] != 'multiselect'
+        ]
     )
     page = ParentalKey(MoloFormPage, related_name='form_fields')
 
@@ -762,7 +767,12 @@ class PersonalisableFormField(SkipLogicMixin, AdminLabelMixin,
     """
     field_type = models.CharField(
         verbose_name=_('field type'),
-        max_length=16, choices=FORM_FIELD_CHOICES)
+        max_length=16,
+        choices=[
+            x for x in FORM_FIELD_CHOICES
+            if x[0] != 'multiselect'
+        ]
+    )
     page = ParentalKey(PersonalisableForm, on_delete=models.CASCADE,
                        related_name='personalisable_form_fields')
     segment = models.ForeignKey(
@@ -801,3 +811,17 @@ class FormsSegmentUserGroup(models.Model):
 
     def __str__(self):
         return self.name
+
+
+class ArticlePageForms(Orderable):
+    page = ParentalKey(ArticlePage, related_name='forms')
+    form = models.ForeignKey(
+        'wagtailcore.Page',
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name='+',
+        help_text=_('Survey')
+    )
+    panels = [PageChooserPanel('form', 'forms.MoloFormPage')]
+    api_fields = ['forms']

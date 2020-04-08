@@ -1,12 +1,12 @@
 from django import forms
-from django.contrib.staticfiles.templatetags.staticfiles import static
+from django.templatetags.static import static
+from django.utils.safestring import mark_safe
 from django.core.exceptions import ValidationError
 from django.utils.translation import ugettext_lazy as _
-from django.utils.safestring import mark_safe
 
-from wagtail.admin.edit_handlers import StreamFieldPanel
 from wagtail.core import blocks
 from wagtail.core.fields import StreamField
+from wagtail.admin.edit_handlers import StreamFieldPanel
 
 
 class SkipState:

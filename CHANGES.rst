@@ -1,5 +1,22 @@
 CHANGE LOG
 ==========
+10.1.9
+------
+- Add ability for API form submissions to be linked to a user
+- User is created/retrieved based on 'uuid' parameter submitted with the form data
+
+10.1.8
+------
+- Add template filter to add urls as anchor elements on the form's thank you text of the success page
+
+10.1.7
+------
+- Add support for hidden form fields
+
+10.1.6
+------
+- Add ArticlePageForms model and forms_list_linked_to_pages template tag to link surveys to articles
+
 10.1.5
 ------
 Updated the README

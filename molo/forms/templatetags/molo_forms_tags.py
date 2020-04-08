@@ -1,3 +1,5 @@
+import re
+
 from django import template
 from django.forms.fields import MultipleChoiceField
 
@@ -157,6 +159,40 @@ def forms_list_for_pages(context, pk=None, page=None):
     return add_form_objects_to_forms(context)
 
 
+@register.inclusion_tag('forms/forms_list.html', takes_context=True)
+def forms_list_linked_to_pages(context, article):
+    locale_code = context.get('locale_code')
+
+    queryset = article.forms.all()\
+        .values_list('form', flat=True)
+
+    forms = MoloFormPage.objects\
+        .filter(pk__in=queryset)
+
+    if context.get('forms'):
+        forms = context['forms'] \
+            + get_pages(context, forms, locale_code)
+    else:
+        forms = get_pages(context, forms, locale_code)
+
+    context.update({'forms': forms})
+    return add_form_objects_to_forms(context)
+
+
 @register.filter(name='is_multiple_choice_field')
 def is_multiple_choice_field(value):
     return isinstance(value.field, MultipleChoiceField)
+
+
+@register.filter(name='url_to_anchor')
+def url_to_anchor(value):
+    def find_links(text):
+        url_pattern = 'http[s]?://' \
+                      '(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*(),]' \
+                      '|(?:%[0-9a-fA-F][0-9a-fA-F]))+'
+        url = re.findall(url_pattern, text)
+        return url
+    links = find_links(value)
+    for link in links:
+        value = value.replace(link, '<a href="{0}">{0}</a>'.format(link))
+    return value
