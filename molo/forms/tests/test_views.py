@@ -1247,8 +1247,11 @@ class SegmentCountView(TestCase, MoloTestCaseMixin):
         submission.objects.create(user=user, page=self.personalisable_form,
                                   form_data=json.dumps(data))
 
-    def test_saeedsegment_user_count(self):
+    def test_segment_user_count(self):
         self.submit_form(self.personalisable_form, self.user)
+        data = SEGMENT_FORM_DATA
+        data['forms_formresponserule_related-0-form'] \
+            = [self.personalisable_form.pk]
         response = self.client.post('/forms/count/', SEGMENT_FORM_DATA)
         self.assertDictEqual(response.json(), {"segmentusercount": 1})
 
