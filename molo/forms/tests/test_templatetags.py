@@ -11,7 +11,8 @@ from molo.forms.models import (
     FormsIndexPage, PersonalisableForm, MoloFormSubmission)
 
 from molo.forms.templatetags.molo_forms_tags import (
-    get_form_list, load_user_choice_poll_form, forms_list_linked_to_pages)
+    get_form_list, url_to_anchor,
+    load_user_choice_poll_form, forms_list_linked_to_pages)
 from .base import create_form
 
 
@@ -337,3 +338,13 @@ class FormListTest(TestCase, MoloTestCaseMixin):
             self.translated_direct_form not in context['forms'])
         self.assertTrue(
             self.trans_personalisable_form in context['forms'])
+
+
+class TestUrlToAnchorTemplateFilter(TestCase):
+
+    def test_url_to_anchor(self):
+        link = 'http://abc.com?somerandomvar=123'
+        self.assertEqual(
+            '<a href="{0}">{0}</a>'.format(link),
+            url_to_anchor(link)
+        )

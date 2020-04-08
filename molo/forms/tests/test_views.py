@@ -8,6 +8,7 @@ from django.utils.text import slugify
 from molo.core.models import (Languages, Main, SiteLanguageRelation,
                               SiteSettings)
 from molo.core.tests.base import MoloTestCaseMixin
+from molo.forms.templatetags.molo_forms_tags import url_to_anchor
 from molo.forms.models import (
     MoloFormField,
     MoloFormPage,
@@ -120,7 +121,9 @@ class TestFormViews(TestCase, MoloTestCaseMixin):
 
     def test_submit_form_as_logged_in_user(self):
         molo_form_page, molo_form_field = \
-            self.create_molo_form_page_with_field(parent=self.section_index)
+            self.create_molo_form_page_with_field(
+                parent=self.section_index,
+                thank_you_text='https://abc.com/123?')
 
         self.client.login(username='tester', password='tester')
 
@@ -133,8 +136,8 @@ class TestFormViews(TestCase, MoloTestCaseMixin):
         response = self.client.post(molo_form_page.url, {
             molo_form_field.label.lower().replace(' ', '-'): 'python'
         }, follow=True)
-
-        self.assertContains(response, molo_form_page.thank_you_text)
+        self.assertContains(
+            response, url_to_anchor(molo_form_page.thank_you_text))
 
         # for test_multiple_submissions_not_allowed_by_default
         return molo_form_page.url
@@ -1244,8 +1247,11 @@ class SegmentCountView(TestCase, MoloTestCaseMixin):
         submission.objects.create(user=user, page=self.personalisable_form,
                                   form_data=json.dumps(data))
 
-    def test_saeedsegment_user_count(self):
+    def test_segment_user_count(self):
         self.submit_form(self.personalisable_form, self.user)
+        data = SEGMENT_FORM_DATA
+        data['forms_formresponserule_related-0-form'] \
+            = [self.personalisable_form.pk]
         response = self.client.post('/forms/count/', SEGMENT_FORM_DATA)
         self.assertDictEqual(response.json(), {"segmentusercount": 1})
 
