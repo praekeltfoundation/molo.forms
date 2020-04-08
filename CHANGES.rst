@@ -1,5 +1,10 @@
 CHANGE LOG
 ==========
+10.1.9
+------
+- Add ability for API form submissions to be linked to a user
+- User is created/retrieved based on 'uuid' parameter submitted with the form data
+
 10.1.8
 ------
 - Add template filter to add urls as anchor elements on the form's thank you text of the success page
