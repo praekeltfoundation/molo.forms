@@ -1,3 +1,5 @@
+import re
+
 from django import template
 from django.forms.fields import MultipleChoiceField
 
@@ -180,3 +182,17 @@ def forms_list_linked_to_pages(context, article):
 @register.filter(name='is_multiple_choice_field')
 def is_multiple_choice_field(value):
     return isinstance(value.field, MultipleChoiceField)
+
+
+@register.filter(name='url_to_anchor')
+def url_to_anchor(value):
+    def find_links(text):
+        url_pattern = 'http[s]?://' \
+                      '(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*(),]' \
+                      '|(?:%[0-9a-fA-F][0-9a-fA-F]))+'
+        url = re.findall(url_pattern, text)
+        return url
+    links = find_links(value)
+    for link in links:
+        value = value.replace(link, '<a href="{0}">{0}</a>'.format(link))
+    return value
