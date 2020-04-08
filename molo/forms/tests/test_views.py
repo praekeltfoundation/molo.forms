@@ -1508,6 +1508,79 @@ class TestAPIEndpointsView(TestCase, MoloTestCaseMixin):
         form_data = json.loads(submissions[0].form_data)
         self.assertEqual(form_data, data)
 
+    def test_submit_form_endpoint_with_uuid_saves_for_new_user(self):
+        self.assertEqual(User.objects.count(), 0)
+
+        data = {self.form_field_1.clean_name: "Tom",
+                self.form_field_2.clean_name: "cat",
+                self.form_field_3.clean_name: "Yellow"}
+        post_data = {"uuid": "some-uuid"}
+        post_data.update(data)
+
+        response = self.client.post(
+            '/api/v2/forms/%s/submit_form/' % self.molo_form_page.id,
+            post_data,
+            format="json",
+            content_type="application/json")
+
+        self.assertEqual(response.status_code, 201)
+        submissions = self.molo_form_page.get_submission_class().objects.all()
+        self.assertEqual(len(submissions), 1)
+        self.assertEqual(submissions[0].user.username, "some-uuid")
+        self.assertEqual(User.objects.count(), 1)
+
+    def test_submit_form_endpoint_with_uuid_saves_for_existing_user(self):
+        User.objects.create(username="some-uuid")
+        self.assertEqual(User.objects.count(), 1)
+
+        data = {self.form_field_1.clean_name: "Tom",
+                self.form_field_2.clean_name: "cat",
+                self.form_field_3.clean_name: "Yellow"}
+        post_data = {"uuid": "some-uuid"}
+        post_data.update(data)
+
+        response = self.client.post(
+            '/api/v2/forms/%s/submit_form/' % self.molo_form_page.id,
+            post_data,
+            format="json",
+            content_type="application/json")
+
+        self.assertEqual(response.status_code, 201)
+        submissions = self.molo_form_page.get_submission_class().objects.all()
+        self.assertEqual(len(submissions), 1)
+        self.assertEqual(submissions[0].user.username, "some-uuid")
+        self.assertEqual(User.objects.count(), 1)
+
+    def test_form_endpoint_raises_error_for_second_sub_if_not_allowed(self):
+        user = User.objects.create(username="some-uuid")
+        self.molo_form_page.get_submission_class().objects.create(
+            user=user, form_data={}, page_id=self.molo_form_page.id
+        )
+        self.molo_form_page.allow_multiple_submissions_per_user = False
+        self.molo_form_page.save()
+
+        data = {self.form_field_1.clean_name: "Tom",
+                self.form_field_2.clean_name: "cat",
+                self.form_field_3.clean_name: "Yellow"}
+        post_data = {"uuid": "some-uuid"}
+        post_data.update(data)
+
+        response = self.client.post(
+            '/api/v2/forms/%s/submit_form/' % self.molo_form_page.id,
+            post_data,
+            format="json",
+            content_type="application/json")
+
+        self.assertEqual(response.status_code, 400)
+        self.assertIn(
+            "User has already submitted. Multiple submissions not allowed.",
+            response.json()
+        )
+        submissions = self.molo_form_page.get_submission_class().objects.all()
+        self.assertEqual(len(submissions), 1)
+        form_data = json.loads(submissions[0].form_data)
+        self.assertEqual(form_data, {})
+
     def test_submit_form_endpoint_returns_400_for_invalid_data(self):
         data = {self.form_field_1.clean_name: "Tom",
                 self.form_field_2.clean_name: "cat",
@@ -1520,6 +1593,7 @@ class TestAPIEndpointsView(TestCase, MoloTestCaseMixin):
             content_type="application/json")
 
         self.assertEqual(response.status_code, 400)
+        self.assertIn('your-favourite-colour', response.json())
         submissions = self.molo_form_page.get_submission_class().objects.all()
         self.assertEqual(len(submissions), 0)
 
@@ -1537,5 +1611,31 @@ class TestAPIEndpointsView(TestCase, MoloTestCaseMixin):
             content_type="application/json")
 
         self.assertEqual(response.status_code, 400)
+        self.assertIn(
+            "Submissions to unpublished forms are not allowed.",
+            response.json()
+        )
+        submissions = self.molo_form_page.get_submission_class().objects.all()
+        self.assertEqual(len(submissions), 0)
+
+    def test_form_endpoint_returns_400_for_anon_sub_when_not_allowed(self):
+        self.molo_form_page.allow_anonymous_submissions = False
+        self.molo_form_page.save()
+
+        data = {self.form_field_1.clean_name: "Tom",
+                self.form_field_2.clean_name: "cat",
+                self.form_field_3.clean_name: "Yellow"}
+
+        response = self.client.post(
+            '/api/v2/forms/%s/submit_form/' % self.molo_form_page.id,
+            data,
+            format="json",
+            content_type="application/json")
+
+        self.assertEqual(response.status_code, 400)
+        self.assertIn(
+            "Anonymous submissions not allowed. Please send uuid.",
+            response.json()
+        )
         submissions = self.molo_form_page.get_submission_class().objects.all()
         self.assertEqual(len(submissions), 0)
