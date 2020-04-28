@@ -21,16 +21,18 @@ class SkipLogicPaginator(Paginator):
 
         super(SkipLogicPaginator, self).__init__(object_list, per_page=1)
 
+        # be sure to exclude hidden article_page field
         self.question_labels = [
             question.clean_name for question in self.object_list
+            if question.pk
         ]
 
         self.page_breaks = [
             i + 1 for i, field in enumerate(self.object_list)
-            if field.has_skipping or field.page_break
+            if (field.has_skipping or field.page_break) and field.pk
         ]
 
-        num_questions = self.object_list.count()
+        num_questions = len([i for i in self.object_list if i.pk])
 
         if self.page_breaks:
             # Always have a break at start to create first page

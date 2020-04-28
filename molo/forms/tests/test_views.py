@@ -13,6 +13,8 @@ from molo.forms.models import (
     MoloFormField,
     MoloFormPage,
     FormsIndexPage,
+    ArticlePageForms,
+    MoloFormSubmission,
     PersonalisableForm,
     PersonalisableFormField
 )
@@ -76,8 +78,8 @@ class TestFormViews(TestCase, MoloTestCaseMixin):
         self.client2 = Client(HTTP_HOST=self.main2.get_site().hostname)
 
     def create_molo_form_page_with_field(
-            self, parent, display_form_directly=False,
-            allow_anonymous_submissions=False, **kwargs):
+        self, parent, display_form_directly=False,
+        allow_anonymous_submissions=False, **kwargs):
         molo_form_page = create_molo_form_page(
             parent,
             display_form_directly=display_form_directly,
@@ -715,6 +717,43 @@ class TestFormViews(TestCase, MoloTestCaseMixin):
             response,
             '<input type="hidden" name="some-hidden-field" '
             'id="id_some-hidden-field">'
+        )
+
+    def test_article_form_submissions(self):
+        """
+        with an article page
+        """
+        form = create_molo_form_page(
+            self.forms_index,
+            title='test form',
+            display_form_directly=True,
+            allow_anonymous_submissions=True,
+        )
+        field = create_molo_form_formfield(form, 'singleline')
+        ArticlePageForms.objects.create(page=self.article, form=form)
+
+        url = self.article.get_full_url()
+        article_field = 'name="article_page" value="{}"' \
+            .format(self.article.pk)
+
+        # Get an article with a related form page
+        res = self.client.get(url)
+        self.assertEqual(res.status_code, 200)
+        self.assertIn(bytes(field.label, encoding='utf-8'), res.content)
+        self.assertIn(bytes(article_field, encoding='utf-8'), res.content)
+        self.assertIn(bytes(self.article.title, encoding='utf-8'), res.content)
+
+        url = form.get_full_url()
+        data = {
+            'article_page': self.article.pk,
+            field.clean_name: 'abc'
+        }
+        # Post: Respond to  form related to article
+        res = self.client.post(url, data=data)
+        self.assertEqual(res.status_code, 302)
+        self.assertTrue(
+            MoloFormSubmission.objects.filter(
+                article_page=self.article).exists()
         )
 
 
