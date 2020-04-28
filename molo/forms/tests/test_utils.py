@@ -57,6 +57,14 @@ class TestSkipLogicPaginator(TestCase, MoloTestCaseMixin):
             ),
             required=True
         )
+        self.hidden_field = MoloFormField.objects.create(
+            page=self.form,
+            sort_order=5,
+            default_value='cat',
+            label='Your least favourite animal',
+            field_type='hidden',
+            required=True
+        )
         self.paginator = SkipLogicPaginator(self.form.get_form_fields())
 
     def test_correct_num_pages(self):
@@ -237,6 +245,14 @@ class TestSkipLogicEveryPage(TestCase, MoloTestCaseMixin):
             ),
             required=True
         )
+        self.hidden_field = MoloFormField.objects.create(
+            page=self.form,
+            sort_order=5,
+            default_value='cat',
+            label='Your least favourite animal',
+            field_type='hidden',
+            required=True
+        )
         self.paginator = SkipLogicPaginator(self.form.get_form_fields())
 
     def test_initialises_correctly(self):
@@ -307,6 +323,14 @@ class SkipLogicPaginatorMulti(TestCase, MoloTestCaseMixin):
             field_type='singleline',
             required=True
         )
+        self.hidden_field = MoloFormField.objects.create(
+            page=self.form,
+            sort_order=5,
+            default_value='cat',
+            label='Your least favourite animal',
+            field_type='hidden',
+            required=True
+        )
         self.paginator = SkipLogicPaginator(self.form.get_form_fields())
 
     def test_correct_num_pages(self):
@@ -363,6 +387,14 @@ class SkipLogicPaginatorPageBreak(TestCase, MoloTestCaseMixin):
             sort_order=3,
             label='Your least favourite animal',
             field_type='singleline',
+            required=True
+        )
+        self.hidden_field = MoloFormField.objects.create(
+            page=self.form,
+            sort_order=5,
+            default_value='cat',
+            label='Your least favourite animal',
+            field_type='hidden',
             required=True
         )
         self.paginator = SkipLogicPaginator(self.form.get_form_fields())
