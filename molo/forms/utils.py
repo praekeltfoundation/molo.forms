@@ -171,7 +171,15 @@ class SkipLogicPaginator(Paginator):
             top_index = index + self.per_page
             top = self.page_breaks[top_index]
 
-        return self._get_page(self.object_list[bottom:top], index + 1, self)
+        if number != 1:
+            return self._get_page(self.object_list[bottom:top], number, self)
+
+        object_list = [
+            i for i in self.object_list
+            if i.field_type == 'hidden'
+        ]
+        object_list += self.object_list[bottom:top]
+        return self._get_page(object_list, number, self)
 
 
 class SkipLogicPage(Page):

@@ -730,6 +730,8 @@ class TestFormViews(TestCase, MoloTestCaseMixin):
             allow_anonymous_submissions=True,
         )
         field = create_molo_form_formfield(form, 'singleline')
+        hidden_field = create_molo_form_formfield(
+            form, 'hidden', label="hidden_field lets check it out")
         ArticlePageForms.objects.create(page=self.article, form=form)
 
         url = self.article.get_full_url()
@@ -741,6 +743,7 @@ class TestFormViews(TestCase, MoloTestCaseMixin):
         self.assertEqual(res.status_code, 200)
         self.assertIn(bytes(field.label, encoding='utf-8'), res.content)
         self.assertIn(bytes(article_field, encoding='utf-8'), res.content)
+        self.assertIn(bytes(hidden_field.label, encoding='utf-8'), res.content)
         self.assertIn(bytes(self.article.title, encoding='utf-8'), res.content)
 
         url = form.get_full_url()
