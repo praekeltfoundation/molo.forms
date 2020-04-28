@@ -79,7 +79,8 @@ class TestFormViews(TestCase, MoloTestCaseMixin):
 
     def create_molo_form_page_with_field(
         self, parent, display_form_directly=False,
-        allow_anonymous_submissions=False, **kwargs):
+        allow_anonymous_submissions=False, **kwargs
+    ):
         molo_form_page = create_molo_form_page(
             parent,
             display_form_directly=display_form_directly,

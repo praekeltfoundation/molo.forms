@@ -29,8 +29,8 @@ class SkipLogicPaginator(Paginator):
 
         self.page_breaks = [
             i + 1 for i, field in enumerate(self.object_list)
-            if (field.has_skipping or field.page_break)
-            and (field.pk and field.field_type != 'hidden')
+            if (field.has_skipping or field.page_break) and
+               (field.pk and field.field_type != 'hidden')
         ]
 
         num_questions = len([
