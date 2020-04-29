@@ -14,6 +14,7 @@ from django.shortcuts import get_object_or_404, redirect
 
 from wagtail.core.utils import cautious_slugify
 
+from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Group
 from django.urls import reverse
 from django.shortcuts import render
@@ -269,6 +270,26 @@ class MoloFormsEndpoint(PagesAPIEndpoint):
             raise ValidationError(
                 detail=_("Submissions to unpublished forms are not allowed."))
         builder = FormBuilder(instance.form_fields.all())
+
+        # Get the user or create a new one
+        UserModel = get_user_model()
+        uuid = request.data.get("uuid", None)
+        user = None
+        if uuid:
+            user = UserModel.objects.get_or_create(username=uuid)[0]
+            request.user = user
+
+        if not user and not instance.allow_anonymous_submissions:
+            raise ValidationError(
+                detail="Anonymous submissions not allowed. Please send uuid."
+            )
+
+        if user and not instance.allow_multiple_submissions_per_user:
+            if instance.has_user_submitted_form(request, instance.id):
+                raise ValidationError(
+                    detail="User has already submitted. "
+                    "Multiple submissions not allowed."
+                )
 
         # Populate the form with the submitted data
         form_class = builder.get_form_class()
