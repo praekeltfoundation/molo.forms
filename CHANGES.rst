@@ -1,5 +1,9 @@
 CHANGE LOG
 ==========
+10.1.10
+-------
+- Save article_page attribute on form submissions
+
 10.1.9
 ------
 - Add ability for API form submissions to be linked to a user
