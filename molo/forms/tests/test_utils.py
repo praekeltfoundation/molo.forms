@@ -57,6 +57,14 @@ class TestSkipLogicPaginator(TestCase, MoloTestCaseMixin):
             ),
             required=True
         )
+        self.hidden_field = MoloFormField.objects.create(
+            page=self.form,
+            sort_order=5,
+            default_value='cat',
+            label='Your least favourite animal',
+            field_type='hidden',
+            required=True
+        )
         self.paginator = SkipLogicPaginator(self.form.get_form_fields())
 
     def test_correct_num_pages(self):
@@ -68,8 +76,12 @@ class TestSkipLogicPaginator(TestCase, MoloTestCaseMixin):
     def test_first_page_correct(self):
         page = self.paginator.page(1)
         self.assertEqual(
-            page.object_list,
-            [self.first_field, self.second_field],
+            page.object_list, [
+                self.hidden_field,
+                page.object_list[1],
+                self.first_field,
+                self.second_field
+            ],
         )
         self.assertTrue(page.has_next())
 
@@ -129,7 +141,11 @@ class TestSkipLogicPaginator(TestCase, MoloTestCaseMixin):
         self.assertEqual(previous_page_number, 1)
         self.assertEqual(
             paginator.page(previous_page_number).object_list,
-            [self.first_field, self.second_field],
+            [
+                self.hidden_field,
+                paginator.page(previous_page_number).object_list[1],
+                self.first_field,
+                self.second_field],
         )
 
     def test_question_progression_index(self):
@@ -237,6 +253,14 @@ class TestSkipLogicEveryPage(TestCase, MoloTestCaseMixin):
             ),
             required=True
         )
+        self.hidden_field = MoloFormField.objects.create(
+            page=self.form,
+            sort_order=5,
+            default_value='cat',
+            label='Your least favourite animal',
+            field_type='hidden',
+            required=True
+        )
         self.paginator = SkipLogicPaginator(self.form.get_form_fields())
 
     def test_initialises_correctly(self):
@@ -307,6 +331,14 @@ class SkipLogicPaginatorMulti(TestCase, MoloTestCaseMixin):
             field_type='singleline',
             required=True
         )
+        self.hidden_field = MoloFormField.objects.create(
+            page=self.form,
+            sort_order=5,
+            default_value='cat',
+            label='Your least favourite animal',
+            field_type='hidden',
+            required=True
+        )
         self.paginator = SkipLogicPaginator(self.form.get_form_fields())
 
     def test_correct_num_pages(self):
@@ -317,8 +349,11 @@ class SkipLogicPaginatorMulti(TestCase, MoloTestCaseMixin):
 
     def test_first_page_correct(self):
         self.assertEqual(
-            self.paginator.page(1).object_list,
-            [self.first_field],
+            self.paginator.page(1).object_list, [
+                self.hidden_field,
+                self.paginator.page(1).object_list[1],
+                self.first_field
+            ],
         )
 
     def test_middle_page_correct(self):
@@ -365,6 +400,14 @@ class SkipLogicPaginatorPageBreak(TestCase, MoloTestCaseMixin):
             field_type='singleline',
             required=True
         )
+        self.hidden_field = MoloFormField.objects.create(
+            page=self.form,
+            sort_order=5,
+            default_value='cat',
+            label='Your least favourite animal',
+            field_type='hidden',
+            required=True
+        )
         self.paginator = SkipLogicPaginator(self.form.get_form_fields())
 
     def test_correct_num_pages(self):
@@ -375,8 +418,11 @@ class SkipLogicPaginatorPageBreak(TestCase, MoloTestCaseMixin):
 
     def test_first_page_correct(self):
         self.assertEqual(
-            self.paginator.page(1).object_list,
-            [self.first_field],
+            self.paginator.page(1).object_list, [
+                self.hidden_field,
+                self.paginator.page(1).object_list[1],
+                self.first_field
+            ],
         )
 
     def test_middle_page_correct(self):

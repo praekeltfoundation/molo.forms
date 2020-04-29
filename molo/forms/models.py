@@ -262,11 +262,29 @@ class MoloFormPage(
 
     def process_form_submission(self, form):
         user = form.user if not form.user.is_anonymous else None
-
+        article_page = form.cleaned_data.pop('article_page', None)
+        try:
+            article_page = int(article_page)
+        except Exception:
+            article_page = None
         self.get_submission_class().objects.create(
+            article_page_id=article_page,
             form_data=json.dumps(form.cleaned_data, cls=DjangoJSONEncoder),
             page=self, user=user
         )
+
+    def get_form_fields(self):
+        class MyQSList(list):
+            """trying to chain qs"""
+            def count(self):
+                return len(self)
+
+        fields = MyQSList(super().get_form_fields())
+        field = MoloFormField(
+            label='article_page',
+            field_type='hidden', required=False)
+        fields.append(field)
+        return fields
 
     def has_user_submitted_form(self, request, form_page_id):
         if 'completed_forms' not in request.session:
