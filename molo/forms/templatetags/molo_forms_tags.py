@@ -32,12 +32,12 @@ def get_form_list(
     page = FormsIndexPage.objects.child_of(main).live().first()
     if page:
         forms = []
-        your_words = MoloFormPage.FORM_TYPES.your_words_competition.value
+        your_words = MoloFormPage.FORM_TYPES.competition.value
         if only_linked_forms:
             forms = (MoloFormPage.objects.descendant_of(page).filter(
                 language__is_main_language=True,
                 display_form_directly=False,
-                form_type=MoloFormPage.FORM_TYPES.basic_form.value,
+                form_type=MoloFormPage.FORM_TYPES.form.value,
             ).exact_type(MoloFormPage).specific())
 
         elif only_direct_forms:
@@ -61,7 +61,7 @@ def get_form_list(
         elif contact_form:
             forms = (MoloFormPage.objects.descendant_of(page).filter(
                 language__is_main_language=True,
-                form_type=MoloFormPage.FORM_TYPES.contact_form.value
+                form_type=MoloFormPage.FORM_TYPES.contact.value
             ).exact_type(MoloFormPage).specific())
 
         else:

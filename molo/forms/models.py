@@ -114,10 +114,10 @@ class MoloFormPage(
 ):
 
     class FORM_TYPES(Enum):
-        basic_form = 1
-        contact_form = 2
-        your_words_competition = 3
-        reaction_question = 4
+        form = 1
+        contact = 2
+        competition = 3
+        reaction = 4
 
         @classmethod
         def as_choice_list(cls):
@@ -197,7 +197,7 @@ class MoloFormPage(
     )
 
     form_type = models.IntegerField(
-        default=FORM_TYPES.basic_form.value,
+        default=FORM_TYPES.form.value,
         choices=FORM_TYPES.as_choice_list(),
         help_text='How will this form be used?'
     )

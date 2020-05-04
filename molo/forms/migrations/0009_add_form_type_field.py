@@ -21,6 +21,6 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='moloformpage',
             name='form_type',
-            field=models.IntegerField(choices=[(1, 'basic_form'), (2, 'contact_form'), (3, 'your_words_competition'), (4, 'reaction_question')], default=1, help_text='How will this form be used?'),
+            field=models.IntegerField(choices=[(1, 'form'), (2, 'contact'), (3, 'competition'), (4, 'reaction')], default=1, help_text='How will this form be used?'),
         ),
     ]

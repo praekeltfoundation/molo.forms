@@ -192,15 +192,14 @@ class FormListTest(TestCase, MoloTestCaseMixin):
                 title="test title",
                 slug="test_tittle",
                 form_type=MoloFormPage.FORM_TYPES
-                .contact_form.value,
+                .contact.value,
             ))
         self.yourwords_molo_form_page, yourwords_molo_form_field = (
             self.create_molo_form_page(
                 parent=self.forms_index,
                 title="yourwords form title",
                 slug="yourwords_form_title",
-                form_type=MoloFormPage.FORM_TYPES
-                .your_words_competition.value,
+                form_type=MoloFormPage.FORM_TYPES.competition.value,
             ))
         self.client.post(reverse(
             'add_translation', args=[self.linked_molo_form_page.id, 'fr']))
