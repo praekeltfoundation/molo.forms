@@ -1,5 +1,6 @@
 import json
 import datetime
+from enum import Enum
 
 from django.conf import settings
 from django.core.exceptions import ValidationError
@@ -109,7 +110,19 @@ def create_form_index_pages(sender, instance, **kwargs):
 
 class MoloFormPage(
         TranslatablePageMixinNotRoutable,
-        forms_models.AbstractEmailForm):
+        forms_models.AbstractEmailForm
+):
+
+    class FORM_TYPES(Enum):
+        form = 1
+        contact = 2
+        competition = 3
+        reaction = 4
+
+        @classmethod
+        def as_choice_list(cls):
+            return [(i.value, i.name) for i in cls]
+
     parent_page_types = [
         'forms.FormsIndexPage', 'core.SectionPage', 'core.ArticlePage']
     subpage_types = []
@@ -182,16 +195,13 @@ class MoloFormPage(
                   'a link to another page to complete the form.'
 
     )
-    your_words_competition = BooleanField(
-        default=False,
-        verbose_name='Is YourWords Competition',
-        help_text='This will display the correct template for yourwords'
+
+    form_type = models.IntegerField(
+        default=FORM_TYPES.form.value,
+        choices=FORM_TYPES.as_choice_list(),
+        help_text='How will this form be used?'
     )
-    contact_form = BooleanField(
-        default=False,
-        verbose_name='Is Contact Form',
-        help_text='This will display the correct template for contact forms'
-    )
+
     extra_style_hints = models.TextField(
         default='',
         null=True, blank=True,
@@ -225,8 +235,7 @@ class MoloFormPage(
             FieldPanel('show_results_as_percentage'),
             FieldPanel('multi_step'),
             FieldPanel('display_form_directly'),
-            FieldPanel('your_words_competition'),
-            FieldPanel('contact_form'),
+            FieldPanel('form_type'),
         ], heading='Form Settings'),
         MultiFieldPanel(
             [FieldRowPanel(
@@ -485,14 +494,6 @@ class MoloFormPage(
 
             raise ValidationError({
                 'multi_step': error, 'display_form_directly': error})
-
-        if all([self.your_words_competition, self.contact_form]):
-            error = _(
-                '"{}" and "{}" can not be both selected at the same time'
-                .format('Is YourWords Competition', 'Is contact form'))
-
-            raise ValidationError({
-                'your_words_competition': error, 'contact_form': error})
 
 
 class MoloFormPageView(models.Model):
