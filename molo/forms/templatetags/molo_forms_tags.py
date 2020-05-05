@@ -50,20 +50,20 @@ def get_form_list(
                 language__is_main_language=True,
                 your_words_competition=True,
                 article_form_only=False
-            ).exact_type(
-                    MoloFormPage).specific())
+            ).exact_type(MoloFormPage).specific())
         elif personalisable_form:
             forms = (PersonalisableForm.objects.descendant_of(page).filter(
                 language__is_main_language=True,
                 article_form_only=False
-            ).exact_type(
-                    PersonalisableForm).specific())
+            ).exact_type(PersonalisableForm).specific())
+
         elif contact_form:
             forms = (MoloFormPage.objects.descendant_of(page).filter(
                 language__is_main_language=True,
                 article_form_only=False,
                 contact_form=True).exact_type(
                 MoloFormPage).specific())
+
         else:
             forms = (MoloFormPage.objects.descendant_of(page).filter(
                 language__is_main_language=True,
