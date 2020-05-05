@@ -192,6 +192,11 @@ class MoloFormPage(
         verbose_name='Is Contact Form',
         help_text='This will display the correct template for contact forms'
     )
+    article_form_only = BooleanField(
+        default=False,
+        verbose_name='Is Article Form Only',
+        help_text='This will display only in article pages'
+    )
     extra_style_hints = models.TextField(
         default='',
         null=True, blank=True,
@@ -225,6 +230,7 @@ class MoloFormPage(
             FieldPanel('show_results_as_percentage'),
             FieldPanel('multi_step'),
             FieldPanel('display_form_directly'),
+            FieldPanel('article_form_only'),
             FieldPanel('your_words_competition'),
             FieldPanel('contact_form'),
         ], heading='Form Settings'),
