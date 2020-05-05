@@ -1,5 +1,10 @@
 CHANGE LOG
 ==========
+10.1.11
+-------
+- Exclude `article_form_only` forms in forms index pages
+- Add `article_form_only` flag to `MoloFormPage` model
+
 10.1.10
 -------
 - Save article_page attribute on form submissions
