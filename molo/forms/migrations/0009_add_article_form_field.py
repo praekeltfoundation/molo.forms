@@ -15,9 +15,4 @@ class Migration(migrations.Migration):
             name='article_form_only',
             field=models.BooleanField(default=False, help_text='This will display only in article pages', verbose_name='Is Article Form Only'),
         ),
-        migrations.AlterField(
-            model_name='personalisableformfield',
-            name='field_type',
-            field=models.CharField(choices=[('singleline', 'Single line text'), ('multiline', 'Multi-line text'), ('email', 'Email'), ('number', 'Number'), ('url', 'URL'), ('checkbox', 'Checkbox'), ('checkboxes', 'Checkboxes'), ('dropdown', 'Drop down'), ('radio', 'Radio buttons'), ('date', 'Date'), ('datetime', 'Date/time'), ('hidden', 'Hidden field')], max_length=16, verbose_name='field type'),
-        ),
     ]
