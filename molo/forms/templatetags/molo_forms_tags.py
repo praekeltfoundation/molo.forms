@@ -37,31 +37,38 @@ def get_form_list(
                 language__is_main_language=True,
                 display_form_directly=False,
                 contact_form=False,
-                your_words_competition=False).exact_type(
-                    MoloFormPage).specific())
+                article_form_only=True,
+                your_words_competition=False
+            ).exact_type(MoloFormPage).specific())
         elif only_direct_forms:
             forms = (MoloFormPage.objects.descendant_of(page).filter(
                 language__is_main_language=True, display_form_directly=True,
-                your_words_competition=False).exact_type(
-                    MoloFormPage).specific())
+                your_words_competition=False, article_form_only=False,
+            ).exact_type(MoloFormPage).specific())
         elif only_yourwords:
             forms = (MoloFormPage.objects.descendant_of(page).filter(
                 language__is_main_language=True,
-                your_words_competition=True).exact_type(
-                    MoloFormPage).specific())
+                your_words_competition=True,
+                article_form_only=False
+            ).exact_type(MoloFormPage).specific())
         elif personalisable_form:
             forms = (PersonalisableForm.objects.descendant_of(page).filter(
-                language__is_main_language=True).exact_type(
-                    PersonalisableForm).specific())
+                language__is_main_language=True,
+                article_form_only=False
+            ).exact_type(PersonalisableForm).specific())
+
         elif contact_form:
             forms = (MoloFormPage.objects.descendant_of(page).filter(
                 language__is_main_language=True,
+                article_form_only=False,
                 contact_form=True).exact_type(
                 MoloFormPage).specific())
+
         else:
             forms = (MoloFormPage.objects.descendant_of(page).filter(
-                language__is_main_language=True).exact_type(
-                    MoloFormPage).specific())
+                language__is_main_language=True,
+                article_form_only=False,
+            ).exact_type(MoloFormPage).specific())
     else:
         forms = MoloFormPage.objects.none()
     context.update({
