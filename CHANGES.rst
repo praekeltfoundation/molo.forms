@@ -1,5 +1,9 @@
 CHANGE LOG
 ==========
+10.1.12
+-------
+- fix template tags bug
+
 10.1.11
 -------
 - Exclude `article_form_only` forms in forms index pages
