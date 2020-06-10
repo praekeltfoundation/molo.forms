@@ -185,6 +185,14 @@ class FormListTest(TestCase, MoloTestCaseMixin):
                 title="linked form title",
                 slug="linked_form_title",
                 display_form_directly=False,
+                article_form_only=False,
+            ))
+        self.article_molo_form_page, article_molo_form_field = (
+            self.create_molo_form_page(
+                parent=self.forms_index,
+                title="article form title(Reaction Question)",
+                slug="article_form_title",
+                display_form_directly=False,
                 article_form_only=True,
             ))
         self.contact_form_page, linked_molo_form_field = (
@@ -225,19 +233,25 @@ class FormListTest(TestCase, MoloTestCaseMixin):
             'request': self.request,
         })
         context = get_form_list(context)
-        self.assertEqual(len(context['forms']), 3)
+        self.assertEqual(len(context['forms']), 5)
         self.assertTrue(self.direct_molo_form_page in context['forms'])
-        self.assertFalse(self.linked_molo_form_page in context['forms'])
+        self.assertFalse(self.translated_linked_form in context['forms'])
+        self.assertTrue(self.article_molo_form_page in context['forms'])
+        self.assertTrue(self.linked_molo_form_page in context['forms'])
+        self.assertTrue(self.yourwords_molo_form_page in context['forms'])
+        self.assertTrue(self.contact_form_page in context['forms'])
 
         context = Context({
             'locale_code': 'fr',
             'request': self.request,
         })
         context = get_form_list(context)
-        self.assertEqual(len(context['forms']), 3)
+        self.assertEqual(len(context['forms']), 5)
+        self.assertFalse(self.direct_molo_form_page in context['forms'])
         self.assertTrue(self.translated_direct_form in context['forms'])
-        self.assertFalse(self.translated_linked_form in context['forms'])
         self.assertTrue(self.yourwords_molo_form_page in context['forms'])
+        self.assertTrue(self.article_molo_form_page in context['forms'])
+        self.assertTrue(self.contact_form_page in context['forms'])
 
     def test_get_form_list_only_direct(self):
         context = Context({
