@@ -1,16 +1,9 @@
 CHANGE LOG
 ==========
-10.1.12
--------
-- fix template tags bug
-
-10.1.11
+10.1.13
 -------
 - Exclude `article_form_only` forms in forms index pages
 - Add `article_form_only` flag to `MoloFormPage` model
-
-10.1.10
--------
 - Save article_page attribute on form submissions
 
 10.1.9

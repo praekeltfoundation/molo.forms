@@ -34,15 +34,14 @@ def get_form_list(
         forms = []
         if only_linked_forms:
             forms = (MoloFormPage.objects.descendant_of(page).filter(
-                language__is_main_language=True,
-                display_form_directly=False,
-                contact_form=False,
+                language__is_main_language=True, display_form_directly=False,
+                contact_form=False, article_form_only=False,
                 your_words_competition=False
             ).exact_type(MoloFormPage).specific())
         elif only_direct_forms:
             forms = (MoloFormPage.objects.descendant_of(page).filter(
                 language__is_main_language=True, display_form_directly=True,
-                your_words_competition=False,
+                article_form_only=False, your_words_competition=False,
             ).exact_type(MoloFormPage).specific())
         elif only_yourwords:
             forms = (MoloFormPage.objects.descendant_of(page).filter(
@@ -63,7 +62,6 @@ def get_form_list(
         else:
             forms = (MoloFormPage.objects.descendant_of(page).filter(
                 language__is_main_language=True,
-                article_form_only=False,
             ).exact_type(MoloFormPage).specific())
     else:
         forms = MoloFormPage.objects.none()
