@@ -144,18 +144,21 @@ class FormSuccess(TemplateView):
 
         if form.show_results:
             # Get information about form fields
-            article = None
-            if form.save_article_object:
-                article = form.get_form_fields().get('article_page')
-
             data_fields = [
                 (field.clean_name, field.label)
                 for field in form.get_form_fields()
             ]
-
             # Get all submissions for current page
+            article = kwargs.get('article')
+            if article:
+                f = {'article_page_id': article}
+            else:
+                f = {'article_page__isnull': True}
+
             submissions = (
-                form.get_submission_class().objects.filter(page=form, article=article))
+                form.get_submission_class().objects.filter(
+                    page=form, **f))
+
             for submission in submissions:
                 data = submission.get_data()
 
@@ -176,14 +179,12 @@ class FormSuccess(TemplateView):
                     question_stats = results.get(label, {})
                     question_stats[answer] = question_stats.get(answer, 0) + 1
                     results[label] = question_stats
-        if form.show_results_as_percentage:
-            article = None
-            if form.save_article_object:
-                article = form.get_form_fields().get('article_page')
-            for question, answers in results.items():
-                total = sum(answers.values())
-                for key in answers.keys():
-                    answers[key] = int((answers[key] * 100) / total)
+
+            if form.show_results_as_percentage:
+                for question, answers in results.items():
+                    total = sum(answers.values())
+                    for key in answers.keys():
+                        answers[key] = int((answers[key] * 100) / total)
         context.update({'self': form, 'results': results})
         return context
 

@@ -16,6 +16,11 @@ urlpatterns = [
         name="success"
     ),
     re_path(
+        r"^(?P<slug>[\w-]+)/(?P<article>[\w-]+)/success/$",
+        FormSuccess.as_view(),
+        name="success_article_form"
+    ),
+    re_path(
         r"^(?P<slug>[\w-]+)/results_json/$",
         ResultsPercentagesJson.as_view(),
         name="results_json"

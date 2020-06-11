@@ -1,6 +1,5 @@
 import json
 import datetime
-from itertools import chain
 
 from django.conf import settings
 from django.core.exceptions import ValidationError
@@ -236,6 +235,7 @@ class MoloFormPage(
             FieldPanel('show_results_as_percentage'),
             FieldPanel('multi_step'),
             FieldPanel('display_form_directly'),
+            FieldPanel('save_article_object'),
             FieldPanel('article_form_only'),
             FieldPanel('your_words_competition'),
             FieldPanel('contact_form'),
@@ -289,13 +289,18 @@ class MoloFormPage(
         )
 
     def get_form_fields(self):
+        class MyQSList(list):
+            """trying to chain qs"""
+            def count(self):
+                return len(self)
+
         fields = super().get_form_fields()
-        if self.save_article_object \
-                and not fields.filter(label='article_page').exists():
+        if self.save_article_object:
+            fields = MyQSList(fields)
             field = MoloFormField(
                 label='article_page',
-                field_type='hidden', required=False)
-            fields = chain(fields, field)
+                field_type='hidden', required=True)
+            fields.append(field)
         return fields
 
     def has_user_submitted_form(self, request, form_page_id):
@@ -423,8 +428,8 @@ class MoloFormPage(
 
                         self.process_form_submission(form)
                         del request.session[self.session_key_data]
-
-                        return prev_step.success(self.slug)
+                        return prev_step.success(
+                            self.slug, form.cleaned_data.get('article_page'))
 
             else:
                 # If data for step is invalid
@@ -484,6 +489,11 @@ class MoloFormPage(
                 self.process_form_submission(form)
 
                 # render the landing_page
+                article = form.cleaned_data.get('article_page')
+                if article:
+                    kw = {'slug': self.slug, 'article': article}
+                    return redirect(
+                        reverse('molo.forms:success_article_form', kwargs=kw))
                 return redirect(
                     reverse('molo.forms:success', args=(self.slug, )))
 
