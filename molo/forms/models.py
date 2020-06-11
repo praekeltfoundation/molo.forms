@@ -1,5 +1,6 @@
 import json
 import datetime
+from itertools import chain
 
 from django.conf import settings
 from django.core.exceptions import ValidationError
@@ -192,6 +193,11 @@ class MoloFormPage(
         verbose_name='Is Contact Form',
         help_text='This will display the correct template for contact forms'
     )
+    save_article_object = BooleanField(
+        default=False,
+        verbose_name='Save Related Article',
+        help_text='This will always save the related article as a hidden form field'
+    )
     article_form_only = BooleanField(
         default=False,
         verbose_name='Is Article Form Only',
@@ -267,12 +273,15 @@ class MoloFormPage(
         return SectionPage.objects.all().ancestor_of(self).last()
 
     def process_form_submission(self, form):
+        article_page = None
         user = form.user if not form.user.is_anonymous else None
-        article_page = form.cleaned_data.pop('article_page', None)
-        try:
-            article_page = int(article_page)
-        except Exception:
-            article_page = None
+
+        if self.save_article_object:
+            article_page = form.cleaned_data.get('article_page')
+            try:
+                article_page = int(article_page)
+            except ValueError as e:
+                raise ValidationError(e)
         self.get_submission_class().objects.create(
             article_page_id=article_page,
             form_data=json.dumps(form.cleaned_data, cls=DjangoJSONEncoder),
@@ -280,16 +289,13 @@ class MoloFormPage(
         )
 
     def get_form_fields(self):
-        class MyQSList(list):
-            """trying to chain qs"""
-            def count(self):
-                return len(self)
-
-        fields = MyQSList(super().get_form_fields())
-        field = MoloFormField(
-            label='article_page',
-            field_type='hidden', required=False)
-        fields.append(field)
+        fields = super().get_form_fields()
+        if self.save_article_object \
+                and not fields.filter(label='article_page').exists():
+            field = MoloFormField(
+                label='article_page',
+                field_type='hidden', required=False)
+            fields = chain(fields, field)
         return fields
 
     def has_user_submitted_form(self, request, form_page_id):
