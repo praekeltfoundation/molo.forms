@@ -195,7 +195,8 @@ class MoloFormPage(
     save_article_object = BooleanField(
         default=False,
         verbose_name='Save Related Article',
-        help_text='This will always save the related article as a hidden form field'
+        help_text='This will always save the related'
+                  ' article as a hidden form field'
     )
     article_form_only = BooleanField(
         default=False,
