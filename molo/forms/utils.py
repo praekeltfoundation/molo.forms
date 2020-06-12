@@ -207,19 +207,18 @@ class SkipLogicPage(Page):
     def is_end(self):
         return self.is_next_action(SkipState.END, SkipState.FORM)
 
-    def success(self, slug, article):
+    def success(self, slug, article=None):
         if self.is_next_action(SkipState.FORM):
             return redirect(
                 self.last_question.next_page(self.last_response).url
             )
         if not article:
             return redirect(
-                reverse('molo.forms:success', args=(slug, ))
-            )
+                reverse('molo.forms:success', args=(slug, )))
+        
         return redirect(
             reverse('molo.forms:success_article_form', kwargs={
-                'slug': slug, 'article': article})
-        )
+                'slug': slug, 'article': article}))
 
     def next_page_number(self):
         return self.paginator.next_page
