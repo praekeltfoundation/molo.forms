@@ -194,7 +194,7 @@ class MoloFormPage(
     )
     save_article_object = BooleanField(
         default=False,
-        verbose_name='Save Related Article',
+        verbose_name='Save Linked Article',
         help_text='This will always save the related'
                   ' article as a hidden form field'
     )
@@ -516,6 +516,12 @@ class MoloFormPage(
 
             raise ValidationError({
                 'your_words_competition': error, 'contact_form': error})
+
+        if self.article_form_only and not self.save_article_object:
+            error = _('"{}" form needs to have "{}" selected'.format(
+                'An article form only', 'Save Linked Article'
+            ))
+            raise ValidationError({'save_article_object': error})
 
 
 class MoloFormPageView(models.Model):
