@@ -215,7 +215,7 @@ class SkipLogicPage(Page):
         if not article:
             return redirect(
                 reverse('molo.forms:success', args=(slug, )))
-        
+
         return redirect(
             reverse('molo.forms:success_article_form', kwargs={
                 'slug': slug, 'article': article}))
