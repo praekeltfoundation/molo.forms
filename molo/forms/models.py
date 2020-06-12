@@ -429,8 +429,13 @@ class MoloFormPage(
 
                         self.process_form_submission(form)
                         del request.session[self.session_key_data]
+
+                        article_page = form.cleaned_data.get('article_page')
+                        is_article_form = self.save_article_object
                         return prev_step.success(
-                            self.slug, form.cleaned_data.get('article_page'))
+                            self.slug,
+                            article_page if is_article_form else None
+                        )
 
             else:
                 # If data for step is invalid
