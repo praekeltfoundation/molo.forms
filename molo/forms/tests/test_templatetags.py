@@ -194,6 +194,7 @@ class FormListTest(TestCase, MoloTestCaseMixin):
                 slug="article_form_title",
                 display_form_directly=False,
                 article_form_only=True,
+                save_article_object=True,
             ))
         self.contact_form_page, linked_molo_form_field = (
             self.create_molo_form_page(

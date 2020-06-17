@@ -192,6 +192,12 @@ class MoloFormPage(
         verbose_name='Is Contact Form',
         help_text='This will display the correct template for contact forms'
     )
+    save_article_object = BooleanField(
+        default=False,
+        verbose_name='Save Linked Article',
+        help_text='This will always save the related'
+                  ' article as a hidden form field'
+    )
     article_form_only = BooleanField(
         default=False,
         verbose_name='Is Article Form Only',
@@ -230,6 +236,7 @@ class MoloFormPage(
             FieldPanel('show_results_as_percentage'),
             FieldPanel('multi_step'),
             FieldPanel('display_form_directly'),
+            FieldPanel('save_article_object'),
             FieldPanel('article_form_only'),
             FieldPanel('your_words_competition'),
             FieldPanel('contact_form'),
@@ -267,12 +274,15 @@ class MoloFormPage(
         return SectionPage.objects.all().ancestor_of(self).last()
 
     def process_form_submission(self, form):
+        article_page = None
         user = form.user if not form.user.is_anonymous else None
-        article_page = form.cleaned_data.pop('article_page', None)
-        try:
-            article_page = int(article_page)
-        except Exception:
-            article_page = None
+
+        if self.save_article_object:
+            article_page = form.cleaned_data.get('article_page')
+            try:
+                article_page = int(article_page)
+            except ValueError as e:
+                raise ValidationError(e)
         self.get_submission_class().objects.create(
             article_page_id=article_page,
             form_data=json.dumps(form.cleaned_data, cls=DjangoJSONEncoder),
@@ -285,11 +295,13 @@ class MoloFormPage(
             def count(self):
                 return len(self)
 
-        fields = MyQSList(super().get_form_fields())
-        field = MoloFormField(
-            label='article_page',
-            field_type='hidden', required=False)
-        fields.append(field)
+        fields = super().get_form_fields()
+        if self.save_article_object:
+            fields = MyQSList(fields)
+            field = MoloFormField(
+                label='article_page',
+                field_type='hidden', required=True)
+            fields.append(field)
         return fields
 
     def has_user_submitted_form(self, request, form_page_id):
@@ -418,7 +430,12 @@ class MoloFormPage(
                         self.process_form_submission(form)
                         del request.session[self.session_key_data]
 
-                        return prev_step.success(self.slug)
+                        article_page = form.cleaned_data.get('article_page')
+                        is_article_form = self.save_article_object
+                        return prev_step.success(
+                            self.slug,
+                            article_page if is_article_form else None
+                        )
 
             else:
                 # If data for step is invalid
@@ -478,6 +495,11 @@ class MoloFormPage(
                 self.process_form_submission(form)
 
                 # render the landing_page
+                article = form.cleaned_data.get('article_page')
+                if article:
+                    kw = {'slug': self.slug, 'article': article}
+                    return redirect(
+                        reverse('molo.forms:success_article_form', kwargs=kw))
                 return redirect(
                     reverse('molo.forms:success', args=(self.slug, )))
 
@@ -499,6 +521,12 @@ class MoloFormPage(
 
             raise ValidationError({
                 'your_words_competition': error, 'contact_form': error})
+
+        if self.article_form_only and not self.save_article_object:
+            error = _('"{}" form needs to have "{}" selected'.format(
+                'An article form only', 'Save Linked Article'
+            ))
+            raise ValidationError({'save_article_object': error})
 
 
 class MoloFormPageView(models.Model):

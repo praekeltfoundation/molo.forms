@@ -728,6 +728,7 @@ class TestFormViews(TestCase, MoloTestCaseMixin):
             self.forms_index,
             title='test form',
             display_form_directly=True,
+            save_article_object=True,
             allow_anonymous_submissions=True,
         )
         field = create_molo_form_formfield(form, 'singleline')
@@ -755,9 +756,65 @@ class TestFormViews(TestCase, MoloTestCaseMixin):
         # Post: Respond to  form related to article
         res = self.client.post(url, data=data)
         self.assertEqual(res.status_code, 302)
+        self.assertEqual(
+            res.url,
+            '/forms/test-form/{}/success/'.format(self.article.pk)
+        )
         self.assertTrue(
             MoloFormSubmission.objects.filter(
                 article_page=self.article).exists()
+        )
+
+    def test_article_form_result_calculations(self):
+        """
+        with an article page
+        """
+        form = create_molo_form_page(
+            self.forms_index,
+            title='test form',
+            display_form_directly=True,
+            show_results=True,
+            save_article_object=True,
+            allow_anonymous_submissions=True,
+        )
+        article = self.mk_article(self.section, title='article 2')
+        field = MoloFormField.objects.create(
+            page=form, label='a, b or c?', field_type='singleline')
+
+        ArticlePageForms.objects.create(page=article, form=form)
+        ArticlePageForms.objects.create(page=self.article, form=form)
+
+        form_data = {field.clean_name: 'a', 'article_page': article.pk}
+        MoloFormSubmission.objects.create(
+            page=form, article_page=article, form_data=json.dumps(form_data))
+
+        form_data.update({'article_page': self.article.pk})
+
+        success_url = reverse('molo.forms:success_article_form', kwargs={
+            'slug': form.slug, 'article': self.article.pk})
+
+        results = self.client.post(form.get_full_url(), data=form_data)
+        self.assertEqual(results.status_code, 302)
+        self.assertEqual(results.url, success_url)
+
+        results = self.client.get(success_url)
+        self.assertEqual(results.status_code, 200)
+        self.assertTemplateUsed(results, 'forms/molo_form_page_success.html')
+        self.assertIn(
+            '<span>a</span> 1', str(results.content)
+        )
+
+        form.show_results_as_percentage = True
+        form.save()
+
+        results = self.client.get(success_url)
+        self.assertEqual(results.status_code, 200)
+        self.assertTemplateUsed(results, 'forms/molo_form_page_success.html')
+        self.assertIn(
+            '<span>a</span> 100%', str(results.content)
+        )
+        self.assertNotIn(
+            'article_page', str(results.content)
         )
 
 

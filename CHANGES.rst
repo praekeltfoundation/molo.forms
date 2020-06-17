@@ -1,5 +1,13 @@
 CHANGE LOG
 ==========
+10.1.14
+-------
+- Fix Form submission results page to filter by article_page when present
+- Add boolean Molo Form Setting to dynamically add an Article Page field to the forms
+- Add Article Form Page's success url
+- Update Templates to skip label and help text for hidden fields
+- Add model level validation
+
 10.1.13
 -------
 - Exclude `article_form_only` forms in forms index pages

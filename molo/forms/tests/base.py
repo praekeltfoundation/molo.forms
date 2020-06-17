@@ -8,6 +8,25 @@ from molo.forms.models import (
 from .utils import skip_logic_data
 
 
+class MoloFormsTestMixin:
+
+    def create_molo_form_page_with_field(
+        self, parent, display_form_directly=False,
+        allow_anonymous_submissions=False, **kwargs
+    ):
+        molo_form_page = create_molo_form_page(
+            parent,
+            display_form_directly=display_form_directly,
+            allow_anonymous_submissions=allow_anonymous_submissions, **kwargs)
+        molo_form_page.save_revision().publish()
+        molo_form_field = create_molo_form_formfield(
+            form=molo_form_page,
+            field_type='singleline',
+            label="Your favourite animal",
+            required=True)
+        return (molo_form_page, molo_form_field)
+
+
 def create_molo_form_field(form, sort_order, obj):
     if obj['type'] == 'radio':
         skip_logic = skip_logic_data(choices=obj['choices'])
