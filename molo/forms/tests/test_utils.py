@@ -78,7 +78,6 @@ class TestSkipLogicPaginator(TestCase, MoloTestCaseMixin):
         self.assertEqual(
             page.object_list, [
                 self.hidden_field,
-                page.object_list[1],
                 self.first_field,
                 self.second_field
             ],
@@ -143,7 +142,6 @@ class TestSkipLogicPaginator(TestCase, MoloTestCaseMixin):
             paginator.page(previous_page_number).object_list,
             [
                 self.hidden_field,
-                paginator.page(previous_page_number).object_list[1],
                 self.first_field,
                 self.second_field],
         )
@@ -351,7 +349,6 @@ class SkipLogicPaginatorMulti(TestCase, MoloTestCaseMixin):
         self.assertEqual(
             self.paginator.page(1).object_list, [
                 self.hidden_field,
-                self.paginator.page(1).object_list[1],
                 self.first_field
             ],
         )
@@ -420,7 +417,6 @@ class SkipLogicPaginatorPageBreak(TestCase, MoloTestCaseMixin):
         self.assertEqual(
             self.paginator.page(1).object_list, [
                 self.hidden_field,
-                self.paginator.page(1).object_list[1],
                 self.first_field
             ],
         )
