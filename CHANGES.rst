@@ -1,5 +1,10 @@
 CHANGE LOG
 ==========
+
+10.1.14
+-------
+- Template tag bug fix, add a check for MoloFormPage instance
+
 10.1.14
 -------
 - Fix Form submission results page to filter by article_page when present

@@ -75,15 +75,16 @@ def add_form_objects_to_forms(context):
     forms = []
     for form_page in context['forms']:
         form = None
-        if (form_page.allow_multiple_submissions_per_user or
-                not form_page.has_user_submitted_form(
-                    context['request'], form_page.id)):
-            form = form_page.get_form()
+        if isinstance(form_page, MoloFormPage):
+            if (form_page.allow_multiple_submissions_per_user or
+                    not form_page.has_user_submitted_form(
+                        context['request'], form_page.id)):
+                form = form_page.get_form()
 
-        forms.append({
-            'molo_form_page': form_page,
-            'form': form,
-        })
+            forms.append({
+                'molo_form_page': form_page,
+                'form': form,
+            })
 
     context.update({
         'forms': forms,
