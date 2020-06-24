@@ -323,6 +323,33 @@ class FormListTest(TestCase, MoloTestCaseMixin):
         article_page_form = ArticlePageForms(form=survey, page=article)
         article.forms.add(article_page_form)
         res = forms_list_linked_to_pages(context, article)
+        self.assertEqual(len(res['forms']), 1)
+        self.assertEqual(res['forms'][0]['molo_form_page'], survey)
+
+    def test_forms_list_linked_to_sub_pages(self):
+        """
+        Create a sub page with a linked molo form
+        test that the linked molo forms are only of the sub page
+        """
+        context = Context({
+            'locale_code': 'en',
+            'request': self.request,
+        })
+        survey = self.direct_molo_form_page
+        article = self.mk_article(self.main)
+        article_page_form = ArticlePageForms(form=survey, page=article)
+        article.forms.add(article_page_form)
+
+        sub_article = self.mk_article(article)
+        sub_article_page_form = ArticlePageForms(form=survey, page=sub_article)
+        sub_article.forms.add(sub_article_page_form)
+
+        res = forms_list_linked_to_pages(context, sub_article)
+        self.assertEqual(len(res['forms']), 1)
+        self.assertEqual(res['forms'][0]['molo_form_page'], survey)
+
+        res = forms_list_linked_to_pages(context, article)
+        self.assertEqual(len(res['forms']), 1)
         self.assertEqual(res['forms'][0]['molo_form_page'], survey)
 
     def test_get_form_list_arg_error(self):
