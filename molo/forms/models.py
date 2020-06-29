@@ -480,28 +480,33 @@ class MoloFormPage(
             form = self.get_form(request.POST, page=self, user=request.user)
 
             if form.is_valid():
+                is_ajax = request.POST.get('ajax') == 'True'
+
                 # check if the post is made via ajax call
-                if 'ajax' in request.POST and \
-                        request.POST['ajax'] == 'True':
-                    # check if a submission exists for this question and user
+                # check if a submission exists for this question and user
+                # currently for submissions via ajax calls
+                # user should be able to update their submission
+                # NB: removes object then creates a new one
+                # NB: add article_page filter in case of multi article_page forms
+                if is_ajax:
                     submission = self.get_submission_class().objects.filter(
-                        page=self, user__pk=request.user.pk)
+                        page=self, user__pk=request.user.pk,
+                        article_page=form.cleaned_data.get('article_page',)
+                    )
                     if submission.exists():
-                        # currently for submissions via ajax calls
-                        # user should be able to update their submission
                         submission.delete()
 
                 self.set_form_as_submitted_for_session(request)
                 self.process_form_submission(form)
 
-                # render the landing_page
                 article = form.cleaned_data.get('article_page')
+                url_suffix = 'format=json' if is_ajax else ''
                 if article:
                     kw = {'slug': self.slug, 'article': article}
                     return redirect(
-                        reverse('molo.forms:success_article_form', kwargs=kw))
+                        reverse('molo.forms:success_article_form', kwargs=kw) + url_suffix)
                 return redirect(
-                    reverse('molo.forms:success', args=(self.slug, )))
+                    reverse('molo.forms:success', args=(self.slug, )) + url_suffix)
 
         return super(MoloFormPage, self).serve(request, *args, **kwargs)
 

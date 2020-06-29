@@ -7,6 +7,7 @@ from rest_framework.response import Response
 from wagtail.core.models import Page
 
 from django.conf.urls import url
+from django.http.response import HttpResponse
 from django.views.generic import TemplateView, View
 from molo.forms.models import MoloFormPage, FormsIndexPage, PersonalisableForm
 from molo.core.models import ArticlePage
@@ -29,6 +30,8 @@ from wagtail_personalisation.models import Segment
 
 from wagtail.contrib.forms.forms import FormBuilder
 from wagtail.contrib.forms.utils import get_forms_for_user
+
+from jsonview.decorators import json_view
 
 from .forms import CSVGroupCreationForm
 from wagtail.api.v2.endpoints import PagesAPIEndpoint
@@ -130,6 +133,7 @@ class ResultsPercentagesJson(View):
 
 
 class FormSuccess(TemplateView):
+    is_ajax = False
     template_name = "forms/molo_form_page_success.html"
 
     def get_context_data(self, *args, **kwargs):
@@ -187,6 +191,13 @@ class FormSuccess(TemplateView):
                         answers[key] = int((answers[key] * 100) / total)
         context.update({'self': form, 'results': results})
         return context
+
+    def dispatch(self, request, *args, **kwargs):
+        if self.is_ajax or request.GET.get('format') == 'json':
+            context = self.get_context_data(*args, **kwargs)
+            content = json.dumps(context.get('results'))
+            return HttpResponse(content=content, content_type='application/json')
+        return super(FormSuccess, self).dispatch(request, *args, **kwargs)
 
 
 def submission_article(request, form_id, submission_id):
