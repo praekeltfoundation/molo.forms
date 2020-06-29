@@ -31,8 +31,6 @@ from wagtail_personalisation.models import Segment
 from wagtail.contrib.forms.forms import FormBuilder
 from wagtail.contrib.forms.utils import get_forms_for_user
 
-from jsonview.decorators import json_view
-
 from .forms import CSVGroupCreationForm
 from wagtail.api.v2.endpoints import PagesAPIEndpoint
 from .serializers import MoloFormSerializer
@@ -196,7 +194,8 @@ class FormSuccess(TemplateView):
         if self.is_ajax or request.GET.get('format') == 'json':
             context = self.get_context_data(*args, **kwargs)
             content = json.dumps(context.get('results'))
-            return HttpResponse(content=content, content_type='application/json')
+            return HttpResponse(
+                content=content, content_type='application/json')
         return super(FormSuccess, self).dispatch(request, *args, **kwargs)
 
 

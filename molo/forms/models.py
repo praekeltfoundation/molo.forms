@@ -487,7 +487,7 @@ class MoloFormPage(
                 # currently for submissions via ajax calls
                 # user should be able to update their submission
                 # NB: removes object then creates a new one
-                # NB: add article_page filter in case of multi article_page forms
+                # NB: article_page filter in case of multi article_page forms
                 if is_ajax:
                     submission = self.get_submission_class().objects.filter(
                         page=self, user__pk=request.user.pk,
@@ -503,10 +503,12 @@ class MoloFormPage(
                 url_suffix = 'format=json' if is_ajax else ''
                 if article:
                     kw = {'slug': self.slug, 'article': article}
-                    return redirect(
-                        reverse('molo.forms:success_article_form', kwargs=kw) + url_suffix)
+                    url_name = 'molo.forms:success_article_form'
+                    return redirect(reverse(url_name, kwargs=kw) + url_suffix)
+
+                url_name = 'molo.forms:success'
                 return redirect(
-                    reverse('molo.forms:success', args=(self.slug, )) + url_suffix)
+                    reverse(url_name, args=(self.slug, )) + url_suffix)
 
         return super(MoloFormPage, self).serve(request, *args, **kwargs)
 
