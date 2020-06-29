@@ -1,7 +1,11 @@
 CHANGE LOG
 ==========
 
-10.1.14
+10.1.16
+-------
+- Add JSON responses for a form success view
+
+10.1.15
 -------
 - Template tag bug fix, add a check for MoloFormPage instance
 
