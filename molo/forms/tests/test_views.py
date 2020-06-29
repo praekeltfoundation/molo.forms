@@ -817,6 +817,57 @@ class TestFormViews(TestCase, MoloTestCaseMixin):
             'article_page', str(results.content)
         )
 
+    def test_article_form_result_calculations_ajax(self):
+        """
+        with an article page
+        """
+        form = create_molo_form_page(
+            self.forms_index,
+            title='test form',
+            display_form_directly=True,
+            show_results=True,
+            save_article_object=True,
+            allow_anonymous_submissions=True,
+        )
+        article = self.mk_article(self.section, title='article 2')
+        field = MoloFormField.objects.create(
+            page=form, label='a, b or c?', field_type='singleline')
+
+        ArticlePageForms.objects.create(page=article, form=form)
+        ArticlePageForms.objects.create(page=self.article, form=form)
+
+        form_data = {field.clean_name: 'a', 'article_page': article.pk}
+        MoloFormSubmission.objects.create(
+            page=form, article_page=article, form_data=json.dumps(form_data))
+
+        form_data.update({'article_page': self.article.pk})
+
+        success_url = reverse('molo.forms:success_article_form', kwargs={
+            'slug': form.slug, 'article': self.article.pk})
+
+        results = self.client.post(form.get_full_url(), data=form_data)
+        self.assertEqual(results.status_code, 302)
+        self.assertEqual(results.url, success_url)
+
+        results = self.client.get(success_url + '?format=json')
+        self.assertEqual(results.status_code, 200)
+        self.assertEqual(
+            b'{"a, b or c?": {"a": 1}, "article_page": {"%d": 1}}'
+            % self.article.pk,
+            results.content
+        )
+
+        form.show_results_as_percentage = True
+        form.save()
+
+        results = self.client.get(success_url + '?format=json')
+        self.assertEqual(results.status_code, 200)
+        self.assertEqual(
+            b'{"a, b or c?": {"a": 100}, "article_page": {"%d": 100}}'
+            % self.article.pk,
+            results.content
+        )
+
 
 class TestDeleteButtonRemoved(TestCase, MoloTestCaseMixin):
 
