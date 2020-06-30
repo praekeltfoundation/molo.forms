@@ -500,7 +500,7 @@ class MoloFormPage(
                 self.process_form_submission(form)
 
                 article = form.cleaned_data.get('article_page')
-                url_suffix = 'format=json' if is_ajax else ''
+                url_suffix = '?format=json' if is_ajax else ''
                 if article:
                     kw = {'slug': self.slug, 'article': article}
                     url_name = 'molo.forms:success_article_form'
