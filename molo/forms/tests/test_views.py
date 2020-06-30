@@ -231,6 +231,30 @@ class TestFormViews(TestCase, MoloTestCaseMixin):
         self.assertContains(response, molo_form_field.label)
         self.assertContains(response, 'python</span> 1')
 
+    def test_show_results_option_ajax(self):
+        molo_form_page, molo_form_field = \
+            self.create_molo_form_page_with_field(
+                parent=self.section_index,
+                allow_anonymous_submissions=True,
+                show_results=True,
+            )
+
+        response = self.client.get(molo_form_page.url)
+        self.assertContains(response, molo_form_page.title)
+        self.assertContains(response, molo_form_page.introduction)
+        self.assertContains(response, molo_form_field.label)
+
+        response = self.client.post(molo_form_page.url, {
+            "ajax": 'True',
+            "article_page": self.article.pk,
+            molo_form_field.label.lower().replace(' ', '-'): 'python'
+        }, follow=True)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(
+            response.content,
+            b'{"Your favourite animal": {"python": 1}}'
+        )
+
     def test_show_results_as_percentage_option(self):
         molo_form_page, molo_form_field = \
             self.create_molo_form_page_with_field(
