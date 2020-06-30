@@ -1,6 +1,10 @@
 CHANGE LOG
 ==========
 
+10.1.17
+-------
+- Update success url's get params suffix
+
 10.1.16
 -------
 - Add JSON responses for a form success view
