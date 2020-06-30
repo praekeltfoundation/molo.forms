@@ -883,4 +883,4 @@ class ArticlePageForms(Orderable):
         help_text=_('Survey')
     )
     panels = [PageChooserPanel('form', 'forms.MoloFormPage')]
-    api_fields = ['forms']
+    api_fields = ['form']
