@@ -10,7 +10,6 @@ from molo.core.models import (Languages, Main, SiteLanguageRelation,
 from molo.core.tests.base import MoloTestCaseMixin
 from molo.forms.templatetags.molo_forms_tags import url_to_anchor
 from molo.forms.models import (
-    ArticlePageForms,
     MoloFormField,
     MoloFormPage,
     FormsIndexPage,
