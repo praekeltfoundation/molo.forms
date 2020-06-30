@@ -15,12 +15,14 @@
 	</h4>
 	<div class="forms__results">
 	{% for question, answers in results.items %}
-		<h3 class="forms__question">{{ question }}</h3>
-		{% for answer, count in answers.items %}
-		  <div class="forms__answer">
-			<span>{{ answer }}</span> {{ count }}{% if self.show_results_as_percentage %}%{% endif %}
-		  </div>
-		{% endfor %}
+		{% if question.lower != 'article_page' %}
+			<h3 class="forms__question">12{{ question }}</h3>
+			{% for answer, count in answers.items %}
+			  <div class="forms__answer">
+				<span>{{ answer }}</span> {{ count }}{% if self.show_results_as_percentage %}%{% endif %}
+			  </div>
+			{% endfor %}
+		{% endif %}
 	{% endfor %}
 	</div>
 	{% endif %}

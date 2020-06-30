@@ -15,10 +15,10 @@ from molo.forms.models import (
 )
 
 from .utils import skip_logic_block_data, skip_logic_data
-from .base import create_form
+from .base import MoloFormsTestMixin, create_form
 
 
-class TestFormModels(TestCase, MoloTestCaseMixin):
+class TestFormModels(MoloFormsTestMixin, MoloTestCaseMixin, TestCase):
     def test_submission_class(self):
         submission_class = MoloFormPage().get_submission_class()
 
@@ -66,6 +66,31 @@ class TestFormModels(TestCase, MoloTestCaseMixin):
                 your_words_competition=True,
             )
             self.assertEqual(e, error)
+
+    def test_article_only_flag(self):
+        with self.assertRaises(ValidationError) as e:
+            error = '"{}" form needs to have "{}" selected'.format(
+                'An article form only', 'Save Linked Article')
+
+            MoloFormPage.objects.create(
+                title="yourwords form title",
+                slug="yourwords_form_title",
+                article_form_only=True,
+            )
+            self.assertEqual(e, error)
+
+        self.mk_main()
+        self.forms_index = FormsIndexPage.objects.child_of(
+            self.main).first()
+
+        form = self.create_molo_form_page_with_field(
+            parent=self.forms_index,
+            title="yourwords form title",
+            slug="yourwords_form_title",
+            article_form_only=True,
+            save_article_object=True,
+        )
+        self.assertTrue(form)
 
 
 class TestSkipLogicMixin(TestCase, MoloTestCaseMixin):

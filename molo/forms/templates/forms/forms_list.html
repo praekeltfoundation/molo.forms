@@ -35,6 +35,7 @@
 					          </fieldset>
 					        {% endfor %}
 									{% trans "Submit Form" as text %}
+					        <input type="hidden" name="article_page" value="{{ self.pk }}" />
 					        <input type="submit" value="{% if is_intermediate_step %}{% trans 'Next Question' %}{% else %}{{ form.submit_text|default:text }}{% endif %}" />
 					      </form>
 					    {% else %}

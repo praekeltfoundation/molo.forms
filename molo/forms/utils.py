@@ -21,16 +21,21 @@ class SkipLogicPaginator(Paginator):
 
         super(SkipLogicPaginator, self).__init__(object_list, per_page=1)
 
+        # be sure to exclude hidden article_page field
         self.question_labels = [
             question.clean_name for question in self.object_list
+            if question.pk and question.field_type != 'hidden'
         ]
 
         self.page_breaks = [
             i + 1 for i, field in enumerate(self.object_list)
-            if field.has_skipping or field.page_break
+            if (field.has_skipping or field.page_break) and
+               (field.pk and field.field_type != 'hidden')
         ]
 
-        num_questions = self.object_list.count()
+        num_questions = len([
+            i for i in self.object_list
+            if i.pk and i.field_type != 'hidden'])
 
         if self.page_breaks:
             # Always have a break at start to create first page
@@ -166,7 +171,15 @@ class SkipLogicPaginator(Paginator):
             top_index = index + self.per_page
             top = self.page_breaks[top_index]
 
-        return self._get_page(self.object_list[bottom:top], index + 1, self)
+        if number != 1:
+            return self._get_page(self.object_list[bottom:top], number, self)
+
+        object_list = [
+            i for i in self.object_list
+            if i.field_type == 'hidden'
+        ]
+        object_list += self.object_list[bottom:top]
+        return self._get_page(object_list, number, self)
 
 
 class SkipLogicPage(Page):
@@ -194,14 +207,18 @@ class SkipLogicPage(Page):
     def is_end(self):
         return self.is_next_action(SkipState.END, SkipState.FORM)
 
-    def success(self, slug):
+    def success(self, slug, article=None):
         if self.is_next_action(SkipState.FORM):
             return redirect(
                 self.last_question.next_page(self.last_response).url
             )
+        if not article:
+            return redirect(
+                reverse('molo.forms:success', args=(slug, )))
+
         return redirect(
-            reverse('molo.forms:success', args=(slug, ))
-        )
+            reverse('molo.forms:success_article_form', kwargs={
+                'slug': slug, 'article': article}))
 
     def next_page_number(self):
         return self.paginator.next_page
