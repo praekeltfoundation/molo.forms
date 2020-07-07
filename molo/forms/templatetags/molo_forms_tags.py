@@ -34,34 +34,35 @@ def get_form_list(
         forms = []
         if only_linked_forms:
             forms = (MoloFormPage.objects.descendant_of(page).filter(
-                language__is_main_language=True,
-                display_form_directly=False,
-                contact_form=False,
-                your_words_competition=False).exact_type(
-                    MoloFormPage).specific())
+                language__is_main_language=True, display_form_directly=False,
+                contact_form=False, article_form_only=False,
+                your_words_competition=False
+            ).exact_type(MoloFormPage).specific())
         elif only_direct_forms:
             forms = (MoloFormPage.objects.descendant_of(page).filter(
                 language__is_main_language=True, display_form_directly=True,
-                your_words_competition=False).exact_type(
-                    MoloFormPage).specific())
+                article_form_only=False, your_words_competition=False,
+            ).exact_type(MoloFormPage).specific())
         elif only_yourwords:
             forms = (MoloFormPage.objects.descendant_of(page).filter(
                 language__is_main_language=True,
-                your_words_competition=True).exact_type(
-                    MoloFormPage).specific())
+                your_words_competition=True,
+            ).exact_type(MoloFormPage).specific())
         elif personalisable_form:
             forms = (PersonalisableForm.objects.descendant_of(page).filter(
-                language__is_main_language=True).exact_type(
-                    PersonalisableForm).specific())
+                language__is_main_language=True,
+            ).exact_type(PersonalisableForm).specific())
+
         elif contact_form:
             forms = (MoloFormPage.objects.descendant_of(page).filter(
                 language__is_main_language=True,
                 contact_form=True).exact_type(
                 MoloFormPage).specific())
+
         else:
             forms = (MoloFormPage.objects.descendant_of(page).filter(
-                language__is_main_language=True).exact_type(
-                    MoloFormPage).specific())
+                language__is_main_language=True,
+            ).exact_type(MoloFormPage).specific())
     else:
         forms = MoloFormPage.objects.none()
     context.update({
@@ -74,15 +75,16 @@ def add_form_objects_to_forms(context):
     forms = []
     for form_page in context['forms']:
         form = None
-        if (form_page.allow_multiple_submissions_per_user or
-                not form_page.has_user_submitted_form(
-                    context['request'], form_page.id)):
-            form = form_page.get_form()
+        if isinstance(form_page, MoloFormPage):
+            if (form_page.allow_multiple_submissions_per_user or
+                    not form_page.has_user_submitted_form(
+                        context['request'], form_page.id)):
+                form = form_page.get_form()
 
-        forms.append({
-            'molo_form_page': form_page,
-            'form': form,
-        })
+            forms.append({
+                'molo_form_page': form_page,
+                'form': form,
+            })
 
     context.update({
         'forms': forms,

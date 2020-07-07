@@ -185,6 +185,16 @@ class FormListTest(TestCase, MoloTestCaseMixin):
                 title="linked form title",
                 slug="linked_form_title",
                 display_form_directly=False,
+                article_form_only=False,
+            ))
+        self.article_molo_form_page, article_molo_form_field = (
+            self.create_molo_form_page(
+                parent=self.forms_index,
+                title="article form title(Reaction Question)",
+                slug="article_form_title",
+                display_form_directly=False,
+                article_form_only=True,
+                save_article_object=True,
             ))
         self.contact_form_page, linked_molo_form_field = (
             self.create_molo_form_page(
@@ -224,19 +234,25 @@ class FormListTest(TestCase, MoloTestCaseMixin):
             'request': self.request,
         })
         context = get_form_list(context)
-        self.assertEqual(len(context['forms']), 4)
+        self.assertEqual(len(context['forms']), 5)
         self.assertTrue(self.direct_molo_form_page in context['forms'])
+        self.assertFalse(self.translated_linked_form in context['forms'])
+        self.assertTrue(self.article_molo_form_page in context['forms'])
         self.assertTrue(self.linked_molo_form_page in context['forms'])
+        self.assertTrue(self.yourwords_molo_form_page in context['forms'])
+        self.assertTrue(self.contact_form_page in context['forms'])
 
         context = Context({
             'locale_code': 'fr',
             'request': self.request,
         })
         context = get_form_list(context)
-        self.assertEqual(len(context['forms']), 4)
+        self.assertEqual(len(context['forms']), 5)
+        self.assertFalse(self.direct_molo_form_page in context['forms'])
         self.assertTrue(self.translated_direct_form in context['forms'])
-        self.assertTrue(self.translated_linked_form in context['forms'])
         self.assertTrue(self.yourwords_molo_form_page in context['forms'])
+        self.assertTrue(self.article_molo_form_page in context['forms'])
+        self.assertTrue(self.contact_form_page in context['forms'])
 
     def test_get_form_list_only_direct(self):
         context = Context({
@@ -307,6 +323,33 @@ class FormListTest(TestCase, MoloTestCaseMixin):
         article_page_form = ArticlePageForms(form=survey, page=article)
         article.forms.add(article_page_form)
         res = forms_list_linked_to_pages(context, article)
+        self.assertEqual(len(res['forms']), 1)
+        self.assertEqual(res['forms'][0]['molo_form_page'], survey)
+
+    def test_forms_list_linked_to_sub_pages(self):
+        """
+        Create a sub page with a linked molo form
+        test that the linked molo forms are only of the sub page
+        """
+        context = Context({
+            'locale_code': 'en',
+            'request': self.request,
+        })
+        survey = self.direct_molo_form_page
+        article = self.mk_article(self.main)
+        article_page_form = ArticlePageForms(form=survey, page=article)
+        article.forms.add(article_page_form)
+
+        sub_article = self.mk_article(article)
+        sub_article_page_form = ArticlePageForms(form=survey, page=sub_article)
+        sub_article.forms.add(sub_article_page_form)
+
+        res = forms_list_linked_to_pages(context, sub_article)
+        self.assertEqual(len(res['forms']), 1)
+        self.assertEqual(res['forms'][0]['molo_form_page'], survey)
+
+        res = forms_list_linked_to_pages(context, article)
+        self.assertEqual(len(res['forms']), 1)
         self.assertEqual(res['forms'][0]['molo_form_page'], survey)
 
     def test_get_form_list_arg_error(self):

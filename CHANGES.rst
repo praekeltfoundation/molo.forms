@@ -1,5 +1,35 @@
 CHANGE LOG
 ==========
+10.1.18
+-------
+- Fix error raised when querying the api for an article that has a form attached
+
+10.1.17
+-------
+- Update success url's get params suffix
+
+10.1.16
+-------
+- Add JSON responses for a form success view
+
+10.1.15
+-------
+- Template tag bug fix, add a check for MoloFormPage instance
+
+10.1.14
+-------
+- Fix Form submission results page to filter by article_page when present
+- Add boolean Molo Form Setting to dynamically add an Article Page field to the forms
+- Add Article Form Page's success url
+- Update Templates to skip label and help text for hidden fields
+- Add model level validation
+
+10.1.13
+-------
+- Exclude `article_form_only` forms in forms index pages
+- Add `article_form_only` flag to `MoloFormPage` model
+- Save article_page attribute on form submissions
+
 10.1.9
 ------
 - Add ability for API form submissions to be linked to a user

@@ -192,6 +192,17 @@ class MoloFormPage(
         verbose_name='Is Contact Form',
         help_text='This will display the correct template for contact forms'
     )
+    save_article_object = BooleanField(
+        default=False,
+        verbose_name='Save Linked Article',
+        help_text='This will always save the related'
+                  ' article as a hidden form field'
+    )
+    article_form_only = BooleanField(
+        default=False,
+        verbose_name='Is Article Form Only',
+        help_text='This will display only in article pages'
+    )
     extra_style_hints = models.TextField(
         default='',
         null=True, blank=True,
@@ -225,6 +236,8 @@ class MoloFormPage(
             FieldPanel('show_results_as_percentage'),
             FieldPanel('multi_step'),
             FieldPanel('display_form_directly'),
+            FieldPanel('save_article_object'),
+            FieldPanel('article_form_only'),
             FieldPanel('your_words_competition'),
             FieldPanel('contact_form'),
         ], heading='Form Settings'),
@@ -261,12 +274,35 @@ class MoloFormPage(
         return SectionPage.objects.all().ancestor_of(self).last()
 
     def process_form_submission(self, form):
+        article_page = None
         user = form.user if not form.user.is_anonymous else None
 
+        if self.save_article_object:
+            article_page = form.cleaned_data.get('article_page')
+            try:
+                article_page = int(article_page)
+            except ValueError as e:
+                raise ValidationError(e)
         self.get_submission_class().objects.create(
+            article_page_id=article_page,
             form_data=json.dumps(form.cleaned_data, cls=DjangoJSONEncoder),
             page=self, user=user
         )
+
+    def get_form_fields(self):
+        class MyQSList(list):
+            """trying to chain qs"""
+            def count(self):
+                return len(self)
+
+        fields = super().get_form_fields()
+        if self.save_article_object:
+            fields = MyQSList(fields)
+            field = MoloFormField(
+                label='article_page',
+                field_type='hidden', required=True)
+            fields.append(field)
+        return fields
 
     def has_user_submitted_form(self, request, form_page_id):
         if 'completed_forms' not in request.session:
@@ -394,7 +430,12 @@ class MoloFormPage(
                         self.process_form_submission(form)
                         del request.session[self.session_key_data]
 
-                        return prev_step.success(self.slug)
+                        article_page = form.cleaned_data.get('article_page')
+                        is_article_form = self.save_article_object
+                        return prev_step.success(
+                            self.slug,
+                            article_page if is_article_form else None
+                        )
 
             else:
                 # If data for step is invalid
@@ -439,23 +480,35 @@ class MoloFormPage(
             form = self.get_form(request.POST, page=self, user=request.user)
 
             if form.is_valid():
+                is_ajax = request.POST.get('ajax') == 'True'
+
                 # check if the post is made via ajax call
-                if 'ajax' in request.POST and \
-                        request.POST['ajax'] == 'True':
-                    # check if a submission exists for this question and user
+                # check if a submission exists for this question and user
+                # currently for submissions via ajax calls
+                # user should be able to update their submission
+                # NB: removes object then creates a new one
+                # NB: article_page filter in case of multi article_page forms
+                if is_ajax:
                     submission = self.get_submission_class().objects.filter(
-                        page=self, user__pk=request.user.pk)
+                        page=self, user__pk=request.user.pk,
+                        article_page=form.cleaned_data.get('article_page',)
+                    )
                     if submission.exists():
-                        # currently for submissions via ajax calls
-                        # user should be able to update their submission
                         submission.delete()
 
                 self.set_form_as_submitted_for_session(request)
                 self.process_form_submission(form)
 
-                # render the landing_page
+                article = form.cleaned_data.get('article_page')
+                url_suffix = '?format=json' if is_ajax else ''
+                if article:
+                    kw = {'slug': self.slug, 'article': article}
+                    url_name = 'molo.forms:success_article_form'
+                    return redirect(reverse(url_name, kwargs=kw) + url_suffix)
+
+                url_name = 'molo.forms:success'
                 return redirect(
-                    reverse('molo.forms:success', args=(self.slug, )))
+                    reverse(url_name, args=(self.slug, )) + url_suffix)
 
         return super(MoloFormPage, self).serve(request, *args, **kwargs)
 
@@ -475,6 +528,12 @@ class MoloFormPage(
 
             raise ValidationError({
                 'your_words_competition': error, 'contact_form': error})
+
+        if self.article_form_only and not self.save_article_object:
+            error = _('"{}" form needs to have "{}" selected'.format(
+                'An article form only', 'Save Linked Article'
+            ))
+            raise ValidationError({'save_article_object': error})
 
 
 class MoloFormPageView(models.Model):
@@ -824,4 +883,4 @@ class ArticlePageForms(Orderable):
         help_text=_('Survey')
     )
     panels = [PageChooserPanel('form', 'forms.MoloFormPage')]
-    api_fields = ['forms']
+    api_fields = ['form']
