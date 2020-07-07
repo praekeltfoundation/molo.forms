@@ -1,5 +1,8 @@
 CHANGE LOG
 ==========
+10.1.18
+-------
+- Fix error raised when querying the api for an article that has a form attached
 
 10.1.17
 -------
