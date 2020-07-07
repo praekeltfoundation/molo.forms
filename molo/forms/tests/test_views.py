@@ -1570,6 +1570,20 @@ class TestAPIEndpointsView(TestCase, MoloTestCaseMixin):
         form.save_revision().publish()
         return form
 
+    def test_article_page_api_returns_linked_forms(self):
+        section = self.mk_section(self.section_index, title='section')
+        article = self.mk_article(section, title='article')
+        form = self.new_form("Article Form")
+        article_page_form = ArticlePageForms(form=form, page=article)
+        article.forms.add(article_page_form)
+        article.save_revision().publish()
+        response = self.client.get('/api/v2/pages/%s/' % article.id)
+
+        obj = response.json()
+        self.assertIn("forms", obj)
+        self.assertEqual(len(obj['forms']), 1)
+        self.assertEqual(obj['forms'][0]['form']['id'], form.id)
+
     def test_api_list_endpoint_shows_forms(self):
         response = self.client.get('/api/v2/forms/')
 
