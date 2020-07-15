@@ -344,6 +344,10 @@ class FormListTest(TestCase, MoloTestCaseMixin):
         self.assertEqual(len(res['forms']), 1)
         self.assertEqual(res['forms'][0]['molo_form_page'], survey2)
 
+        res = forms_list_linked_to_pages(context, article)
+        self.assertEqual(len(res['forms']), 1)
+        self.assertEqual(res['forms'][0]['molo_form_page'], survey)
+
     def test_forms_list_linked_to_sub_pages(self):
         """
         Create a sub page with a linked molo form
