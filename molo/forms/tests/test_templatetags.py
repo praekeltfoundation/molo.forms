@@ -320,11 +320,29 @@ class FormListTest(TestCase, MoloTestCaseMixin):
         })
         survey = self.direct_molo_form_page
         article = self.mk_article(self.main)
+
         article_page_form = ArticlePageForms(form=survey, page=article)
         article.forms.add(article_page_form)
         res = forms_list_linked_to_pages(context, article)
         self.assertEqual(len(res['forms']), 1)
         self.assertEqual(res['forms'][0]['molo_form_page'], survey)
+
+        sub_section = self.mk_sections(article, count=1)[0]
+        sub_article = self.mk_article(sub_section)
+
+        survey2, survey2_form_field = (
+            self.create_molo_form_page(
+                parent=self.forms_index,
+                title="direct form title",
+                slug="direct_form_title",
+                display_form_directly=True,
+            ))
+
+        article_page_form = ArticlePageForms(form=survey2, page=sub_article)
+        sub_article.forms.add(article_page_form)
+        res = forms_list_linked_to_pages(context, sub_article)
+        self.assertEqual(len(res['forms']), 1)
+        self.assertEqual(res['forms'][0]['molo_form_page'], survey2)
 
     def test_forms_list_linked_to_sub_pages(self):
         """
