@@ -400,7 +400,7 @@ class MoloFormPage(
                 form_data.update(prev_form.cleaned_data)
                 self.save_data(request, form_data)
 
-                if prev_step.has_next():
+                if prev_step.has_next() and len(prev_step.object_list) > 0:
                     # Create a new form for a following step, if the following
                     # step is present
                     form_class = self.get_form_class_for_step(step)

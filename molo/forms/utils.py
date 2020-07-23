@@ -189,9 +189,17 @@ class SkipLogicPage(Page):
     def possibly_has_next(self):
         return super(SkipLogicPage, self).has_next()
 
+    def get_last_non_empty_page(self, page):
+        # Recursively find the last page that had a question and return that
+        if len(page.object_list) == 0:
+            return self.get_last_non_empty_page(
+                self.paginator.page(page.previous_page_number()))
+        return page
+
     @cached_property
     def last_question(self):
-        return self.object_list[-1]
+        page = self.get_last_non_empty_page(self)
+        return page.object_list[-1]
 
     @cached_property
     def last_response(self):
