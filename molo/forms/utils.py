@@ -27,11 +27,17 @@ class SkipLogicPaginator(Paginator):
             if question.pk and question.field_type != 'hidden'
         ]
 
-        self.page_breaks = [
-            i + 1 for i, field in enumerate(self.object_list)
-            if (field.has_skipping or field.page_break) and
-               (field.pk and field.field_type != 'hidden')
-        ]
+        self.page_breaks = []
+        for i, field in enumerate(self.object_list):
+            # Remove page breaks before questions that have been skipped
+            if field.has_skipping:
+                if field.clean_name in self.previous_answers:
+                    answer = self.previous_answers[field.clean_name]
+                    if field.is_next_action(answer, SkipState.QUESTION):
+                        continue
+                self.page_breaks.append(i+1)
+            elif field.page_break:
+                self.page_breaks.append(i+1)
 
         num_questions = len([
             i for i in self.object_list
