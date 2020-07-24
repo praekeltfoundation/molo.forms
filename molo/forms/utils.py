@@ -27,11 +27,17 @@ class SkipLogicPaginator(Paginator):
             if question.pk and question.field_type != 'hidden'
         ]
 
-        self.page_breaks = [
-            i + 1 for i, field in enumerate(self.object_list)
-            if (field.has_skipping or field.page_break) and
-               (field.pk and field.field_type != 'hidden')
-        ]
+        self.page_breaks = []
+        for i, field in enumerate(self.object_list):
+            # Remove page breaks before questions that have been skipped
+            if field.has_skipping:
+                if field.clean_name in self.previous_answers:
+                    answer = self.previous_answers[field.clean_name]
+                    if field.is_next_action(answer, SkipState.QUESTION):
+                        continue
+                self.page_breaks.append(i + 1)
+            elif field.page_break:
+                self.page_breaks.append(i + 1)
 
         num_questions = len([
             i for i in self.object_list
@@ -189,9 +195,17 @@ class SkipLogicPage(Page):
     def possibly_has_next(self):
         return super(SkipLogicPage, self).has_next()
 
+    def get_last_non_empty_page(self, page):
+        # Recursively find the last page that had a question and return that
+        if len(page.object_list) == 0:
+            return self.get_last_non_empty_page(
+                self.paginator.page(page.previous_page_number()))
+        return page
+
     @cached_property
     def last_question(self):
-        return self.object_list[-1]
+        page = self.get_last_non_empty_page(self)
+        return page.object_list[-1]
 
     @cached_property
     def last_response(self):

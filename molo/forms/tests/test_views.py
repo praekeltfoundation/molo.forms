@@ -876,9 +876,9 @@ class TestFormViews(TestCase, MoloTestCaseMixin):
         results = self.client.get(success_url + '?format=json')
         self.assertEqual(results.status_code, 200)
         self.assertEqual(
-            b'{"a, b or c?": {"a": 1}, "article_page": {"%d": 1}}'
-            % self.article.pk,
-            results.content
+            json.loads('{"a, b or c?": {"a": 1}, "article_page": {"%d": 1}}'
+                       % self.article.pk),
+            results.json()
         )
 
         form.show_results_as_percentage = True
@@ -887,9 +887,11 @@ class TestFormViews(TestCase, MoloTestCaseMixin):
         results = self.client.get(success_url + '?format=json')
         self.assertEqual(results.status_code, 200)
         self.assertEqual(
-            b'{"a, b or c?": {"a": 100}, "article_page": {"%d": 100}}'
-            % self.article.pk,
-            results.content
+            json.loads(
+                '{"a, b or c?": {"a": 100}, "article_page": {"%d": 100}}'
+                % self.article.pk
+            ),
+            results.json()
         )
 
 
@@ -973,16 +975,17 @@ class TestSkipLogicFormView(TestCase, MoloTestCaseMixin):
 
         self.last_molo_form_field = MoloFormField.objects.create(
             page=self.molo_form_page,
-            sort_order=3,
+            sort_order=2,
             label='Your favourite actor',
             field_type='singleline',
-            required=True
+            required=True,
+            page_break=True
         )
 
         self.choices = ['next', 'end', 'form', 'question']
         self.skip_logic_form_field = MoloFormField.objects.create(
             page=self.molo_form_page,
-            sort_order=1,
+            sort_order=0,
             label='Where should we go',
             field_type='dropdown',
             skip_logic=skip_logic_data(
@@ -991,21 +994,23 @@ class TestSkipLogicFormView(TestCase, MoloTestCaseMixin):
                 form=self.another_molo_form_page,
                 question=self.last_molo_form_field,
             ),
-            required=True
+            required=True,
+            page_break=True
         )
 
         self.molo_form_field = MoloFormField.objects.create(
             page=self.molo_form_page,
-            sort_order=2,
+            sort_order=1,
             label='Your favourite animal',
             field_type='singleline',
-            required=True
+            required=True,
+            page_break=False
         )
 
         self.another_molo_form_field = (
             MoloFormField.objects.create(
                 page=self.another_molo_form_page,
-                sort_order=1,
+                sort_order=0,
                 label='Your favourite actress',
                 field_type='singleline',
                 required=True
@@ -1028,7 +1033,6 @@ class TestSkipLogicFormView(TestCase, MoloTestCaseMixin):
         self.assertContains(response, form.title)
         self.assertContains(response, form.introduction)
         for question in questions:
-            self.assertContains(response, question.label)
             self.assertContains(response, question.label)
 
     def test_skip_logic_next_question(self):
@@ -1122,6 +1126,8 @@ class TestSkipLogicFormView(TestCase, MoloTestCaseMixin):
         )
 
     def test_skip_logic_to_another_question(self):
+        self.molo_form_field.page_break = True
+        self.molo_form_field.save()
         response = self.client.get(self.molo_form_page.url)
 
         self.assertFormAndQuestions(
@@ -1140,18 +1146,27 @@ class TestSkipLogicFormView(TestCase, MoloTestCaseMixin):
             self.skip_logic_form_field.clean_name: self.choices[3],
         }, follow=True)
 
-        # Should end the form and progress to the new form
+        self.assertNotContains(response, self.skip_logic_form_field.label)
+        self.assertNotContains(response, self.molo_form_field.label)
+
+        # Should show the last question
         self.assertFormAndQuestions(
             response,
             self.molo_form_page,
             [self.last_molo_form_field],
         )
 
+        response = self.client.post(self.molo_form_page.url + '?p=3', {
+            self.last_molo_form_field.clean_name: "frank",
+        }, follow=True)
+
+        self.assertContains(response, self.molo_form_page.thank_you_text)
+
     def test_skip_logic_checkbox_with_data(self):
         self.skip_logic_form_field.field_type = 'checkbox'
         self.skip_logic_form_field.skip_logic = skip_logic_data(
             ['', ''],
-            self.choices[:2],
+            self.choices[:2],  # next, end
         )
         self.skip_logic_form_field.save()
 
@@ -1192,7 +1207,7 @@ class TestSkipLogicFormView(TestCase, MoloTestCaseMixin):
         self.skip_logic_form_field.field_type = 'checkbox'
         self.skip_logic_form_field.skip_logic = skip_logic_data(
             ['', ''],
-            self.choices[:2],
+            self.choices[:2],  # next, end
         )
         self.skip_logic_form_field.save()
 
