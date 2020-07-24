@@ -1,5 +1,13 @@
 CHANGE LOG
 ==========
+10.1.20
+-------
+- Ensure skip logic recalculates pages based on skipped questions
+
+10.1.19
+-------
+- Bug fix: forms_list_linked_to_pages template tag was rendering parent forms
+
 10.1.18
 -------
 - Fix error raised when querying the api for an article that has a form attached
