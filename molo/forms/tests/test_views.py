@@ -1002,7 +1002,7 @@ class TestSkipLogicFormView(TestCase, MoloTestCaseMixin):
             label='Your favourite animal',
             field_type='singleline',
             required=True,
-            page_break=True
+            page_break=False
         )
 
         self.another_molo_form_field = (
@@ -1124,6 +1124,8 @@ class TestSkipLogicFormView(TestCase, MoloTestCaseMixin):
         )
 
     def test_skip_logic_to_another_question(self):
+        self.molo_form_field.page_break = True
+        self.molo_form_field.save()
         response = self.client.get(self.molo_form_page.url)
 
         self.assertFormAndQuestions(
@@ -1162,7 +1164,7 @@ class TestSkipLogicFormView(TestCase, MoloTestCaseMixin):
         self.skip_logic_form_field.field_type = 'checkbox'
         self.skip_logic_form_field.skip_logic = skip_logic_data(
             ['', ''],
-            self.choices[:2],
+            self.choices[:2],  # next, end
         )
         self.skip_logic_form_field.save()
 
@@ -1203,7 +1205,7 @@ class TestSkipLogicFormView(TestCase, MoloTestCaseMixin):
         self.skip_logic_form_field.field_type = 'checkbox'
         self.skip_logic_form_field.skip_logic = skip_logic_data(
             ['', ''],
-            self.choices[:2],
+            self.choices[:2],  # next, end
         )
         self.skip_logic_form_field.save()
 
