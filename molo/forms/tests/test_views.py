@@ -876,9 +876,9 @@ class TestFormViews(TestCase, MoloTestCaseMixin):
         results = self.client.get(success_url + '?format=json')
         self.assertEqual(results.status_code, 200)
         self.assertEqual(
-            b'{"a, b or c?": {"a": 1}, "article_page": {"%d": 1}}'
-            % self.article.pk,
-            results.content
+            json.loads('{"a, b or c?": {"a": 1}, "article_page": {"%d": 1}}'
+                       % self.article.pk),
+            results.json()
         )
 
         form.show_results_as_percentage = True
@@ -887,10 +887,10 @@ class TestFormViews(TestCase, MoloTestCaseMixin):
         results = self.client.get(success_url + '?format=json')
         self.assertEqual(results.status_code, 200)
         self.assertEqual(
-            b'{"a, b or c?": {"a": 100}, "article_page": {"%d": 100}}'
-            % self.article.pk,
-            results.content
-        )
+            json.loads('{"a, b or c?": {"a": 100}, "article_page": {"%d": 100}}'
+                       % self.article.pk),
+            results.json()
+            )
 
 
 class TestDeleteButtonRemoved(TestCase, MoloTestCaseMixin):
