@@ -887,10 +887,12 @@ class TestFormViews(TestCase, MoloTestCaseMixin):
         results = self.client.get(success_url + '?format=json')
         self.assertEqual(results.status_code, 200)
         self.assertEqual(
-            json.loads('{"a, b or c?": {"a": 100}, "article_page": {"%d": 100}}'
-                       % self.article.pk),
+            json.loads(
+                '{"a, b or c?": {"a": 100}, "article_page": {"%d": 100}}'
+                % self.article.pk
+            ),
             results.json()
-            )
+        )
 
 
 class TestDeleteButtonRemoved(TestCase, MoloTestCaseMixin):

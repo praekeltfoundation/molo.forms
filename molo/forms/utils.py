@@ -35,9 +35,9 @@ class SkipLogicPaginator(Paginator):
                     answer = self.previous_answers[field.clean_name]
                     if field.is_next_action(answer, SkipState.QUESTION):
                         continue
-                self.page_breaks.append(i+1)
+                self.page_breaks.append(i + 1)
             elif field.page_break:
-                self.page_breaks.append(i+1)
+                self.page_breaks.append(i + 1)
 
         num_questions = len([
             i for i in self.object_list
