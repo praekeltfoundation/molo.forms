@@ -352,6 +352,7 @@ class TestPageBreakWithTwoQuestionsInOneStep(TestCase, MoloTestCaseMixin):
         })
         self.assertContains(response, field_2.label)
         self.assertContains(response, field_3.label)
+        self.assertContains(response, 'action="' + form.url + '?p=3"')
 
         response = self.client.post(form.url + '?p=3', {
             field_3.clean_name: 'because ;)',
