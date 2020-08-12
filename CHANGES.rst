@@ -1,5 +1,10 @@
 CHANGE LOG
 ==========
+10.1.21
+-------
+- Fix skip logic forms not saving last question in some cases
+- Build on changes to how pages are calculated based on skipped questions
+
 10.1.20
 -------
 - Ensure skip logic recalculates pages based on skipped questions
