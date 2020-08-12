@@ -1253,6 +1253,7 @@ class TestSkipLogicFormView(TestCase, MoloTestCaseMixin):
 
         self.assertNotContains(response, self.skip_logic_form_field.label)
         self.assertNotContains(response, self.molo_form_field.label)
+        self.assertNotContains(response, self.extra_form_field.label)
 
         # Should show the last question
         self.assertFormAndQuestions(
@@ -1271,6 +1272,7 @@ class TestSkipLogicFormView(TestCase, MoloTestCaseMixin):
         self.assertEqual(json.loads(subs[0].form_data), {
             "where-should-we-go": "question",
             "your-favourite-animal": "NA (Skipped)",
+            "extra-question": "NA (Skipped)",
             "your-favourite-actor": "frank"})
 
     def test_skip_logic_checkbox_with_data(self):
