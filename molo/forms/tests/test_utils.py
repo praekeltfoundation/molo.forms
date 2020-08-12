@@ -25,9 +25,9 @@ class TestSkipLogicPaginator(TestCase, MoloTestCaseMixin):
             field_type='singleline',
             required=True
         )
-        self.fourth_field = MoloFormField.objects.create(
+        self.fifth_field = MoloFormField.objects.create(
             page=self.form,
-            sort_order=4,
+            sort_order=5,
             label='A random animal',
             field_type='singleline',
             required=True
@@ -41,7 +41,7 @@ class TestSkipLogicPaginator(TestCase, MoloTestCaseMixin):
             skip_logic=skip_logic_data(
                 field_choices,
                 field_choices,
-                question=self.fourth_field,
+                question=self.fifth_field,
             ),
             required=True
         )
@@ -53,9 +53,17 @@ class TestSkipLogicPaginator(TestCase, MoloTestCaseMixin):
             skip_logic=skip_logic_data(
                 field_choices,
                 field_choices,
-                question=self.fourth_field,
+                question=self.fifth_field,
             ),
             required=True
+        )
+        self.fourth_field = MoloFormField.objects.create(
+            page=self.form,
+            sort_order=4,
+            label='Your least favourite animal',
+            field_type='singleline',
+            required=True,
+            page_break=True
         )
         self.hidden_field = MoloFormField.objects.create(
             page=self.form,
@@ -68,10 +76,10 @@ class TestSkipLogicPaginator(TestCase, MoloTestCaseMixin):
         self.paginator = SkipLogicPaginator(self.form.get_form_fields())
 
     def test_correct_num_pages(self):
-        self.assertEqual(self.paginator.num_pages, 3)
+        self.assertEqual(self.paginator.num_pages, 4)
 
     def test_page_breaks_correct(self):
-        self.assertEqual(self.paginator.page_breaks, [0, 2, 3, 4])
+        self.assertEqual(self.paginator.page_breaks, [0, 2, 3, 4, 5])
 
     def test_first_page_correct(self):
         page = self.paginator.page(1)
@@ -89,9 +97,14 @@ class TestSkipLogicPaginator(TestCase, MoloTestCaseMixin):
         self.assertEqual(page.object_list, [self.third_field])
         self.assertTrue(page.has_next())
 
+    def test_third_page_correct(self):
+        third_page = self.paginator.page(3)
+        self.assertEqual(third_page.object_list, [self.fourth_field])
+        self.assertTrue(third_page.has_next())
+
     def test_last_page_correct(self):
-        last_page = self.paginator.page(3)
-        self.assertEqual(last_page.object_list, [self.fourth_field])
+        last_page = self.paginator.page(4)
+        self.assertEqual(last_page.object_list, [self.fifth_field])
         self.assertFalse(last_page.has_next())
 
     def test_is_end_if_skip_logic(self):
@@ -109,9 +122,10 @@ class TestSkipLogicPaginator(TestCase, MoloTestCaseMixin):
         )
         page = paginator.page(1)
         next_page_number = page.next_page_number()
-        self.assertEqual(next_page_number, 3)
+        self.assertEqual(next_page_number, 4)
         second_page = paginator.page(next_page_number)
-        self.assertEqual(second_page.object_list, [self.fourth_field])
+        self.assertEqual(second_page.object_list, [self.fifth_field])
+        self.assertFalse(second_page.has_next())
 
     def test_first_question_skip_to_next(self):
         paginator = SkipLogicPaginator(
@@ -134,7 +148,7 @@ class TestSkipLogicPaginator(TestCase, MoloTestCaseMixin):
         )
         page = paginator.page(1)
         next_page_number = page.next_page_number()
-        self.assertEqual(next_page_number, 3)
+        self.assertEqual(next_page_number, 4)
         second_page = paginator.page(next_page_number)
         previous_page_number = second_page.previous_page_number()
         self.assertEqual(previous_page_number, 1)
@@ -156,8 +170,8 @@ class TestSkipLogicPaginator(TestCase, MoloTestCaseMixin):
         )
         self.assertEqual(paginator.previous_page, 1)
         self.assertEqual(paginator.last_question_index, 1)
-        self.assertEqual(paginator.next_page, 3)
-        self.assertEqual(paginator.next_question_index, 3)
+        self.assertEqual(paginator.next_page, 4)
+        self.assertEqual(paginator.next_question_index, 4)
 
     def test_no_data_index(self):
         paginator = SkipLogicPaginator(self.form.get_form_fields())
@@ -185,6 +199,7 @@ class TestSkipLogicPaginator(TestCase, MoloTestCaseMixin):
         self.first_field.delete()
         self.third_field.delete()
         self.fourth_field.delete()
+        self.fifth_field.delete()
         paginator = SkipLogicPaginator(self.form.get_form_fields())
         self.assertEqual(paginator.num_pages, 1)
 
