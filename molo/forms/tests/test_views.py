@@ -1275,6 +1275,77 @@ class TestSkipLogicFormView(TestCase, MoloTestCaseMixin):
             "extra-question": "NA (Skipped)",
             "your-favourite-actor": "frank"})
 
+    def test_skip_logic_doesnt_repeat_pages_if_earlier_pages_were_skipped(self):
+        # The previous method of calculating page breaks led to later pages being
+        # displayed multiple times
+
+        self.molo_form_field.page_break = True
+        self.molo_form_field.save()
+
+        # add another question after the one we skip to
+        self.extra_form_field = MoloFormField.objects.create(
+            page=self.molo_form_page,
+            sort_order=3,
+            label='extra question',
+            field_type='singleline',
+            required=True,
+            page_break=True
+        )
+
+        response = self.client.get(self.molo_form_page.url)
+
+        self.assertFormAndQuestions(
+            response,
+            self.molo_form_page,
+            [self.skip_logic_form_field]
+        )
+        self.assertNotContains(
+            response,
+            self.last_molo_form_field.label,
+        )
+        self.assertNotContains(response, self.molo_form_field.label)
+        self.assertContains(response, 'Next Question')
+
+        response = self.client.post(self.molo_form_page.url + '?p=2', {
+            self.skip_logic_form_field.clean_name: self.choices[3],
+        }, follow=True)
+
+        self.assertNotContains(response, self.skip_logic_form_field.label)
+        self.assertNotContains(response, self.molo_form_field.label)
+
+        # Should show the question we skipped to
+        self.assertFormAndQuestions(
+            response,
+            self.molo_form_page,
+            [self.last_molo_form_field],
+        )
+
+        response = self.client.post(self.molo_form_page.url + '?p=3', {
+            self.last_molo_form_field.clean_name: "frank",
+        }, follow=True)
+
+        self.assertNotContains(response, self.last_molo_form_field.label)
+
+        # Should show the extra question
+        self.assertFormAndQuestions(
+            response,
+            self.molo_form_page,
+            [self.extra_form_field],
+        )
+
+        response = self.client.post(self.molo_form_page.url + '?p=4', {
+            self.extra_form_field.clean_name: "answered",
+        }, follow=True)
+
+        self.assertContains(response, self.molo_form_page.thank_you_text)
+        subs = self.molo_form_page.get_submission_class().objects.all()
+        self.assertEqual(len(subs), 1)
+        self.assertEqual(json.loads(subs[0].form_data), {
+            "where-should-we-go": "question",
+            "your-favourite-animal": "NA (Skipped)",
+            "extra-question": "answered",
+            "your-favourite-actor": "frank"})
+
     def test_skip_logic_checkbox_with_data(self):
         self.skip_logic_form_field.field_type = 'checkbox'
         self.skip_logic_form_field.skip_logic = skip_logic_data(
