@@ -382,11 +382,9 @@ class MoloFormPage(
             is_last_step = True
 
         if request.method == 'POST':
-            # The first step will be submitted with step_number == 2,
-            # so we need to get a from from previous step
-            # Edge case - submission of the last step
-            prev_step = step if is_last_step else paginator.page(
-                int(step_number) - 1)
+            # To validate the previous step we need to get it's form
+            # use the paginator to figure it out
+            prev_step = paginator.page(paginator.current_page)
 
             # Create a form only for submitted step
             prev_form_class = self.get_form_class_for_step(prev_step)
@@ -399,8 +397,7 @@ class MoloFormPage(
                 # If data for step is valid, update the session
                 form_data.update(prev_form.cleaned_data)
                 self.save_data(request, form_data)
-
-                if prev_step.has_next() and len(prev_step.object_list) > 0:
+                if prev_step.has_next() and paginator.current_page != paginator.num_pages:
                     # Create a new form for a following step, if the following
                     # step is present
                     form_class = self.get_form_class_for_step(step)
