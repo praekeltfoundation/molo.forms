@@ -370,7 +370,6 @@ class MoloFormPage(
             form_data,
         )
 
-        is_last_step = False
         step_number = request.GET.get('p', 1)
 
         try:
@@ -379,7 +378,6 @@ class MoloFormPage(
             step = paginator.page(1)
         except EmptyPage:
             step = paginator.page(paginator.num_pages)
-            is_last_step = True
 
         if request.method == 'POST':
             # To validate the previous step we need to get it's form
@@ -397,7 +395,8 @@ class MoloFormPage(
                 # If data for step is valid, update the session
                 form_data.update(prev_form.cleaned_data)
                 self.save_data(request, form_data)
-                if prev_step.has_next() and paginator.current_page != paginator.num_pages:
+                if (prev_step.has_next() and
+                        paginator.current_page != paginator.num_pages):
                     # Create a new form for a following step, if the following
                     # step is present
                     form_class = self.get_form_class_for_step(step)

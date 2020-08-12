@@ -1125,7 +1125,7 @@ class TestSkipLogicFormView(TestCase, MoloTestCaseMixin):
             [self.another_molo_form_field],
         )
 
-    def test_skip_logic_to_another_question_without_skipped_page_breaks(self):
+    def test_skip_logic_to_question_without_skipped_page_breaks(self):
         response = self.client.get(self.molo_form_page.url)
 
         self.assertFormAndQuestions(
@@ -1166,7 +1166,7 @@ class TestSkipLogicFormView(TestCase, MoloTestCaseMixin):
             "your-favourite-animal": "NA (Skipped)",
             "your-favourite-actor": "frank"})
 
-    def test_skip_logic_to_another_question_with_one_skipped_page_break(self):
+    def test_skip_logic_to_question_with_one_skipped_page_break(self):
         self.molo_form_field.page_break = True
         self.molo_form_field.save()
 
@@ -1210,7 +1210,7 @@ class TestSkipLogicFormView(TestCase, MoloTestCaseMixin):
             "your-favourite-animal": "NA (Skipped)",
             "your-favourite-actor": "frank"})
 
-    def test_skip_logic_to_another_question_with_multiple_skipped_page_breaks(self):
+    def test_skip_logic_to_question_with_multiple_skipped_page_breaks(self):
         self.molo_form_field.page_break = True
         self.molo_form_field.save()
         # add another form field to skip over
@@ -1223,7 +1223,7 @@ class TestSkipLogicFormView(TestCase, MoloTestCaseMixin):
             page_break=True
         )
         # Move the last question down and make sure the skip logic points to it
-        self.last_molo_form_field.sort_order=3
+        self.last_molo_form_field.sort_order = 3
         self.last_molo_form_field.save()
         self.skip_logic_form_field.skip_logic = skip_logic_data(
             self.choices,
@@ -1275,9 +1275,9 @@ class TestSkipLogicFormView(TestCase, MoloTestCaseMixin):
             "extra-question": "NA (Skipped)",
             "your-favourite-actor": "frank"})
 
-    def test_skip_logic_doesnt_repeat_pages_if_earlier_pages_were_skipped(self):
-        # The previous method of calculating page breaks led to later pages being
-        # displayed multiple times
+    def test_skip_logic_doesnt_repeat_pages_if_prev_pages_skipped(self):
+        # The previous method of calculating page breaks led to later
+        # pages being displayed multiple times
 
         self.molo_form_field.page_break = True
         self.molo_form_field.save()

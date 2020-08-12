@@ -26,7 +26,7 @@ class SkipLogicPaginator(Paginator):
             question.clean_name for question in self.object_list
             if question.pk and question.field_type != 'hidden'
         ]
-        
+
         self.page_breaks = []
         i = 0
         while i < len(self.object_list):
@@ -43,16 +43,17 @@ class SkipLogicPaginator(Paginator):
                     # skipped questions
                     # just add one before the question we're skipping TO
                     answer = self.previous_answers[field.clean_name]
-                    if field.is_next_action(answer,SkipState.QUESTION):
-                        next_question = field.skip_logic[field.choice_index(answer)].value['question']
+                    if field.is_next_action(answer, SkipState.QUESTION):
+                        next_question = field.skip_logic[
+                            field.choice_index(answer)].value['question']
                         i = next_question - 1
 
             elif field.page_break:
                 self.page_breaks.append(i)
 
         num_questions = len([
-            i for i in self.object_list
-            if i.pk and i.field_type != 'hidden'])
+            j for j in self.object_list
+            if j.pk and j.field_type != 'hidden'])
 
         if self.page_breaks:
             # Always have a break at start to create first page
