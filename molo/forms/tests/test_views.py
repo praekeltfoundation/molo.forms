@@ -1,6 +1,7 @@
 import json
 from bs4 import BeautifulSoup
 from django.contrib.auth import get_user_model
+from django.core.cache import cache
 from django.urls import reverse
 from django.test import TestCase, RequestFactory
 from django.test.client import Client
@@ -137,7 +138,7 @@ class TestFormViews(TestCase, MoloTestCaseMixin):
         self.assertContains(response, molo_form_page.submit_text)
 
         response = self.client.post(molo_form_page.url, {
-            molo_form_field.label.lower().replace(' ', '-'): 'python'
+            molo_form_field.label.lower().replace(' ', '_'): 'python',
         }, follow=True)
         self.assertContains(
             response, url_to_anchor(molo_form_page.thank_you_text))
@@ -159,7 +160,7 @@ class TestFormViews(TestCase, MoloTestCaseMixin):
         self.assertContains(response, molo_form_page.introduction)
         self.assertContains(response, molo_form_field.label)
         response = self.client.post(molo_form_page.url, {
-            molo_form_field.label.lower().replace(' ', '-'): 'python'
+            molo_form_field.label.lower().replace(' ', '_'): 'python'
         }, follow=True)
         self.assertContains(response, molo_form_page.thank_you_text)
 
@@ -201,7 +202,7 @@ class TestFormViews(TestCase, MoloTestCaseMixin):
             self.assertContains(response, molo_form_field.label)
 
             response = self.client.post(molo_form_page.url, {
-                molo_form_field.label.lower().replace(' ', '-'):
+                molo_form_field.label.lower().replace(' ', '_'):
                     'python'
             }, follow=True)
 
@@ -224,7 +225,7 @@ class TestFormViews(TestCase, MoloTestCaseMixin):
         self.assertContains(response, molo_form_field.label)
 
         response = self.client.post(molo_form_page.url, {
-            molo_form_field.label.lower().replace(' ', '-'): 'python'
+            molo_form_field.label.lower().replace(' ', '_'): 'python'
         }, follow=True)
         self.assertContains(response, molo_form_page.thank_you_text)
         self.assertContains(response, 'Results')
@@ -243,11 +244,9 @@ class TestFormViews(TestCase, MoloTestCaseMixin):
         self.assertContains(response, molo_form_page.title)
         self.assertContains(response, molo_form_page.introduction)
         self.assertContains(response, molo_form_field.label)
-
-        response = self.client.post(molo_form_page.url, {
+        response = self.client.post(molo_form_page.get_full_url(), {
             "ajax": 'True',
-            "article_page": self.article.pk,
-            molo_form_field.label.lower().replace(' ', '-'): 'python'
+                molo_form_field.label.lower().replace(' ', '_'): 'python',
         }, follow=True)
         self.assertEqual(response.status_code, 200)
         self.assertEqual(
@@ -271,7 +270,7 @@ class TestFormViews(TestCase, MoloTestCaseMixin):
         self.assertContains(response, molo_form_field.label)
 
         response = self.client.post(molo_form_page.url, {
-            molo_form_field.label.lower().replace(' ', '-'): 'python'
+            molo_form_field.label.lower().replace(' ', '_'): 'python'
         }, follow=True)
         self.assertContains(response, molo_form_page.thank_you_text)
         self.assertContains(response, 'Results')
@@ -279,7 +278,7 @@ class TestFormViews(TestCase, MoloTestCaseMixin):
         self.assertContains(response, 'python</span> 100%')
 
         response = self.client.post(molo_form_page.url, {
-            molo_form_field.label.lower().replace(' ', '-'): 'java'
+            molo_form_field.label.lower().replace(' ', '_'): 'java'
         }, follow=True)
         self.assertContains(response, molo_form_page.thank_you_text)
         self.assertContains(response, 'Results')
@@ -294,7 +293,7 @@ class TestFormViews(TestCase, MoloTestCaseMixin):
             )
 
         response = self.client.post(molo_form_page.url, {
-            molo_form_field.label.lower().replace(' ', '-'): 'python'
+            molo_form_field.label.lower().replace(' ', '_'): 'python'
         }, follow=True)
         response = self.client.get(
             '/forms/%s/results_json/' % molo_form_page.slug)
@@ -302,21 +301,21 @@ class TestFormViews(TestCase, MoloTestCaseMixin):
             response.json(), {'Your favourite animal': {'python': 100}})
 
         response = self.client.post(molo_form_page.url, {
-            molo_form_field.label.lower().replace(' ', '-'): 'java'
+            molo_form_field.label.lower().replace(' ', '_'): 'java'
         }, follow=True)
         response = self.client.get(
             '/forms/%s/results_json/' % molo_form_page.slug)
         self.assertEqual(response.json(),
                          {'Your favourite animal': {'java': 50, 'python': 50}})
         response = self.client.post(molo_form_page.url, {
-            molo_form_field.label.lower().replace(' ', '-'): 'java'
+            molo_form_field.label.lower().replace(' ', '_'): 'java'
         }, follow=True)
         response = self.client.get(
             '/forms/%s/results_json/' % molo_form_page.slug)
         self.assertEqual(response.json(),
                          {'Your favourite animal': {'java': 67, 'python': 33}})
         response = self.client.post(molo_form_page.url, {
-            molo_form_field.label.lower().replace(' ', '-'): 'java'
+            molo_form_field.label.lower().replace(' ', '_'): 'java'
         }, follow=True)
         response = self.client.get(
             '/forms/%s/results_json/' % molo_form_page.slug)
@@ -348,7 +347,7 @@ class TestFormViews(TestCase, MoloTestCaseMixin):
         self.assertContains(response, 'Next Question')
 
         response = self.client.post(molo_form_page.url + '?p=2', {
-            molo_form_field.label.lower().replace(' ', '-'): 'python'
+            molo_form_field.label.lower().replace(' ', '_'): 'python'
         })
 
         self.assertContains(response, molo_form_page.title)
@@ -358,7 +357,7 @@ class TestFormViews(TestCase, MoloTestCaseMixin):
         self.assertContains(response, molo_form_page.submit_text)
 
         response = self.client.post(molo_form_page.url + '?p=3', {
-            extra_molo_form_field.label.lower().replace(' ', '-'):
+            extra_molo_form_field.label.lower().replace(' ', '_'):
                 'Steven Seagal ;)'
         }, follow=True)
 
@@ -385,7 +384,7 @@ class TestFormViews(TestCase, MoloTestCaseMixin):
         self.assertContains(response, 'This field is required.')
 
         response = self.client.post(molo_form_page.url, {
-            molo_form_field.label.lower().replace(' ', '-'): 'python'
+            molo_form_field.label.lower().replace(' ', '_'): 'python'
         }, follow=True)
 
         self.assertContains(response, molo_form_page.thank_you_text)
@@ -462,7 +461,6 @@ class TestFormViews(TestCase, MoloTestCaseMixin):
         request = RequestFactory().get(molo_form_page.url)
         request.LANGUAGE_CODE = 'fr'
         request.context = {'page': molo_form_page}
-        request.site = self.main.get_site()
         response = molo_form_page.serve_questions(request)
         self.assertEqual(response.status_code, 302)
         self.assertEqual(response['location'], translated_form.url)
@@ -482,7 +480,6 @@ class TestFormViews(TestCase, MoloTestCaseMixin):
         request = RequestFactory().get(molo_form_page.url)
         request.LANGUAGE_CODE = 'fr'
         request.context = {'page': molo_form_page}
-        request.site = self.main.get_site()
         request.session = {}
         request.user = self.user
         response = molo_form_page.serve_questions(request)
@@ -514,11 +511,11 @@ class TestFormViews(TestCase, MoloTestCaseMixin):
 
         # Submit responses to both forms
         self.client.post(molo_form_page.url, {
-            molo_form_field.label.lower().replace(' ', '-'):
+            molo_form_field.label.lower().replace(' ', '_'):
                 'an english answer'
         })
         self.client.post(translated_form.url, {
-            translated_form_field.label.lower().replace(' ', '-'):
+            translated_form_field.label.lower().replace(' ', '_'):
                 'a french answer'
         })
 
@@ -677,7 +674,7 @@ class TestFormViews(TestCase, MoloTestCaseMixin):
         self.assertContains(response, molo_form_field.label)
 
         response = self.client.post(molo_form_page.url, {
-            molo_form_field.label.lower().replace(' ', '-'): 'python'
+            molo_form_field.label.lower().replace(' ', '_'): 'python'
         }, follow=True)
 
         self.assertContains(response, molo_form_page.thank_you_text)
@@ -699,7 +696,7 @@ class TestFormViews(TestCase, MoloTestCaseMixin):
 
         self.assertContains(response, molo_form_field.label)
         response = self.client.post(molo_form_page.url, {
-            molo_form_field.label.lower().replace(' ', '-'): 'python'
+            molo_form_field.label.lower().replace(' ', '_'): 'python'
         }, follow=True)
         self.assertContains(response, molo_form_page.thank_you_text)
 
@@ -718,7 +715,7 @@ class TestFormViews(TestCase, MoloTestCaseMixin):
 
         self.user = self.login()
         response = self.client.post(molo_form_page.url, {
-            molo_form_field.label.lower().replace(' ', '-'): 'python'
+            molo_form_field.label.lower().replace(' ', '_'): 'python'
         }, follow=True)
         self.assertContains(response, molo_form_page.thank_you_text)
 
@@ -740,8 +737,8 @@ class TestFormViews(TestCase, MoloTestCaseMixin):
         self.assertNotContains(response, hidden_field.label)
         self.assertContains(
             response,
-            '<input type="hidden" name="some-hidden-field" '
-            'id="id_some-hidden-field">'
+            '<input type="hidden" name="some_hidden_field" '
+            'id="id_some_hidden_field">'
         )
 
     def test_article_form_submissions(self):
@@ -775,7 +772,8 @@ class TestFormViews(TestCase, MoloTestCaseMixin):
         url = form.get_full_url()
         data = {
             'article_page': self.article.pk,
-            field.clean_name: 'abc'
+            field.clean_name: 'abc',
+            '': 10
         }
         # Post: Respond to  form related to article
         res = self.client.post(url, data=data)
@@ -812,7 +810,9 @@ class TestFormViews(TestCase, MoloTestCaseMixin):
         MoloFormSubmission.objects.create(
             page=form, article_page=article, form_data=json.dumps(form_data))
 
-        form_data.update({'article_page': self.article.pk})
+        form_data.update({
+        'article_page': self.article.pk,
+        '': "nada"})
 
         success_url = reverse('molo.forms:success_article_form', kwargs={
             'slug': form.slug, 'article': self.article.pk})
@@ -864,7 +864,7 @@ class TestFormViews(TestCase, MoloTestCaseMixin):
         MoloFormSubmission.objects.create(
             page=form, article_page=article, form_data=json.dumps(form_data))
 
-        form_data.update({'article_page': self.article.pk})
+        form_data.update({'article_page': self.article.pk, '': '10'})
 
         success_url = reverse('molo.forms:success_article_form', kwargs={
             'slug': form.slug, 'article': self.article.pk})
@@ -1162,9 +1162,9 @@ class TestSkipLogicFormView(TestCase, MoloTestCaseMixin):
         subs = self.molo_form_page.get_submission_class().objects.all()
         self.assertEqual(len(subs), 1)
         self.assertEqual(json.loads(subs[0].form_data), {
-            "where-should-we-go": "question",
-            "your-favourite-animal": "NA (Skipped)",
-            "your-favourite-actor": "frank"})
+            "where_should_we_go": "question",
+            "your_favourite_animal": "NA (Skipped)",
+            "your_favourite_actor": "frank"})
 
     def test_skip_logic_to_question_with_one_skipped_page_break(self):
         self.molo_form_field.page_break = True
@@ -1206,9 +1206,9 @@ class TestSkipLogicFormView(TestCase, MoloTestCaseMixin):
         subs = self.molo_form_page.get_submission_class().objects.all()
         self.assertEqual(len(subs), 1)
         self.assertEqual(json.loads(subs[0].form_data), {
-            "where-should-we-go": "question",
-            "your-favourite-animal": "NA (Skipped)",
-            "your-favourite-actor": "frank"})
+            "where_should_we_go": "question",
+            "your_favourite_animal": "NA (Skipped)",
+            "your_favourite_actor": "frank"})
 
     def test_skip_logic_to_question_with_multiple_skipped_page_breaks(self):
         self.molo_form_field.page_break = True
@@ -1270,10 +1270,10 @@ class TestSkipLogicFormView(TestCase, MoloTestCaseMixin):
         subs = self.molo_form_page.get_submission_class().objects.all()
         self.assertEqual(len(subs), 1)
         self.assertEqual(json.loads(subs[0].form_data), {
-            "where-should-we-go": "question",
-            "your-favourite-animal": "NA (Skipped)",
-            "extra-question": "NA (Skipped)",
-            "your-favourite-actor": "frank"})
+            "where_should_we_go": "question",
+            "your_favourite_animal": "NA (Skipped)",
+            "extra_question": "NA (Skipped)",
+            "your_favourite_actor": "frank"})
 
     def test_skip_logic_doesnt_repeat_pages_if_prev_pages_skipped(self):
         # The previous method of calculating page breaks led to later
@@ -1341,10 +1341,10 @@ class TestSkipLogicFormView(TestCase, MoloTestCaseMixin):
         subs = self.molo_form_page.get_submission_class().objects.all()
         self.assertEqual(len(subs), 1)
         self.assertEqual(json.loads(subs[0].form_data), {
-            "where-should-we-go": "question",
-            "your-favourite-animal": "NA (Skipped)",
-            "extra-question": "answered",
-            "your-favourite-actor": "frank"})
+            "where_should_we_go": "question",
+            "your_favourite_animal": "NA (Skipped)",
+            "extra_question": "answered",
+            "your_favourite_actor": "frank"})
 
     def test_skip_logic_checkbox_with_data(self):
         self.skip_logic_form_field.field_type = 'checkbox'
@@ -1651,6 +1651,7 @@ class TestPollsViaFormsView(TestCase, MoloTestCaseMixin):
     Also test that page_break is not causing any pagination on the forms
     """
     def setUp(self):
+        cache.clear( )
         self.mk_main()
         self.choices = ['next', 'end', 'form']
         self.forms_index = FormsIndexPage.objects.first()
@@ -1660,6 +1661,7 @@ class TestPollsViaFormsView(TestCase, MoloTestCaseMixin):
             self.forms_index, display_form_directly=True)
         drop_down_field = create_molo_dropddown_field(
             self.forms_index, form, self.choices)
+        self.client.get('/')
         response = self.client.post(
             form.url + '?p=1',
             {drop_down_field.clean_name: 'next'},
@@ -1981,7 +1983,7 @@ class TestAPIEndpointsView(TestCase, MoloTestCaseMixin):
             content_type="application/json")
 
         self.assertEqual(response.status_code, 400)
-        self.assertIn('your-favourite-colour', response.json())
+        self.assertIn('your_favourite_colour', response.json())
         submissions = self.molo_form_page.get_submission_class().objects.all()
         self.assertEqual(len(submissions), 0)
 

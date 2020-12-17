@@ -88,10 +88,10 @@ class TestFormDataRuleSegmentation(TestCase, MoloTestCaseMixin):
             expected_response='super random text',
             field_name='incorrect-field-name')
 
-        with self.assertRaises(ValidationError):
+        with pytest.raises(ValidationError):
             rule.clean()
 
-        rule.field_name = 'singleline-text'
+        rule.field_name = "singleline_text"
         try:
             rule.clean()
         except ValidationError:
@@ -104,17 +104,17 @@ class TestFormDataRuleSegmentation(TestCase, MoloTestCaseMixin):
             expected_response='super random text',
             field_name='Incorrect Field name!!')
 
-        with self.assertRaises(ValidationError):
+        with pytest.raises(ValidationError):
             rule.clean()
 
-        rule.field_name = 'Singleline Text'
+        rule.field_name = "singleline_text"
         try:
             rule.clean()
         except ValidationError:
             self.fail(
                 "FormSubmissionDataRule.clean()raised ValidationError!")
         # check the field_name has been changed to the correct one
-        self.assertEqual(rule.field_name, 'singleline-text')
+        self.assertEqual(rule.field_name, 'singleline_text')
 
     def test_get_field_model(self):
         rule = FormSubmissionDataRule(

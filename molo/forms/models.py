@@ -37,7 +37,7 @@ from wagtail.admin.edit_handlers import (
 )
 from wagtail.core import blocks
 from wagtail.core.fields import StreamField
-from wagtail.core.models import Orderable, Page
+from wagtail.core.models import Orderable, Page, Site
 from wagtail.images.blocks import ImageChooserBlock
 from wagtail.images.edit_handlers import ImageChooserPanel
 from wagtail_personalisation.adapters import get_segment_adapter
@@ -278,7 +278,7 @@ class MoloFormPage(
         user = form.user if not form.user.is_anonymous else None
 
         if self.save_article_object:
-            article_page = form.cleaned_data.get('article_page')
+            article_page = form.data.get('article_page')
             try:
                 article_page = int(article_page)
             except ValueError as e:
@@ -354,9 +354,10 @@ class MoloFormPage(
         """
         context = self.get_context(request)
         # this will only return a page if there is a translation
+        site = Site.find_for_request(request)
         page = get_translation_for(
             [context['page']],
-            locale=request.LANGUAGE_CODE, site=request.site)
+            locale=request.LANGUAGE_CODE, site=site)
         if page:
             page = page[0]
             if not page.language.is_main_language:
@@ -426,7 +427,7 @@ class MoloFormPage(
                         self.process_form_submission(form)
                         del request.session[self.session_key_data]
 
-                        article_page = form.cleaned_data.get('article_page')
+                        article_page = form.data.get('article_page')
                         is_article_form = self.save_article_object
                         return prev_step.success(
                             self.slug,
@@ -474,7 +475,6 @@ class MoloFormPage(
 
         if request.method == 'POST':
             form = self.get_form(request.POST, page=self, user=request.user)
-
             if form.is_valid():
                 is_ajax = request.POST.get('ajax') == 'True'
 
@@ -487,7 +487,7 @@ class MoloFormPage(
                 if is_ajax:
                     submission = self.get_submission_class().objects.filter(
                         page=self, user__pk=request.user.pk,
-                        article_page=form.cleaned_data.get('article_page',)
+                        article_page=form.data.get('article_page',)
                     )
                     if submission.exists():
                         submission.delete()
@@ -495,7 +495,7 @@ class MoloFormPage(
                 self.set_form_as_submitted_for_session(request)
                 self.process_form_submission(form)
 
-                article = form.cleaned_data.get('article_page')
+                article = form.data.get('article_page')
                 url_suffix = '?format=json' if is_ajax else ''
                 if article:
                     kw = {'slug': self.slug, 'article': article}

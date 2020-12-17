@@ -19,12 +19,12 @@ from ..forms import CHARACTER_COUNT_CHOICE_LIMIT
 from wagtail_personalisation.models import Segment
 from wagtail_personalisation.rules import UserIsLoggedInRule
 
-from .base import create_molo_form_page
+from .base import create_molo_form_page, MoloFormsTestMixin, create_molo_form_formfield
 
 User = get_user_model()
 
 
-class TestFormAdminViews(TestCase, MoloTestCaseMixin):
+class TestFormAdminViews(TestCase, MoloTestCaseMixin, MoloFormsTestMixin):
     def setUp(self):
         self.client = Client()
         self.mk_main()
@@ -332,7 +332,7 @@ class TestFormAdminViews(TestCase, MoloTestCaseMixin):
         self.assertContains(response, molo_form_page.introduction)
         self.assertContains(response, molo_form_field.label)
         response = self.client.post(molo_form_page.url, {
-            molo_form_field.label.lower().replace(' ', '-'): 'python'
+            molo_form_field.label.lower().replace(' ', '_'): 'python'
         }, follow=True)
         self.client.logout()
         self.client.login(
@@ -343,7 +343,6 @@ class TestFormAdminViews(TestCase, MoloTestCaseMixin):
         # test shows convert to article button when no article created yet
         response = self.client.get(
             '/admin/forms/submissions/%s/' % molo_form_page.id)
-
         self.assertContains(response, 'Convert to Article')
 
         # convert submission to article
@@ -395,13 +394,19 @@ class TestFormAdminViews(TestCase, MoloTestCaseMixin):
         self.assertNotContains(response, 'Convert to Article')
 
     def test_export_submission_standard_form(self):
-        molo_form_page, molo_form_field = \
-            self.create_molo_form_page(parent=self.section_index)
-
+        molo_form_page = create_molo_form_page(
+            self.section_index,
+            title='test form',
+            display_form_directly=True,
+            save_article_object=False,
+            allow_anonymous_submissions=True,
+        )
+        molo_form_field = create_molo_form_formfield(molo_form_page, 'singleline')
         self.client.force_login(self.user)
         answer = 'PYTHON'
-        response = self.client.post(molo_form_page.url, {
-            molo_form_field.label.lower().replace(' ', '-'): answer
+        response = self.client.post(molo_form_page.get_full_url(), data={
+            molo_form_field.clean_name: answer,
+            '': "abc"
         })
 
         self.client.force_login(self.super_user)
@@ -410,8 +415,8 @@ class TestFormAdminViews(TestCase, MoloTestCaseMixin):
             {'action': 'CSV'},
         )
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, 'Username')
-        self.assertContains(response, 'Submission Date')
+        self.assertContains(response, 'username')
+        self.assertContains(response, 'submit_time')
         self.assertNotContains(response, molo_form_field.label)
         self.assertContains(response, molo_form_field.admin_label)
         self.assertContains(response, answer)
@@ -424,7 +429,7 @@ class TestFormAdminViews(TestCase, MoloTestCaseMixin):
         answer = 'PYTHON'
 
         molo_form_page.get_submission_class().objects.create(
-            form_data=json.dumps({"question-1": answer},
+            form_data=json.dumps({"question_1": answer},
                                  cls=DjangoJSONEncoder),
             page=molo_form_page,
             user=self.user
@@ -435,16 +440,14 @@ class TestFormAdminViews(TestCase, MoloTestCaseMixin):
             '/admin/forms/submissions/{}/'.format(molo_form_page.id),
             {'action': 'CSV'},
         )
-
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, 'Username')
-        self.assertContains(response, 'Submission Date')
+        self.assertContains(response, 'username')
+        self.assertContains(response, 'submit_time')
         self.assertNotContains(response, molo_form_field.label)
 
         self.assertContains(
             response,
-            '{} ({})'.format(molo_form_field.admin_label,
-                             molo_form_field.segment.name))
+            molo_form_field.admin_label)
 
         self.assertContains(response, self.user.username)
         self.assertContains(response, answer)
@@ -478,7 +481,7 @@ class TestFormAdminViews(TestCase, MoloTestCaseMixin):
             segment=test_segment,
             form=molo_form_page, operator=FormSubmissionDataRule.EQUALS,
             expected_response='super random text',
-            field_name='question-1')
+            field_name='question_1')
         rule.save()
         test_segment.save()
 
