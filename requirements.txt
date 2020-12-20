@@ -2,7 +2,7 @@ molo.core<11.0.0,>=10.1.0
 celery<4.0
 dateparser>=0.7.0,<0.8.0
 django-celery
-wagtail-personalisation-molo==3.0.0
+wagtail-personalisation-molo==3.0.1
 psycopg2-binary
 psycopg2
 html5lib==0.9999999
