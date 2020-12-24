@@ -278,7 +278,7 @@ class MoloFormPage(
         user = form.user if not form.user.is_anonymous else None
 
         if self.save_article_object:
-            article_page = form.data.get('article_page')
+            article_page = form.cleaned_data.get('article_page')
             try:
                 article_page = int(article_page)
             except ValueError as e:

@@ -760,6 +760,8 @@ class TestFormViews(TestCase, MoloTestCaseMixin):
         url = self.article.get_full_url()
         article_field = 'name="article_page" value="{}"' \
             .format(self.article.pk)
+        article_field.clean_name = 'article_page'
+        article_field.save()
 
         # Get an article with a related form page
         res = self.client.get(url)
@@ -773,7 +775,6 @@ class TestFormViews(TestCase, MoloTestCaseMixin):
         data = {
             'article_page': self.article.pk,
             field.clean_name: 'abc',
-            '': 10
         }
         # Post: Respond to  form related to article
         res = self.client.post(url, data=data)
@@ -800,6 +801,10 @@ class TestFormViews(TestCase, MoloTestCaseMixin):
             allow_anonymous_submissions=True,
         )
         article = self.mk_article(self.section, title='article 2')
+        article_field = 'name="article_page" value="{}"' \
+             .format(self.article.pk)
+        article_field.clean_name = 'article_page'
+        article_field.save()
         field = MoloFormField.objects.create(
             page=form, label='a, b or c?', field_type='singleline')
 
@@ -810,9 +815,7 @@ class TestFormViews(TestCase, MoloTestCaseMixin):
         MoloFormSubmission.objects.create(
             page=form, article_page=article, form_data=json.dumps(form_data))
 
-        form_data.update({
-        'article_page': self.article.pk,
-        '': "nada"})
+        form_data.update({'article_page': self.article.pk})
 
         success_url = reverse('molo.forms:success_article_form', kwargs={
             'slug': form.slug, 'article': self.article.pk})
@@ -854,6 +857,10 @@ class TestFormViews(TestCase, MoloTestCaseMixin):
             allow_anonymous_submissions=True,
         )
         article = self.mk_article(self.section, title='article 2')
+        article_field = 'name="article_page" value="{}"' \
+             .format(self.article.pk)
+        article_field.clean_name = 'article_page'
+        article_field.save()
         field = MoloFormField.objects.create(
             page=form, label='a, b or c?', field_type='singleline')
 
@@ -864,7 +871,7 @@ class TestFormViews(TestCase, MoloTestCaseMixin):
         MoloFormSubmission.objects.create(
             page=form, article_page=article, form_data=json.dumps(form_data))
 
-        form_data.update({'article_page': self.article.pk, '': '10'})
+        form_data.update({'article_page': self.article.pk})
 
         success_url = reverse('molo.forms:success_article_form', kwargs={
             'slug': form.slug, 'article': self.article.pk})
