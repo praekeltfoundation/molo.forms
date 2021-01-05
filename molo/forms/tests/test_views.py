@@ -760,8 +760,6 @@ class TestFormViews(TestCase, MoloTestCaseMixin):
         url = self.article.get_full_url()
         article_field = 'name="article_page" value="{}"' \
             .format(self.article.pk)
-        article_field.clean_name = 'article_page'
-        article_field.save()
 
         # Get an article with a related form page
         res = self.client.get(url)
