@@ -42,7 +42,6 @@ INSTALLED_APPS = [
     'wagtail.api.v2',
 
     'mptt',
-    'djcelery',
     'el_pagination',
 
     'raven.contrib.django.raven_compat',
