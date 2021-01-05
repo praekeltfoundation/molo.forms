@@ -246,7 +246,7 @@ class TestFormViews(TestCase, MoloTestCaseMixin):
         self.assertContains(response, molo_form_field.label)
         response = self.client.post(molo_form_page.get_full_url(), {
             "ajax": 'True',
-                molo_form_field.label.lower().replace(' ', '_'): 'python',
+            molo_form_field.label.lower().replace(' ', '_'): 'python',
         }, follow=True)
         self.assertEqual(response.status_code, 200)
         self.assertEqual(
@@ -801,8 +801,6 @@ class TestFormViews(TestCase, MoloTestCaseMixin):
             allow_anonymous_submissions=True,
         )
         article = self.mk_article(self.section, title='article 2')
-        article_field = 'name="article_page" value="{}"' \
-             .format(self.article.pk)
         field = MoloFormField.objects.create(
             page=form, label='a, b or c?', field_type='singleline')
 
@@ -853,8 +851,6 @@ class TestFormViews(TestCase, MoloTestCaseMixin):
             allow_anonymous_submissions=True,
         )
         article = self.mk_article(self.section, title='article 2')
-        article_field = 'name="article_page" value="{}"' \
-             .format(self.article.pk)
         field = MoloFormField.objects.create(
             page=form, label='a, b or c?', field_type='singleline')
 
@@ -1652,7 +1648,7 @@ class TestPollsViaFormsView(TestCase, MoloTestCaseMixin):
     Also test that page_break is not causing any pagination on the forms
     """
     def setUp(self):
-        cache.clear( )
+        cache.clear()
         self.mk_main()
         self.choices = ['next', 'end', 'form']
         self.forms_index = FormsIndexPage.objects.first()

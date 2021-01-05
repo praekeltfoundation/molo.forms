@@ -19,7 +19,11 @@ from ..forms import CHARACTER_COUNT_CHOICE_LIMIT
 from wagtail_personalisation.models import Segment
 from wagtail_personalisation.rules import UserIsLoggedInRule
 
-from .base import create_molo_form_page, MoloFormsTestMixin, create_molo_form_formfield
+from .base import (
+    create_molo_form_page,
+    MoloFormsTestMixin,
+    create_molo_form_formfield
+)
 
 User = get_user_model()
 
@@ -401,7 +405,8 @@ class TestFormAdminViews(TestCase, MoloTestCaseMixin, MoloFormsTestMixin):
             save_article_object=False,
             allow_anonymous_submissions=True,
         )
-        molo_form_field = create_molo_form_formfield(molo_form_page, 'singleline')
+        molo_form_field = create_molo_form_formfield(
+            molo_form_page, 'singleline')
         self.client.force_login(self.user)
         answer = 'PYTHON'
         response = self.client.post(molo_form_page.get_full_url(), data={
