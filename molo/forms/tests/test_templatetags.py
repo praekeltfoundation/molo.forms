@@ -40,7 +40,6 @@ class LoadUserChoicePollForm(TestCase, MoloTestCaseMixin):
         # create a requset object
         self.factory = RequestFactory()
         self.request = self.factory.get('/')
-        self.request.site = self.site
         self.request.user = self.user
         add_session_to_request(self.request)
 
@@ -57,32 +56,32 @@ class LoadUserChoicePollForm(TestCase, MoloTestCaseMixin):
             language=self.english)
         form = MoloFormPage.objects.last()
         self.client.post(form.url, {
-            'i-feel-i-can-be-myself-around-other-people':
+            'i_feel_i_can_be_myself_around_other_people':
                 'agree',
             'ajax': 'True'
         })
         self.assertEqual(MoloFormSubmission.objects.count(), 1)
         self.assertTrue(load_user_choice_poll_form(
             {'request': self.request},
-            form, 'i-feel-i-can-be-myself-around-other-people',
+            form, 'i_feel_i_can_be_myself_around_other_people',
             'agree'))
         self.assertFalse(load_user_choice_poll_form(
             {'request': self.request},
-            form, 'i-feel-i-can-be-myself-around-other-people',
+            form, 'i_feel_i_can_be_myself_around_other_people',
             'disagree'))
         self.client.post(form.url, {
-            'i-feel-i-can-be-myself-around-other-people':
+            'i_feel_i_can_be_myself_around_other_people':
                 'disagree',
             'ajax': 'True'
         })
         self.assertEqual(MoloFormSubmission.objects.count(), 1)
         self.assertFalse(load_user_choice_poll_form(
             {'request': self.request},
-            form, 'i-feel-i-can-be-myself-around-other-people',
+            form, 'i_feel_i_can_be_myself_around_other_people',
             'agree'))
         self.assertTrue(load_user_choice_poll_form(
             {'request': self.request},
-            form, 'i-feel-i-can-be-myself-around-other-people',
+            form, 'i_feel_i_can_be_myself_around_other_people',
             'disagree'))
 
 
@@ -160,7 +159,6 @@ class FormListTest(TestCase, MoloTestCaseMixin):
         # create a requset object
         self.factory = RequestFactory()
         self.request = self.factory.get('/')
-        self.request.site = self.site
         self.request.user = self.user
         add_session_to_request(self.request)
         self.user = self.login()

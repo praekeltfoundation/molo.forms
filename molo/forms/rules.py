@@ -1,3 +1,5 @@
+import six
+
 from importlib import import_module
 from operator import attrgetter
 
@@ -7,11 +9,11 @@ from django.conf import settings
 from django.core.exceptions import ValidationError, ObjectDoesNotExist
 from django.db import models
 from django.test.client import RequestFactory
-from django.utils import six, timezone
+from django.utils import timezone
 from django.utils.functional import cached_property
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 
-from django.utils.six import text_type
+from six import text_type
 from django.utils.text import slugify
 from unidecode import unidecode
 

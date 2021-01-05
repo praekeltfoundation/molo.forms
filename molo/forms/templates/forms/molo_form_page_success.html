@@ -1,11 +1,13 @@
 {% extends 'base.html' %}
 {% load i18n molo_forms_tags %}
+{% load wagtailcore_tags %}
+{% wagtail_site as current_site %}
 
 {% block content %}
 <div class="forms">
 	<h4 class="forms__thank-you">{{ self.thank_you_text|url_to_anchor|safe }}</h4>
 	<div class="call-to-action call-to-action--forms">
-		<a href="{{request.site.root_page.url}}" class="call-to-action__nav-item call-to-action__nav-item--back-home">
+		<a href="{{current_site.root_page.url}}" class="call-to-action__nav-item call-to-action__nav-item--back-home">
 		{% trans "Back to Home page" %}</a>
 	</div>
 	{% if self.show_results and results %}

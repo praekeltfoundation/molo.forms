@@ -4,7 +4,7 @@ import json
 from rest_framework import status
 from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
-from wagtail.core.models import Page
+from wagtail.core.models import Page, Site
 
 from django.conf.urls import url
 from django.http.response import HttpResponse
@@ -21,10 +21,10 @@ from django.urls import reverse
 from django.shortcuts import render
 from django.http import JsonResponse
 from django.utils.translation import ugettext as _
-from wagtail.utils.pagination import paginate
+from django.core.paginator import Paginator
 
 from wagtail.admin import messages
-from wagtail.admin.utils import permission_required
+from wagtail.admin.auth import permission_required
 from wagtail_personalisation.forms import SegmentAdminForm
 from wagtail_personalisation.models import Segment
 
@@ -32,16 +32,19 @@ from wagtail.contrib.forms.forms import FormBuilder
 from wagtail.contrib.forms.utils import get_forms_for_user
 
 from .forms import CSVGroupCreationForm
-from wagtail.api.v2.endpoints import PagesAPIEndpoint
+from wagtail.api.v2.views import PagesAPIViewSet
 from .serializers import MoloFormSerializer
 
 
 def index(request):
     form_pages = get_forms_for_user(request.user)
+    site = Site.find_for_request(request)
     form_pages = (
-        form_pages.descendant_of(request.site.root_page).specific()
+        form_pages.descendant_of(site.root_page).specific()
     )
-    paginator, form_pages = paginate(request, form_pages)
+
+    paginator = Paginator(form_pages, per_page=25)
+    form_pages = paginator.get_page(request.GET.get('p'))
 
     return render(request, 'wagtailforms/index.html', {
         'form_pages': form_pages,
@@ -85,7 +88,8 @@ def get_segment_user_count(request):
 
 class ResultsPercentagesJson(View):
     def get(self, *args, **kwargs):
-        pages = self.request.site.root_page.get_descendants()
+        site = Site.find_for_request(self.request)
+        pages = site.root_page.get_descendants()
         ids = []
         for page in pages:
             ids.append(page.id)
@@ -136,7 +140,8 @@ class FormSuccess(TemplateView):
 
     def get_context_data(self, *args, **kwargs):
         context = super(TemplateView, self).get_context_data(*args, **kwargs)
-        pages = self.request.site.root_page.get_descendants()
+        site = Site.find_for_request(self.request)
+        pages = site.root_page.get_descendants()
         ids = []
         for page in pages:
             ids.append(page.id)
@@ -207,9 +212,10 @@ def submission_article(request, form_id, submission_id):
     submission = SubmissionClass.objects.filter(
         page=form_page).filter(pk=submission_id).first()
     if not submission.article_page:
+        site = Site.find_for_request(request)
         form_index_page = (
             FormsIndexPage.objects.descendant_of(
-                request.site.root_page).live().first())
+                site.root_page).live().first())
         body = []
         for value in submission.get_data().values():
             body.append({"type": "paragraph", "value": str(value)})
@@ -260,11 +266,11 @@ def create(request):
     })
 
 
-class MoloFormsEndpoint(PagesAPIEndpoint):
+class MoloFormsEndpoint(PagesAPIViewSet):
     base_serializer_class = MoloFormSerializer
 
     listing_default_fields = \
-        PagesAPIEndpoint.listing_default_fields + ['homepage_introduction']
+        PagesAPIViewSet.listing_default_fields + ['homepage_introduction']
 
     def get_queryset(self):
         '''
@@ -277,8 +283,9 @@ class MoloFormsEndpoint(PagesAPIEndpoint):
         request = self.request
 
         # Filter by site
+        site = Site.find_for_request(request)
         queryset = queryset.descendant_of(
-            request.site.root_page, inclusive=True)
+            site.root_page, inclusive=True)
 
         return queryset
 

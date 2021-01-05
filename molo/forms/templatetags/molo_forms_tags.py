@@ -4,7 +4,7 @@ from django import template
 from django.forms.fields import MultipleChoiceField
 
 from copy import copy
-from wagtail.core.models import Page
+from wagtail.core.models import Page, Site
 from molo.forms.models import (
     MoloFormPage, FormsIndexPage, PersonalisableForm)
 
@@ -28,7 +28,8 @@ def get_form_list(
 
     context = copy(context)
     locale_code = context.get('locale_code')
-    main = context['request'].site.root_page
+    site = Site.find_for_request(context['request'])
+    main = site.root_page
     page = FormsIndexPage.objects.child_of(main).live().first()
     if page:
         forms = []

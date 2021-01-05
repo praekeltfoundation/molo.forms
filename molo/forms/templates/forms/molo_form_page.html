@@ -2,6 +2,7 @@
 
 {% load i18n %}
 {% load wagtailcore_tags %}
+{% wagtail_site as current_site %}
 
 {% block content %}
 <div class="forms forms{{page.get_parent_section.get_effective_extra_style_hints}}">
@@ -52,7 +53,7 @@
     {% else %}
       <p class="error error--forms">{% trans 'You have already completed this form.' %}</p>
       <div class="call-to-action call-to-action--forms">
-        <a href="{{request.site.root_page.url}}" class="call-to-action__nav-item call-to-action__nav-item--back-home">
+        <a href="{{current_site.root_page.url}}" class="call-to-action__nav-item call-to-action__nav-item--back-home">
         {% trans "Back to Home page" %}</a>
       </div>
     {% endif %}

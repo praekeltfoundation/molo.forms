@@ -37,7 +37,7 @@ from wagtail.admin.edit_handlers import (
 )
 from wagtail.core import blocks
 from wagtail.core.fields import StreamField
-from wagtail.core.models import Orderable, Page
+from wagtail.core.models import Orderable, Page, Site
 from wagtail.images.blocks import ImageChooserBlock
 from wagtail.images.edit_handlers import ImageChooserPanel
 from wagtail_personalisation.adapters import get_segment_adapter
@@ -300,7 +300,8 @@ class MoloFormPage(
             fields = MyQSList(fields)
             field = MoloFormField(
                 label='article_page',
-                field_type='hidden', required=True)
+                field_type='hidden', required=True,
+                clean_name='article_page')
             fields.append(field)
         return fields
 
@@ -354,9 +355,10 @@ class MoloFormPage(
         """
         context = self.get_context(request)
         # this will only return a page if there is a translation
+        site = Site.find_for_request(request)
         page = get_translation_for(
             [context['page']],
-            locale=request.LANGUAGE_CODE, site=request.site)
+            locale=request.LANGUAGE_CODE, site=site)
         if page:
             page = page[0]
             if not page.language.is_main_language:
@@ -474,7 +476,6 @@ class MoloFormPage(
 
         if request.method == 'POST':
             form = self.get_form(request.POST, page=self, user=request.user)
-
             if form.is_valid():
                 is_ajax = request.POST.get('ajax') == 'True'
 
