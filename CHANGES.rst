@@ -1,5 +1,10 @@
 CHANGE LOG
 ==========
+
+11.0.0
+------
+- Upgrades for Django 3
+
 10.1.21
 -------
 - Fix skip logic forms not saving last question in some cases
