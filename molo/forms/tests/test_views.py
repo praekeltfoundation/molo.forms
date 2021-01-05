@@ -803,20 +803,16 @@ class TestFormViews(TestCase, MoloTestCaseMixin):
         article = self.mk_article(self.section, title='article 2')
         article_field = 'name="article_page" value="{}"' \
              .format(self.article.pk)
-        article_field.clean_name = 'article_page'
-        article_field.save()
         field = MoloFormField.objects.create(
             page=form, label='a, b or c?', field_type='singleline')
 
         ArticlePageForms.objects.create(page=article, form=form)
         ArticlePageForms.objects.create(page=self.article, form=form)
-
         form_data = {field.clean_name: 'a', 'article_page': article.pk}
         MoloFormSubmission.objects.create(
             page=form, article_page=article, form_data=json.dumps(form_data))
 
         form_data.update({'article_page': self.article.pk})
-
         success_url = reverse('molo.forms:success_article_form', kwargs={
             'slug': form.slug, 'article': self.article.pk})
 
@@ -859,8 +855,6 @@ class TestFormViews(TestCase, MoloTestCaseMixin):
         article = self.mk_article(self.section, title='article 2')
         article_field = 'name="article_page" value="{}"' \
              .format(self.article.pk)
-        article_field.clean_name = 'article_page'
-        article_field.save()
         field = MoloFormField.objects.create(
             page=form, label='a, b or c?', field_type='singleline')
 

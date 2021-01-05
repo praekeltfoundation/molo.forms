@@ -300,7 +300,8 @@ class MoloFormPage(
             fields = MyQSList(fields)
             field = MoloFormField(
                 label='article_page',
-                field_type='hidden', required=True)
+                field_type='hidden', required=True,
+                clean_name='article_page')
             fields.append(field)
         return fields
 
@@ -427,7 +428,7 @@ class MoloFormPage(
                         self.process_form_submission(form)
                         del request.session[self.session_key_data]
 
-                        article_page = form.data.get('article_page')
+                        article_page = form.cleaned_data.get('article_page')
                         is_article_form = self.save_article_object
                         return prev_step.success(
                             self.slug,
@@ -487,7 +488,7 @@ class MoloFormPage(
                 if is_ajax:
                     submission = self.get_submission_class().objects.filter(
                         page=self, user__pk=request.user.pk,
-                        article_page=form.data.get('article_page',)
+                        article_page=form.cleaned_data.get('article_page',)
                     )
                     if submission.exists():
                         submission.delete()
@@ -495,7 +496,7 @@ class MoloFormPage(
                 self.set_form_as_submitted_for_session(request)
                 self.process_form_submission(form)
 
-                article = form.data.get('article_page')
+                article = form.cleaned_data.get('article_page')
                 url_suffix = '?format=json' if is_ajax else ''
                 if article:
                     kw = {'slug': self.slug, 'article': article}
