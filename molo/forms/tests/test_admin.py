@@ -410,9 +410,7 @@ class TestFormAdminViews(TestCase, MoloTestCaseMixin, MoloFormsTestMixin):
         self.client.force_login(self.user)
         answer = 'PYTHON'
         response = self.client.post(molo_form_page.get_full_url(), data={
-            molo_form_field.clean_name: answer,
-            '': "abc"
-        })
+            molo_form_field.clean_name: answer})
 
         self.client.force_login(self.super_user)
         response = self.client.get(
