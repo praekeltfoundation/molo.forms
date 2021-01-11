@@ -1,6 +1,10 @@
 CHANGE LOG
 ==========
 
+11.0.1
+------
+- Upgrade to new molo
+
 11.0.0
 ------
 - Upgrades for Django 3
