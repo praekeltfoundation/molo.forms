@@ -1,6 +1,10 @@
 CHANGE LOG
 ==========
 
+11.0.2
+------
+- Add necessary migrations
+
 11.0.1
 ------
 - Upgrade to new molo
