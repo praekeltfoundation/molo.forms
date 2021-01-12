@@ -50,7 +50,7 @@ from .forms import (  # noqa
     PersonalisableMoloForm,
     FormsFormBuilder,
 )
-from .rules import (  # noqa
+from molo.forms.rules import (  # noqa
     FormsArticleTagRule,
     FormGroupMembershipRule,
     FormSubmissionDataRule,

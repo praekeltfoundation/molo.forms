@@ -9,7 +9,7 @@ import modelcluster.fields
 import molo.core.blocks
 import molo.core.models
 import molo.forms.blocks
-import molo.forms.rules
+from molo.forms import rules
 import wagtail.core.blocks
 import wagtail.core.fields
 import wagtail.images.blocks
