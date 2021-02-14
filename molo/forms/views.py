@@ -277,7 +277,6 @@ class MoloFormsEndpoint(PagesAPIViewSet):
         # exclude PersonalisableForms and ones that require login
         queryset = queryset.exclude(
             id__in=PersonalisableForm.objects.public())
-        request = self.request
 
         # Filter by site
         queryset = queryset.descendant_of(
