@@ -37,7 +37,7 @@ from wagtail.admin.edit_handlers import (
 )
 from wagtail.core import blocks
 from wagtail.core.fields import StreamField
-from wagtail.core.models import Orderable, Page, Site
+from wagtail.core.models import Orderable, Page
 from wagtail.images.blocks import ImageChooserBlock
 from wagtail.images.edit_handlers import ImageChooserPanel
 from wagtail_personalisation.adapters import get_segment_adapter
@@ -355,7 +355,7 @@ class MoloFormPage(
         """
         context = self.get_context(request)
         # this will only return a page if there is a translation
-        site = Site.find_for_request(request)
+        site = settings.site
         page = get_translation_for(
             [context['page']],
             locale=request.LANGUAGE_CODE, site=site)
