@@ -1,6 +1,10 @@
 CHANGE LOG
 ==========
 
+11.1.0
+------
+- Get site from wagtail cache
+
 11.0.2
 ------
 - Add necessary migrations
