@@ -28,7 +28,7 @@ def get_form_list(
 
     context = copy(context)
     locale_code = context.get('locale_code')
-    main = request._wagtail_site.root_page
+    main = context['request']._wagtail_site.root_page
     page = FormsIndexPage.objects.child_of(main).live().first()
     if page:
         forms = []

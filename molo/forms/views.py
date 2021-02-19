@@ -87,7 +87,7 @@ def get_segment_user_count(request):
 
 class ResultsPercentagesJson(View):
     def get(self, *args, **kwargs):
-        pages = request._wagtail_site.root_page.get_descendants()
+        pages = self.request._wagtail_site.root_page.get_descendants()
         ids = []
         for page in pages:
             ids.append(page.id)
@@ -138,7 +138,7 @@ class FormSuccess(TemplateView):
 
     def get_context_data(self, *args, **kwargs):
         context = super(TemplateView, self).get_context_data(*args, **kwargs)
-        pages = request._wagtail_site.root_page.get_descendants()
+        pages = self.request._wagtail_site.root_page.get_descendants()
         ids = []
         for page in pages:
             ids.append(page.id)
@@ -279,7 +279,7 @@ class MoloFormsEndpoint(PagesAPIViewSet):
 
         # Filter by site
         queryset = queryset.descendant_of(
-            request._wagtail_site.root_page, inclusive=True)
+            self.request._wagtail_site.root_page, inclusive=True)
 
         return queryset
 
