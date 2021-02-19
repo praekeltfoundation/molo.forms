@@ -40,7 +40,7 @@ from .serializers import MoloFormSerializer
 def index(request):
     form_pages = get_forms_for_user(request.user)
     form_pages = (
-        form_pages.descendant_of(settings.main).specific()
+        form_pages.descendant_of(request._wagtail_site.root_page).specific()
     )
 
     paginator = Paginator(form_pages, per_page=25)
@@ -88,7 +88,7 @@ def get_segment_user_count(request):
 
 class ResultsPercentagesJson(View):
     def get(self, *args, **kwargs):
-        pages = settings.main.get_descendants()
+        pages = request._wagtail_site.root_page.get_descendants()
         ids = []
         for page in pages:
             ids.append(page.id)
@@ -139,7 +139,7 @@ class FormSuccess(TemplateView):
 
     def get_context_data(self, *args, **kwargs):
         context = super(TemplateView, self).get_context_data(*args, **kwargs)
-        pages = settings.main.get_descendants()
+        pages = request._wagtail_site.root_page.get_descendants()
         ids = []
         for page in pages:
             ids.append(page.id)
@@ -212,7 +212,7 @@ def submission_article(request, form_id, submission_id):
     if not submission.article_page:
         form_index_page = (
             FormsIndexPage.objects.descendant_of(
-                settings.main).live().first())
+                request._wagtail_site.root_page).live().first())
         body = []
         for value in submission.get_data().values():
             body.append({"type": "paragraph", "value": str(value)})
@@ -280,7 +280,7 @@ class MoloFormsEndpoint(PagesAPIViewSet):
 
         # Filter by site
         queryset = queryset.descendant_of(
-            settings.main, inclusive=True)
+            request._wagtail_site.root_page, inclusive=True)
 
         return queryset
 

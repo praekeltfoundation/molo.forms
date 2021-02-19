@@ -355,7 +355,7 @@ class MoloFormPage(
         """
         context = self.get_context(request)
         # this will only return a page if there is a translation
-        site = settings.site
+        site = request._wagtail_site
         page = get_translation_for(
             [context['page']],
             locale=request.LANGUAGE_CODE, site=site)
