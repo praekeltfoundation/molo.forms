@@ -159,8 +159,8 @@ class FormListTest(TestCase, MoloTestCaseMixin):
         # create a requset object
         self.factory = RequestFactory()
         self.request = self.factory.get('/')
-        self.request._wagtial_site = self.main.get_site()
         self.request.user = self.user
+        self.request._wagtail_site = self.main.get_site()
         add_session_to_request(self.request)
         self.user = self.login()
 
