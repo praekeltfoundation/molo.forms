@@ -461,6 +461,7 @@ class TestFormViews(TestCase, MoloTestCaseMixin):
         request = RequestFactory().get(molo_form_page.url)
         request.LANGUAGE_CODE = 'fr'
         request.context = {'page': molo_form_page}
+        request._wagtail_site = self.main.get_site()
         response = molo_form_page.serve_questions(request)
         self.assertEqual(response.status_code, 302)
         self.assertEqual(response['location'], translated_form.url)
@@ -482,6 +483,7 @@ class TestFormViews(TestCase, MoloTestCaseMixin):
         request.context = {'page': molo_form_page}
         request.session = {}
         request.user = self.user
+        request._wagtail_site = self.main.get_site()
         response = molo_form_page.serve_questions(request)
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, 'Test Form')

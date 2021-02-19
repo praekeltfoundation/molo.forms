@@ -4,7 +4,7 @@ import json
 from rest_framework import status
 from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
-from wagtail.core.models import Page, Site
+from wagtail.core.models import Page
 
 from django.conf.urls import url
 from django.http.response import HttpResponse
@@ -38,9 +38,8 @@ from .serializers import MoloFormSerializer
 
 def index(request):
     form_pages = get_forms_for_user(request.user)
-    site = Site.find_for_request(request)
     form_pages = (
-        form_pages.descendant_of(site.root_page).specific()
+        form_pages.descendant_of(request._wagtail_site.root_page).specific()
     )
 
     paginator = Paginator(form_pages, per_page=25)
@@ -88,8 +87,7 @@ def get_segment_user_count(request):
 
 class ResultsPercentagesJson(View):
     def get(self, *args, **kwargs):
-        site = Site.find_for_request(self.request)
-        pages = site.root_page.get_descendants()
+        pages = self.request._wagtail_site.root_page.get_descendants()
         ids = []
         for page in pages:
             ids.append(page.id)
@@ -140,8 +138,7 @@ class FormSuccess(TemplateView):
 
     def get_context_data(self, *args, **kwargs):
         context = super(TemplateView, self).get_context_data(*args, **kwargs)
-        site = Site.find_for_request(self.request)
-        pages = site.root_page.get_descendants()
+        pages = self.request._wagtail_site.root_page.get_descendants()
         ids = []
         for page in pages:
             ids.append(page.id)
@@ -212,10 +209,9 @@ def submission_article(request, form_id, submission_id):
     submission = SubmissionClass.objects.filter(
         page=form_page).filter(pk=submission_id).first()
     if not submission.article_page:
-        site = Site.find_for_request(request)
         form_index_page = (
             FormsIndexPage.objects.descendant_of(
-                site.root_page).live().first())
+                request._wagtail_site.root_page).live().first())
         body = []
         for value in submission.get_data().values():
             body.append({"type": "paragraph", "value": str(value)})
@@ -280,12 +276,10 @@ class MoloFormsEndpoint(PagesAPIViewSet):
         # exclude PersonalisableForms and ones that require login
         queryset = queryset.exclude(
             id__in=PersonalisableForm.objects.public())
-        request = self.request
 
         # Filter by site
-        site = Site.find_for_request(request)
         queryset = queryset.descendant_of(
-            site.root_page, inclusive=True)
+            self.request._wagtail_site.root_page, inclusive=True)
 
         return queryset
 
