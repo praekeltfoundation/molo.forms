@@ -7,7 +7,6 @@ from rest_framework.response import Response
 from wagtail.core.models import Page
 
 from django.conf.urls import url
-from django.conf import settings
 from django.http.response import HttpResponse
 from django.views.generic import TemplateView, View
 from molo.forms.models import MoloFormPage, FormsIndexPage, PersonalisableForm
