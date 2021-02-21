@@ -1,11 +1,11 @@
-## Getting started
+# Getting started
 
 These instructions assume familiarity with virtual environments and the [Django Web Environment](https://docs.djangoproject.com/en/3.1/)
 
-# Dependencies needed for installation
+## Dependencies needed for installation
 - Python 3
 
-# Quick install
+## Quick install
 Run the virtual environment of your choice
 
 ```
@@ -27,3 +27,5 @@ $ ./manage.py migrate
 $ ./manage.py createsuperuser
 $ ./manage.py runserver
 ```
+
+Your site is now accessible at `http://localhost:8000`, with the admin backend available at `http://localhost:8000/admin/`.
