@@ -1,8 +1,17 @@
-## Welcome to GitHub Pages
+## Molo Forms Documentation
+Molo Forms is a form builder based on [Wagtail forms](https://docs.wagtail.io/en/latest/reference/contrib/forms/) with a personalisation element that uses [Wagtail personalisation](https://wagtail-personalisation.readthedocs.io/en/latest/). Molo forms relies on [Molo](https://github.com/praekeltfoundation/molo/) which is based off [Wagtail](https://docs.wagtail.io/en/stable/)
 
-You can use the [editor on GitHub](https://github.com/praekeltfoundation/molo.forms/edit/gh-pages/index.md) to maintain and preview the content for your website in Markdown files.
+Below are a couple of links that you might find useful
 
-Whenever you commit to this repository, GitHub Pages will run [Jekyll](https://jekyllrb.com/) to rebuild the pages in your site, from the content in your Markdown files.
+- First steps
+  - Getting started
+- Using Molo forms
+  - How to use it
+- Personalisation
+  - Getting started with personalisation
+  - Adding rules
+- Contributing
+  - Adding tests
 
 ### Markdown
 
@@ -28,10 +37,4 @@ Syntax highlighted code block
 
 For more details see [GitHub Flavored Markdown](https://guides.github.com/features/mastering-markdown/).
 
-### Jekyll Themes
 
-Your Pages site will use the layout and styles from the Jekyll theme you have selected in your [repository settings](https://github.com/praekeltfoundation/molo.forms/settings). The name of this theme is saved in the Jekyll `_config.yml` configuration file.
-
-### Support or Contact
-
-Having trouble with Pages? Check out our [documentation](https://docs.github.com/categories/github-pages-basics/) or [contact support](https://support.github.com/contact) and we’ll help you sort it out.
