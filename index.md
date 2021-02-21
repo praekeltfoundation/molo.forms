@@ -6,7 +6,7 @@ Below are a couple of links that you might find useful
 - First steps
   - [Getting started](https://github.com/praekeltfoundation/molo.forms/blob/gh-pages/getting-started.md)
 - Using Molo forms
-  - Adding Molo Forms to a project
+  - [Adding Molo Forms to a project](https://github.com/praekeltfoundation/molo.forms/blob/gh-pages/adding-to-project.md)
 - Personalisation
   - Getting started with personalisation
   - Adding rules
