@@ -18,7 +18,7 @@ $ pip install -r requirements-dev.txt
 Molo core scaffolds each plugin to create a testapp. After installing the requirements run
 
 ```
-molo scaffold testapp --require molo.forms --include molo.forms forms/
+$ molo scaffold testapp --require molo.forms --include molo.forms forms/
 ```
 This will create a testapp folder that will create an instance of the molo forms project that is a django application. Once you see this run the following
 ```
