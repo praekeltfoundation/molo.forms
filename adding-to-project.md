@@ -1,6 +1,6 @@
 # Adding Molo Forms to a Django project
 
-Please follow [these steps](https://docs.wagtail.io/en/stable/getting_started/integrating_into_django.html) to get Wagtail installed into your existing project before adding molo.forms
+Please follow [these steps](https://docs.wagtail.io/en/stable/getting_started/integrating_into_django.html) to get Wagtail installed into your existing project and [wagtail forms]before adding molo.forms
 
 Molo forms is currently compatible with Django 3.0, 3.1 First, install the molo forms package from PyPI:
 ```
