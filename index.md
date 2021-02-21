@@ -1,5 +1,5 @@
 ## Molo Forms Documentation
-Molo Forms is a form builder based on [Wagtail forms](https://docs.wagtail.io/en/latest/reference/contrib/forms/) with a personalisation element that uses [Wagtail personalisation](https://wagtail-personalisation.readthedocs.io/en/latest/). Molo forms relies on [Molo](https://github.com/praekeltfoundation/molo/) which is based off [Wagtail](https://docs.wagtail.io/en/stable/)
+Molo Forms is a form builder based on [Wagtail forms](https://docs.wagtail.io/en/latest/reference/contrib/forms/) with a personalisation element that uses [Wagtail personalisation](https://wagtail-personalisation.readthedocs.io/en/latest/). Molo forms relies on [Molo](https://github.com/praekeltfoundation/molo/) which is based off [Wagtail](https://docs.wagtail.io/en/stable/). Reading these docs first will help you understand Molo Forms much easier, both as a developer and an editor.
 
 Below are a couple of links that you might find useful
 
