@@ -31,12 +31,10 @@ jobs:
     - name: Publish distribution 📦 to Test PyPI
       uses: pypa/gh-action-pypi-publish@master
       with:
-        user: ${{ secrets.PYPI_USERNAME}}
-        password: ${{ secrets.PYPI_PASSWORD}}
+        password: ${{ secrets.PYPI_SECURE}}
         repository_url: https://test.pypi.org/legacy/
     - name: Publish distribution 📦 to PyPI
       if: startsWith(github.ref, 'refs/tags')
       uses: pypa/gh-action-pypi-publish@master
       with:
-        user: ${{ secrets.PYPI_USERNAME}}
-        password: ${{ secrets.PYPI_PASSWORD}}
+        password: ${{ secrets.PYPI_SECURE}}
