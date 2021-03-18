@@ -1,6 +1,10 @@
 CHANGE LOG
 ==========
 
+11.1.9
+------
+- Update pypi publish deploy
+
 11.1.1
 ------
 - Change from travis to github actions
