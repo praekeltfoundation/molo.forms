@@ -1,6 +1,10 @@
 CHANGE LOG
 ==========
 
+11.1.1
+------
+- Change from travis to github actions
+
 11.1.0
 ------
 - Get site from wagtail cache
