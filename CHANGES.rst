@@ -1,6 +1,10 @@
 CHANGE LOG
 ==========
 
+11.2.0
+------
+- Update skip logic to always show
+
 11.1.9
 ------
 - Update pypi publish deploy
