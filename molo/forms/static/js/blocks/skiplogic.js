@@ -14,10 +14,9 @@
             var questionID = $(questionWidgetID + '_0');
 
             var thisQuestion = question(fieldID);
-
             var updateQuestionFormDisplay = function () {
-                hideElement(skipLogicForm);
-                hideElement(questionSelect);
+                // hideElement(skipLogicForm);
+                // hideElement(questionSelect);
                 switch (skipLogicSelect.val()) {
                     case 'form':
                         showElement(skipLogicForm);
@@ -56,9 +55,6 @@
                 if (!shouldShowSkipLogic) {
                     hideElement(skipLogicSelect);
                     showElement(skipLogicChoice);
-                } else if (thisQuestion.fieldSelect().val() == 'checkbox') {
-                    showElement(skipLogicSelect);
-                    hideElement(skipLogicChoice);
                 } else {
                     showElement(skipLogicChoice);
                     showElement(skipLogicSelect);
