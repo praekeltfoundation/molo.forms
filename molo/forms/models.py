@@ -60,7 +60,6 @@ from .utils import SkipLogicPaginator
 from .widgets import NaturalDateInput
 from wagtail.contrib.forms.views import SubmissionsListView
 from wagtail.contrib.forms.forms import SelectDateForm
-from molo.forms.filters import MoloFormSubmissionsFilter
 from molo.forms.forms import SelectShortlistWinnerForm
 
 
