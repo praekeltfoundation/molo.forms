@@ -34,6 +34,7 @@ from wagtail.contrib.forms.utils import get_forms_for_user
 from .forms import CSVGroupCreationForm
 from wagtail.api.v2.views import PagesAPIViewSet
 from .serializers import MoloFormSerializer
+import django_filters
 
 
 def index(request):
@@ -228,6 +229,36 @@ def submission_article(request, form_id, submission_id):
         submission.save()
         return redirect('/admin/pages/%d/move/' % article.id)
     return redirect('/admin/pages/%d/edit/' % submission.article_page.id)
+
+
+def shortlist(request, form_id, submission_id):
+    # get the specific submission entry
+    form_page = get_object_or_404(Page, id=form_id).specific
+    SubmissionClass = form_page.get_submission_class()
+
+    submission = SubmissionClass.objects.filter(
+        page=form_page).filter(pk=submission_id).first()
+    if not submission.is_shortlisted:
+        submission.is_shortlisted = True
+    else:
+        submission.is_shortlisted = False
+    submission.save()
+    return redirect('/admin/forms/submissions/%d/' % form_page.pk)
+
+
+def winner(request, form_id, submission_id):
+    # get the specific submission entry
+    form_page = get_object_or_404(Page, id=form_id).specific
+    SubmissionClass = form_page.get_submission_class()
+
+    submission = SubmissionClass.objects.filter(
+        page=form_page).filter(pk=submission_id).first()
+    if not submission.is_winner:
+        submission.is_winner = True
+    else:
+        submission.is_winner = False
+    submission.save()
+    return redirect('/admin/forms/submissions/%d/' % form_page.pk)
 
 
 # CSV creation views

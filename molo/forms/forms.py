@@ -21,6 +21,14 @@ from .widgets import NaturalDateInput
 CHARACTER_COUNT_CHOICE_LIMIT = 512
 
 
+class SelectShortlistWinnerForm(django.forms.Form):
+    is_shortlisted = forms.BooleanField(
+        required=False,
+        label="Shortlised"
+    )
+    is_winner = forms.BooleanField(required=False, label="Winner")
+
+
 class CharacterCountWidget(forms.TextInput):
     class Media:
         js = ('js/widgets/character_count.js',)
