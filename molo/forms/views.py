@@ -34,7 +34,6 @@ from wagtail.contrib.forms.utils import get_forms_for_user
 from .forms import CSVGroupCreationForm
 from wagtail.api.v2.views import PagesAPIViewSet
 from .serializers import MoloFormSerializer
-import django_filters
 
 
 def index(request):

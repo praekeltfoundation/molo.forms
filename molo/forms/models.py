@@ -58,6 +58,10 @@ from molo.forms.rules import (  # noqa
 )
 from .utils import SkipLogicPaginator
 from .widgets import NaturalDateInput
+from wagtail.contrib.forms.views import SubmissionsListView
+from wagtail.contrib.forms.forms import SelectDateForm
+from molo.forms.filters import MoloFormSubmissionsFilter
+from molo.forms.forms import SelectShortlistWinnerForm
 
 
 SKIP = 'NA (Skipped)'
@@ -132,12 +136,6 @@ class MoloFormSubmission(forms_models.AbstractFormSubmission):
         })
         return form_data
 
-
-from wagtail.contrib.forms.views import SubmissionsListView
-from wagtail.contrib.forms.forms import SelectDateForm
-from django_filters.views import FilterView
-from molo.forms.filters import MoloFormSubmissionsFilter
-from molo.forms.forms import SelectShortlistWinnerForm
 
 class CustomSubmissionsListView(SubmissionsListView):
 
@@ -215,7 +213,6 @@ class CustomSubmissionsListView(SubmissionsListView):
                 'data_headings': data_headings,
                 'data_rows': data_rows,
             })
-            print(context)
             return context
 
 

@@ -292,21 +292,4 @@ $(function(){
   initRuleIndex();
   attachActionToRuleCreators();
   addActionToExistingDeleteButtons();
-
-
-  const updateField = (submission_id) =>{
-    var form = new FormData();
-
-    form.append('submission_id', submission_id);
-
-    fetch('{% url "update_shortlisted_winner" %}', {
-      method:'post',
-      body:form,
-      mode:'cors',
-      cache:'default',
-      credentials:'include',
-    }).then((response)=>{
-      console.log('field update as well')
-   })
-})
 })
