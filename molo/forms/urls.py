@@ -2,7 +2,8 @@
 from django.urls import re_path
 from molo.forms.views import (
     FormSuccess, ResultsPercentagesJson, submission_article,
-    get_segment_user_count, MoloFormsEndpoint
+    get_segment_user_count, MoloFormsEndpoint, shortlist,
+    winner
 )
 from molo.core.api.urls import api_router
 
@@ -28,6 +29,14 @@ urlpatterns = [
     re_path(
         r'^submissions/(\d+)/article/(\d+)/$',
         submission_article, name='article'
+    ),
+    re_path(
+        r'^submissions/(\d+)/shortlist/(\d+)/$',
+        shortlist, name='shortlist'
+    ),
+    re_path(
+        r'^submissions/(\d+)/winner/(\d+)/$',
+        winner, name='winner'
     ),
     re_path(
         r"^count/$",

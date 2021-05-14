@@ -144,6 +144,28 @@ def submission_has_article(context, form_id, submission_id):
     return True
 
 
+@register.simple_tag(takes_context=True)
+def submission_is_shortlisted(context, form_id, submission_id):
+    form_page = get_object_or_404(Page, id=form_id).specific
+    SubmissionClass = form_page.get_submission_class()
+    submission = SubmissionClass.objects.filter(
+        page=form_page).filter(pk=submission_id).first()
+    if submission.is_shortlisted:
+        return True
+    return False
+
+
+@register.simple_tag(takes_context=True)
+def submission_is_winner(context, form_id, submission_id):
+    form_page = get_object_or_404(Page, id=form_id).specific
+    SubmissionClass = form_page.get_submission_class()
+    submission = SubmissionClass.objects.filter(
+        page=form_page).filter(pk=submission_id).first()
+    if submission.is_winner:
+        return True
+    return False
+
+
 @register.inclusion_tag('forms/forms_list.html', takes_context=True)
 def forms_list_for_pages(context, pk=None, page=None):
     context = copy(context)

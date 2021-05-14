@@ -58,6 +58,9 @@ from molo.forms.rules import (  # noqa
 )
 from .utils import SkipLogicPaginator
 from .widgets import NaturalDateInput
+from wagtail.contrib.forms.views import SubmissionsListView
+from wagtail.contrib.forms.forms import SelectDateForm
+from molo.forms.forms import SelectShortlistWinnerForm
 
 
 SKIP = 'NA (Skipped)'
@@ -106,10 +109,116 @@ def create_form_index_pages(sender, instance, **kwargs):
         instance.add_child(instance=form_index)
         form_index.save_revision().publish()
 
+class MoloFormSubmission(forms_models.AbstractFormSubmission):
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True
+    )
+    article_page = models.ForeignKey(
+        'core.ArticlePage',
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name='+',
+        help_text='Page to which the entry was converted to'
+    )
+    is_shortlisted = models.BooleanField(default=False, null=True, blank=True)
+    is_winner = models.BooleanField(default=False, null=True, blank=True)
+
+    def get_data(self):
+        form_data = super(MoloFormSubmission, self).get_data()
+        for key, value in form_data.items():
+            # Convert lists to strings so they display properly in the view
+            if isinstance(value, list):
+                form_data[key] = u', '.join(value)
+        form_data.update({
+            'username': self.user.username if self.user else 'Anonymous',
+        })
+        return form_data
+
+
+class CustomSubmissionsListView(SubmissionsListView):
+
+    def get_filtering(self):
+        """ Return filering as a dict for submissions queryset """
+        self.select_date_form = SelectDateForm(self.request.GET)
+        self.select_shortlist_winner_form = SelectShortlistWinnerForm(self.request.GET)
+        result = dict()
+        if self.select_shortlist_winner_form.is_valid():
+            is_shortlisted = self.select_shortlist_winner_form.cleaned_data.get('is_shortlisted')
+            is_winner = self.select_shortlist_winner_form.cleaned_data.get('is_winner')
+            if is_shortlisted:
+                result['is_shortlisted'] = True
+            if is_winner:
+                result['is_winner'] = True
+        if self.select_date_form.is_valid():
+            date_from = self.select_date_form.cleaned_data.get('date_from')
+            date_to = self.select_date_form.cleaned_data.get('date_to')
+            if date_to:
+                # careful: date_to must be increased by 1 day
+                # as submit_time is a time so will always be greater
+                date_to += datetime.timedelta(days=1)
+                if date_from:
+                    result['submit_time__range'] = [date_from, date_to]
+                else:
+                    result['submit_time__lte'] = date_to
+            elif date_from:
+                result['submit_time__gte'] = date_from
+        return result
+
+    def get_context_data(self, **kwargs):
+        """ Return context for view """
+        context = super().get_context_data(**kwargs)
+        self.form_page = context["form_page"]
+        submissions = context[self.context_object_name]
+        data_fields = self.form_page.get_data_fields()
+        data_rows = []
+        context['submissions'] = submissions
+        if not self.is_export:
+            # Build data_rows as list of dicts containing model_id and fields
+            for submission in submissions:
+                form_data = submission.get_data()
+                data_row = []
+                for name, label in data_fields:
+                    val = form_data.get(name)
+                    if isinstance(val, list):
+                        val = ', '.join(val)
+                    data_row.append(val)
+                data_rows.append({
+                    'model_id': submission.id,
+                    'fields': data_row
+                })
+            # Build data_headings as list of dicts containing model_id and fields
+            ordering_by_field = self.get_validated_ordering()
+            orderable_fields = self.orderable_fields
+            data_headings = []
+            for name, label in data_fields:
+                order_label = None
+                if name in orderable_fields:
+                    order = ordering_by_field.get(name)
+                    if order:
+                        order_label = order[1]  # 'ascending' or 'descending'
+                    else:
+                        order_label = 'orderable'  # not ordered yet but can be
+                data_headings.append({
+                    'name': name,
+                    'label': label,
+                    'order': order_label,
+                })
+
+            context.update({
+                'form_page': self.form_page,
+                'select_date_form': self.select_date_form,
+                'select_shortlist_winner_form': self.select_shortlist_winner_form,
+                'data_headings': data_headings,
+                'data_rows': data_rows,
+            })
+            return context
+
 
 class MoloFormPage(
         TranslatablePageMixinNotRoutable,
         forms_models.AbstractEmailForm):
+    submissions_list_view_class = CustomSubmissionsListView
     parent_page_types = [
         'forms.FormsIndexPage', 'core.SectionPage', 'core.ArticlePage']
     subpage_types = []
@@ -203,6 +312,7 @@ class MoloFormPage(
         verbose_name='Is Article Form Only',
         help_text='This will display only in article pages'
     )
+
     extra_style_hints = models.TextField(
         default='',
         null=True, blank=True,
@@ -286,7 +396,7 @@ class MoloFormPage(
         self.get_submission_class().objects.create(
             article_page_id=article_page,
             form_data=json.dumps(form.cleaned_data, cls=DjangoJSONEncoder),
-            page=self, user=user
+            page=self, user=user, is_shortlisted=False, is_winner=False
         )
 
     def get_form_fields(self):
@@ -691,31 +801,6 @@ class MoloFormField(SkipLogicMixin, AdminLabelMixin,
 
 
 forms_models.AbstractFormField.panels[4] = SkipLogicStreamPanel('skip_logic')
-
-
-class MoloFormSubmission(forms_models.AbstractFormSubmission):
-    user = models.ForeignKey(
-        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True
-    )
-    article_page = models.ForeignKey(
-        'core.ArticlePage',
-        null=True,
-        blank=True,
-        on_delete=models.SET_NULL,
-        related_name='+',
-        help_text='Page to which the entry was converted to'
-    )
-
-    def get_data(self):
-        form_data = super(MoloFormSubmission, self).get_data()
-        for key, value in form_data.items():
-            # Convert lists to strings so they display properly in the view
-            if isinstance(value, list):
-                form_data[key] = u', '.join(value)
-        form_data.update({
-            'username': self.user.username if self.user else 'Anonymous',
-        })
-        return form_data
 
 
 # Personalised Forms
