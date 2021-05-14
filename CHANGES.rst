@@ -1,6 +1,10 @@
 CHANGE LOG
 ==========
 
+11.3.0
+------
+- Add Shortlist and Winner
+
 11.2.0
 ------
 - Update skip logic to always show
