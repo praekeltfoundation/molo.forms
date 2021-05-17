@@ -1,9 +1,11 @@
 import json
+from datetime import datetime, timedelta
 
 from django.core.serializers.json import DjangoJSONEncoder
 from django.contrib.auth import get_user_model
 from django.test import TestCase
 from django.test.client import Client
+from django.utils.timezone import make_aware
 
 from molo.core.models import SiteLanguageRelation, Main, Languages, ArticlePage
 from molo.core.tests.base import MoloTestCaseMixin
@@ -396,6 +398,207 @@ class TestFormAdminViews(TestCase, MoloTestCaseMixin, MoloFormsTestMixin):
 
         # it should not show convert to article as there is already article
         self.assertNotContains(response, 'Convert to Article')
+
+    def test_submissions_list_shows_shortlist_and_winner_buttons(self):
+        molo_form_page, molo_form_field = \
+            self.create_molo_form_page(parent=self.section_index)
+        self.client.login(
+            username='testuser',
+            password='password'
+        )
+
+        # Create submission
+        sub_class = molo_form_page.get_submission_class()
+        data = {molo_form_field.clean_name: 'super random text'}
+        sub_class.objects.create(user=self.user, page=molo_form_page,
+                                  form_data=json.dumps(data))
+
+        # test shows shortlisted and winner buttons
+        response = self.client.get(
+            '/admin/forms/submissions/%s/' % molo_form_page.id)
+        self.assertContains(response, 'Shortlist<')
+        self.assertContains(response, 'Make Winner<')
+
+    def test_submission_list_filterable_by_shortlisted(self):
+        molo_form_page, molo_form_field = \
+            self.create_molo_form_page(parent=self.section_index)
+        self.client.login(
+            username='testuser',
+            password='password'
+        )
+
+        # Create submissions
+        sub_class = molo_form_page.get_submission_class()
+        data_1 = {molo_form_field.clean_name: 'shortlisted submission'}
+        form_sub_1 = sub_class.objects.create(user=self.user, page=molo_form_page,
+                                  form_data=json.dumps(data_1), is_shortlisted=True)
+        data_2 = {molo_form_field.clean_name: 'lame submission'}
+        form_sub_2 = sub_class.objects.create(user=self.super_user, page=molo_form_page,
+                                  form_data=json.dumps(data_2), is_shortlisted=False)
+        self.assertTrue(form_sub_1.is_shortlisted)
+        self.assertFalse(form_sub_2.is_shortlisted)
+
+        # Call submission list view
+        response = self.client.get(
+            '/admin/forms/submissions/%s/' % molo_form_page.id)
+        self.assertContains(response, 'shortlisted submission')
+        self.assertContains(response, 'lame submission')
+
+        # Call submission list filtered for shortlisted
+        response = self.client.get(
+            '/admin/forms/submissions/%s/?is_shortlisted=on' % molo_form_page.id)
+        self.assertContains(response, 'shortlisted submission')
+        self.assertNotContains(response, 'lame submission')
+
+    def test_submission_list_filterable_by_winner(self):
+        molo_form_page, molo_form_field = \
+            self.create_molo_form_page(parent=self.section_index)
+        self.client.login(
+            username='testuser',
+            password='password'
+        )
+
+        # Create submissions
+        sub_class = molo_form_page.get_submission_class()
+        data_1 = {molo_form_field.clean_name: 'winning submission'}
+        form_sub_1 = sub_class.objects.create(user=self.user, page=molo_form_page,
+                                  form_data=json.dumps(data_1), is_winner=True)
+        data_2 = {molo_form_field.clean_name: 'lame submission'}
+        form_sub_2 = sub_class.objects.create(user=self.super_user, page=molo_form_page,
+                                  form_data=json.dumps(data_2), is_winner=False)
+        self.assertTrue(form_sub_1.is_winner)
+        self.assertFalse(form_sub_2.is_winner)
+
+        # Call submission list view
+        response = self.client.get(
+            '/admin/forms/submissions/%s/' % molo_form_page.id)
+        self.assertContains(response, 'winning submission')
+        self.assertContains(response, 'lame submission')
+
+        # Call submission list filtered for shortlisted
+        response = self.client.get(
+            '/admin/forms/submissions/%s/?is_winner=on' % molo_form_page.id)
+        self.assertContains(response, 'winning submission')
+        self.assertNotContains(response, 'lame submission')
+
+    def test_submission_list_filterable_by_date(self):
+        molo_form_page, molo_form_field = \
+            self.create_molo_form_page(parent=self.section_index)
+        self.client.login(
+            username='testuser',
+            password='password'
+        )
+
+        # Create submissions
+        yesterday = datetime.now().today() - timedelta(days=1)
+        yesterday = yesterday.strftime("%Y-%m-%d")
+        day_before = make_aware(datetime.now().today() - timedelta(days=2))
+        sub_class = molo_form_page.get_submission_class()
+        data_1 = {molo_form_field.clean_name: 'last submission'}
+        form_sub_1 = sub_class.objects.create(user=self.user, page=molo_form_page,
+                                  form_data=json.dumps(data_1))
+        data_2 = {molo_form_field.clean_name: 'first submission'}
+        form_sub_2 = sub_class.objects.create(user=self.super_user, page=molo_form_page,
+                                  form_data=json.dumps(data_2))
+        form_sub_2.submit_time = day_before
+        form_sub_2.save()
+        self.assertTrue(form_sub_1.submit_time > form_sub_2.submit_time)
+
+        # Call submission list view
+        response = self.client.get(
+            '/admin/forms/submissions/%s/' % molo_form_page.id)
+        self.assertContains(response, 'last submission')
+        self.assertContains(response, 'first submission')
+
+        # Call submission list filtered from date
+        response = self.client.get(
+            '/admin/forms/submissions/%s/?date_from=%s' % (
+                molo_form_page.id, yesterday))
+        self.assertContains(response, 'last submission')
+        self.assertNotContains(response, 'first submission')
+
+        # Call submission list filtered to date
+        response = self.client.get(
+            '/admin/forms/submissions/%s/?date_to=%s' % (
+                molo_form_page.id, yesterday))
+        self.assertContains(response, 'first submission')
+        self.assertNotContains(response, 'last submission')
+
+    def test_shortlist_view_toggles_submission(self):
+        molo_form_page, molo_form_field = \
+            self.create_molo_form_page(parent=self.section_index)
+        self.client.login(
+            username='testuser',
+            password='password'
+        )
+
+        # Create submission
+        sub_class = molo_form_page.get_submission_class()
+        data = {molo_form_field.clean_name: 'super random text'}
+        form_sub = sub_class.objects.create(user=self.user, page=molo_form_page,
+                                  form_data=json.dumps(data))
+        self.assertFalse(form_sub.is_shortlisted)
+
+        # Call shortlist view
+        response = self.client.get(
+            '/forms/submissions/%s/shortlist/%s/' % (
+                molo_form_page.id, form_sub.id), follow=True)
+        self.assertEqual(response.status_code, 200)
+
+        # test is_shortlisted value updated
+        form_sub.refresh_from_db()
+        self.assertTrue(form_sub.is_shortlisted)
+
+        # test shortlist button updated
+        self.assertContains(response, 'Remove From Shortlist<')
+
+        # Call shortlist view
+        response = self.client.get(
+            '/forms/submissions/%s/shortlist/%s/' % (
+                molo_form_page.id, form_sub.id), follow=True)
+        self.assertEqual(response.status_code, 200)
+
+        # test is_shortlisted value updated
+        form_sub.refresh_from_db()
+        self.assertFalse(form_sub.is_shortlisted)
+
+    def test_winner_view_toggles_submission(self):
+        molo_form_page, molo_form_field = \
+            self.create_molo_form_page(parent=self.section_index)
+        self.client.login(
+            username='testuser',
+            password='password'
+        )
+
+        # Create submission
+        sub_class = molo_form_page.get_submission_class()
+        data = {molo_form_field.clean_name: 'super random text'}
+        form_sub = sub_class.objects.create(user=self.user, page=molo_form_page,
+                                  form_data=json.dumps(data))
+        self.assertFalse(form_sub.is_winner)
+
+        # Call winner view
+        response = self.client.get(
+            '/forms/submissions/%s/winner/%s/' % (
+                molo_form_page.id, form_sub.id), follow=True)
+        self.assertEqual(response.status_code, 200)
+
+        # test is_winner value updated
+        form_sub.refresh_from_db()
+        self.assertTrue(form_sub.is_winner)
+
+        # test winner button updated
+        self.assertContains(response, 'Remove as Winner<')
+
+        # Call winner view
+        response = self.client.get(
+            '/forms/submissions/%s/winner/%s/' % (
+                molo_form_page.id, form_sub.id), follow=True)
+        self.assertEqual(response.status_code, 200)
+
+        # test is_winner value updated
+        form_sub.refresh_from_db()
+        self.assertFalse(form_sub.is_winner)
 
     def test_export_submission_standard_form(self):
         molo_form_page = create_molo_form_page(
