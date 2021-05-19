@@ -1,11 +1,7 @@
 {% load wagtailadmin_tags i18n %}
 <div class="field {{ field|fieldtype }} {{ field|widgettype }} {{ field_classes }}" {% if include_contentpath|default_if_none:True %}data-contentpath="{{ field.name }}"{% endif %}>
-    {% if field.label_tag %}
-      {% if show_label|default_if_none:True %}{{ field.label_tag }}{% endif %}
-    {% endif %}
-    {% if field.label %}
-      {% if show_label|default_if_none:True %}{{ field.label }}{% endif %}
-    {% endif %}
+      {% if field.label == 'Shortlised' or field.label == 'Winner'%}{{ field.label }}
+      {% elif show_label|default_if_none:True %}{{ field.label_tag }}{% endif %}
     <div class="field-content">
         <div class="input {{ input_classes }} ">
             {% block form_field %}
