@@ -1,7 +1,7 @@
 CHANGE LOG
 ==========
 
-11.3.0
+11.3.2
 ------
 - Add Shortlist and Winner
 
