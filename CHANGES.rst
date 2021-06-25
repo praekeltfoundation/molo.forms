@@ -1,6 +1,10 @@
 CHANGE LOG
 ==========
 
+11.3.3
+------
+- Update wagtail-personalisation to 3.0.4
+
 11.3.2
 ------
 - Add Shortlist and Winner
